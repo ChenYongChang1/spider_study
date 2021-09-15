@@ -56,7 +56,7 @@ def get_article_list(path):
 
 
 def get(base_path, name):
-    arr = get_article_list('database/_{}.py'.format(name))
+    arr = get_article_list('./database/_{}.py'.format(name))
     path = base_path + name
     make_dir(path)
     for i in arr:
@@ -64,7 +64,7 @@ def get(base_path, name):
         md = get_requests_marked(i['id'])
         time.sleep(30 + 10 * random.random())
         str = '标题:{}\n描述:{}\n\n'.format(i['title'], i['desc'])
-        with open('{}/{}.md'.format(path, repr(i['title']).replace('\\', '_').replace('/', '_')), 'w+', encoding='utf-8') as f:
+        with open('./{}/{}.md'.format(path, repr(i['title']).replace('\\', '_').replace('/', '_')), 'w+', encoding='utf-8') as f:
             f.write(str + md)
 
 # get('article/', '面试')
