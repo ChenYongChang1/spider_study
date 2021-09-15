@@ -67,7 +67,7 @@ def get(base_path, name):
             time.sleep(1800 + 1800 * random.random())
             get(base_path, name)
         str = '标题:{}\n描述:{}\n\n'.format(i['title'], i['desc'])
-        with open('/opt/python/spiders/spider_study/{}/{}.md'.format(path, i['title']).replace('\\', '_').replace('/', '_'), 'w+', encoding='utf-8') as f:
+        with open('/opt/python/spiders/spider_study/{}/{}.md'.format(path, i['title'].replace('\\', '_').replace('/', '_')), 'w+', encoding='utf-8') as f:
             f.write(str + md)
         time.sleep(30 + 30 * random.random())
 
