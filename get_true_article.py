@@ -5,9 +5,8 @@ import json
 import os
 import threading
 
-file_path = ['面试']
-# ['微信小程序', '算法', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
-#              'HTML', '面试', 'Webpack', 'Flutter', 'Node.js', 'Vue.js', 'JavaScript', '前端']
+file_path = ['微信小程序', '算法', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
+              'HTML', '面试', 'Webpack', 'Flutter', 'Node.js', 'Vue.js', 'JavaScript', '前端']
 
 base_url = 'https://api.juejin.cn/content_api/v1/article/detail?uuid='
 
@@ -74,9 +73,10 @@ def get(base_path, name):
 s = []
 
 for i in file_path:
-    t = threading.Thread(target=get, args=(
-        'article/', i))  # 每次循环开启一个线程
-    s.append(t)
+    get('article/', i)
+    # t = threading.Thread(target=get, args=(
+    #     'article/', i))  # 每次循环开启一个线程
+    # s.append(t)
 
-for i in s:
-    i.start()
+# for i in s:
+#     i.start()
