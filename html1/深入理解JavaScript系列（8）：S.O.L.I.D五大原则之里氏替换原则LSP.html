@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第3篇，里氏替换原则LSP（TheLiskov Substitution Principle ）。英文原文：http://" />
+    <meta property="og:description" content="前言本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第3篇，里氏替换原则LSP（TheLiskov Substitution Principle ）。英文原文：http://" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（8）：S.O.L.I.D五大原则之里氏替换原则LSP - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-10 08:56';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/10/2310244.html">
+    <span>深入理解JavaScript系列（8）：S.O.L.I.D五大原则之里氏替换原则LSP</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-10 08:56</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">18939</span>)&nbsp;
+评论(<span id="post_comment_count">31</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2310244" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2310244);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第3篇，里氏替换原则LSP（The&nbsp;Liskov Substitution Principle ）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://freshbrewedcode.com/derekgreer/2011/12/31/solid-javascript-the-liskov-substitution-principle/</span></pre>
+</div>
+<p>开闭原则的描述是：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">Subtypes must be substitutable for their base types.</span><br><span style="color: rgba(255, 102, 0, 1)">派生类型必须可以替换它的基类型。</span> </pre>
+</div>
+<p>在面向对象编程里，继承提供了一个机制让子类和共享基类的代码，这是通过在基类型里封装通用的数据和行为来实现的，然后已经及类型来声明更详细的子类型，为了应用里氏替换原则，继承子类型需要在语义上等价于基类型里的期望行为。</p>
+<p>为了来更好的理解，请参考如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> Vehicle(my) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> my = my || {};<br>    my.speed = 0;<br>    my.running = <span style="color: rgba(0, 0, 255, 1)">false</span>;<br><br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.speed = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> my.speed;<br>    };<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.start = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        my.running = <span style="color: rgba(0, 0, 255, 1)">true</span>;<br>    };<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.stop = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        my.running = <span style="color: rgba(0, 0, 255, 1)">false</span>;<br>    };<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.accelerate = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        my.speed++;<br>    };<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decelerate = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        my.speed--;<br>    }, <span style="color: rgba(0, 0, 255, 1)">this</span>.state = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        <span style="color: rgba(0, 0, 255, 1)">if</span> (!my.running) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> "parked";<br>        }<br>        <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (my.running &amp;&amp; my.speed) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> "moving";<br>        }<br>        <span style="color: rgba(0, 0, 255, 1)">else</span> <span style="color: rgba(0, 0, 255, 1)">if</span> (my.running) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> "idle";<br>        }<br>    };<br>}</pre>
+</div>
+<p>上述代码我们定义了一个Vehicle函数，其构造函数为vehicle对象提供了一些基本的操作，我们来想想如果当前函数当前正运行在服务客户的产品环境上，如果现在需要添加一个新的构造函数来实现加快移动的vehicle。思考以后，我们写出了如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> FastVehicle(my) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> my = my || {};<br><br>    <span style="color: rgba(0, 0, 255, 1)">var</span> that = <span style="color: rgba(0, 0, 255, 1)">new</span> Vehicle(my);<br>    that.accelerate = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        my.speed += 3;<br>    };<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> that;<br>}</pre>
+</div>
+<p>在浏览器的控制台我们都测试了，所有的功能都是我们的预期，没有问题，FastVehicle的速度增快了3倍，而且继承他的方法也是按照我们的预期工作。此后，我们开始部署这个新版本的类库到产品环境上，可是我们却接到了新的构造函数导致现有的代码不能支持执行了，下面的代码段揭示了这个问题：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> maneuver = <span style="color: rgba(0, 0, 255, 1)">function</span>(vehicle) {<br>    write(vehicle.state());<br>    vehicle.start();<br>    write(vehicle.state());<br>    vehicle.accelerate();<br>    write(vehicle.state());<br>    write(vehicle.speed());<br>    vehicle.decelerate();<br>    write(vehicle.speed());<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (vehicle.state() != "idle") {<br>        <span style="color: rgba(0, 0, 255, 1)">throw</span> "The vehicle is still moving!";<br>    }<br>    vehicle.stop();<br>    write(vehicle.state());<br>};</pre>
+</div>
+<p>根据上面的代码，我们看到抛出的异常是“The vehicle is still moving!”，这是因为写这段代码的作者一直认为加速（accelerate）和减速（decelerate）的数字是一样的。但FastVehicle的代码和Vehicle的代码并不是完全能够替换掉的。因此，FastVehicle违反了里氏替换原则。&nbsp;</p>
+<p>在这点上，你可能会想：“但，客户端不能老假定vehicle都是按照这样的规则来做”，里氏替换原则(LSP)的妨碍（译者注：就是妨碍实现LSP的代码）不是基于我们所想的继承子类应该在行为里确保更新代码，而是这样的更新是否能在当前的期望中得到实现。</p>
+<p>上述代码这个case，解决这个不兼容的问题需要在vehicle类库或者客户端调用代码上进行一点重新设计，或者两者都要改。</p>
+<h1>减少LSP妨碍</h1>
+<p>那么，我们如何避免LSP妨碍？不幸的话，并不是一直都是可以做到的。我们这里有几个策略我们处理这个事情。</p>
+<h2><strong>契约（Contracts）</strong></h2>
+<p>处理LSP过分妨碍的一个策略是使用契约，契约清单有2种形式：执行说明书（executable specifications）和错误处理，在执行说明书里，一个详细类库的契约也包括一组自动化测试，而错误处理是在代码里直接处理的，例如在前置条件，后置条件，常量检查等，可以从Bertrand Miller的大作《<a href="http://en.wikipedia.org/wiki/Design_by_contract" target="_blank">契约设计</a>》中查看这个技术。虽然自动化测试和契约设计不在本篇文字的范围内，但当我们用的时候我还是推荐如下内容：</p>
+<ol>
+<li>检查使用测试驱动开发（Test-Driven Development）来指导你代码的设计</li>
+<li>设计可重用类库的时候可随意使用契约设计技术</li>
+</ol>
+<p>对于你自己要维护和实现的代码，使用契约设计趋向于添加很多不必要的代码，如果你要控制输入，添加测试是非常有必要的，如果你是类库作者，使用契约设计，你要注意不正确的使用方法以及让你的用户使之作为一个测试工具。</p>
+<h2><strong>避免继承</strong></h2>
+<p>避免LSP妨碍的另外一个测试是：如果可能的话，尽量不用继承，在Gamma的大作《<a href="http://www.amazon.com/Design-Patterns-Elements-Reusable-Object-Oriented/dp/0201633612" target="_blank">Design Patterns – Elements of Reusable Object-Orineted Software</a>》中，我们可以看到如下建议：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">Favor object composition over class inheritance</span><br><span style="color: rgba(255, 102, 0, 1)">尽量使用对象组合而不是类继承</span></pre>
+</div>
+<p>有些书里讨论了组合比继承好的唯一作用是静态类型，基于类的语言（例如，在运行时可以改变行为），与JavaScript相关的一个问题是耦合，当使用继承的时候，继承子类型和他们的基类型耦合在一起了，就是说及类型的改变会影响到继承子类型。组合倾向于对象更小化，更容易想静态和动态语言语言维护。</p>
+<h1>与行为有关，而不是继承</h1>
+<p>到现在，我们讨论了和继承上下文在内的里氏替换原则，指示出JavaScript的面向对象实。不过，里氏替换原则（LSP）的本质不是真的和继承有关，而是行为兼容性。JavaScript是一个动态语言，一个对象的契约行为不是对象的类型决定的，而是对象期望的功能决定的。里氏替换原则的初始构想是作为继承的一个原则指南，等价于对象设计中的隐式接口。</p>
+<p>举例来说，让我们来看一下Robert C. Martin的大作《<a href="http://www.amazon.com/Software-Development-Principles-Patterns-Practices/dp/0135974445" target="_blank">敏捷软件开发 原则、模式与实践</a>》中的一个矩形类型：</p>
+<h2><strong>矩形例子</strong></h2>
+<p>考虑我们有一个程序用到下面这样的一个矩形对象:</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> rectangle = {<br>    length: 0,<br>    width: 0<br>};</pre>
+</div>
+<p>过后，程序有需要一个正方形，由于正方形就是一个长(length)和宽(width)都一样的特殊矩形，所以我们觉得创建一个正方形代替矩形。我们添加了length和width属性来匹配矩形的声明，但我们觉得使用属性的getters/setters一般我们可以让length和width保存同步，确保声明的是一个正方形：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> square = {};<br>(<span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> length = 0, width = 0;<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注意defineProperty方式是262-5版的新特性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    Object.defineProperty(square, "length", {<br>        get: <span style="color: rgba(0, 0, 255, 1)">function</span>() { <span style="color: rgba(0, 0, 255, 1)">return</span> length; },<br>        set: <span style="color: rgba(0, 0, 255, 1)">function</span>(value) { length = width = value; }<br>    });<br>    Object.defineProperty(square, "width", {<br>        get: <span style="color: rgba(0, 0, 255, 1)">function</span>() { <span style="color: rgba(0, 0, 255, 1)">return</span> width; },<br>        set: <span style="color: rgba(0, 0, 255, 1)">function</span>(value) { length = width = value; }<br>    });<br>})();</pre>
+</div>
+<p>不幸的是，当我们使用正方形代替矩形执行代码的时候发现了问题，其中一个计算矩形面积的方法如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> g = <span style="color: rgba(0, 0, 255, 1)">function</span>(rectangle) {<br>    rectangle.length = 3;<br>    rectangle.width = 4;<br>    write(rectangle.length);<br>    write(rectangle.width);<br>    write(rectangle.length * rectangle.width);<br>};</pre>
+</div>
+<p>该方法在调用的时候，结果是16，而不是期望的12，我们的正方形square对象违反了LSP原则，square的长度和宽度属性暗示着并不是和矩形100%兼容，但我们并不总是这样明确的暗示。解决这个问题，我们可以重新设计一个shape对象来实现程序，依据多边形的概念，我们声明rectangle和square，relevant。不管怎么说，我们的目的是要说里氏替换原则并不只是继承，而是任何方法（其中的行为可以另外的行为）。</p>
+<h1>总结</h1>
+<p>里氏替换原则（LSP）表达的意思不是继承的关系，而是任何方法（只要该方法的行为能体会另外的行为就行）。</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E9%87%8C%E6%B0%8F%E6%9B%BF%E6%8D%A2%E5%8E%9F%E5%88%99/">里氏替换原则</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/LSP/">LSP</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E7%BB%A7%E6%89%BF/">继承</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Liskov%20Substitution%20Principle/">Liskov Substitution Principle</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2310244, cb_entryCreatedDate = '2012-01-10 08:56', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvDfLm6TqTpInfLKBEwJkoWdPQZJHantoTz1x7XSlux46Oqk1iFwRrGGcs3Pqe2Kb6s9myozEMZUtzt6gJlcNKYszuD9y3JjqVgz-7odeQ8LjgZwiU3fWNyjkzyVLYGB8k" />
+</body>
+</html>

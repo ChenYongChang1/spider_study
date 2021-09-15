@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍装饰者提供比继承更有弹性的替代方案。 装饰者用用于包装同接口的对象，不仅允许你向方法添加行为，而且还可以将方法设置成原始对象调用（例如装饰者的构造函数）。装饰者用于通过重载方法的形式添加新功能，该" />
+    <meta property="og:description" content="介绍装饰者提供比继承更有弹性的替代方案。 装饰者用用于包装同接口的对象，不仅允许你向方法添加行为，而且还可以将方法设置成原始对象调用（例如装饰者的构造函数）。装饰者用于通过重载方法的形式添加新功能，该" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（29）：设计模式之装饰者模式 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-24 08:59';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/24/2353434.html">
+    <span>深入理解JavaScript系列（29）：设计模式之装饰者模式</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-24 08:59</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">19306</span>)&nbsp;
+评论(<span id="post_comment_count">34</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2353434" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2353434);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>装饰者提供比继承更有弹性的替代方案。 装饰者用用于包装同接口的对象，不仅允许你向方法添加行为，而且还可以将方法设置成原始对象调用（例如装饰者的构造函数）。</p>
+<p>装饰者用于通过重载方法的形式添加新功能，该模式可以在被装饰者前面或者后面加上自己的行为以达到特定的目的。</p>
+<h1>正文</h1>
+<p>那么装饰者模式有什么好处呢？前面说了，装饰者是一种实现继承的替代方案。当脚本运行时，在子类中增加行为会影响原有类所有的实例，而装饰者却不然。取而代之的是它能给不同对象各自添加新行为。如下代码所示：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">需要装饰的类（函数）</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> Macbook() {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.cost = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> 1000;<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> Memory(macbook) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.cost = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> macbook.cost() + 75;<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> BlurayDrive(macbook) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.cost = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> macbook.cost() + 300;<br>    };<br>}<br><br><br><span style="color: rgba(0, 0, 255, 1)">function</span> Insurance(macbook) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.cost = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> macbook.cost() + 250;<br>    };<br>}<br><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 用法</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myMacbook = <span style="color: rgba(0, 0, 255, 1)">new</span> Insurance(<span style="color: rgba(0, 0, 255, 1)">new</span> BlurayDrive(<span style="color: rgba(0, 0, 255, 1)">new</span> Memory(<span style="color: rgba(0, 0, 255, 1)">new</span> Macbook())));<br>console.log(myMacbook.cost());</pre>
+</div>
+<p>下面是另一个实例，当我们在装饰者对象上调用performTask时，它不仅具有一些装饰者的行为，同时也调用了下层对象的performTask函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> ConcreteClass() {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.performTask = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.preTask();<br>        console.log('doing something');<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.postTask();<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> AbstractDecorator(decorated) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.performTask = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        decorated.performTask();<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> ConcreteDecoratorClass(decorated) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.base = AbstractDecorator;<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.base(decorated);<br><br>    decorated.preTask = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        console.log('pre-calling..');<br>    };<br><br>    <span style="color: rgba(0, 0, 0, 1)">decorated</span>.postTask = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        console.log('post-calling..');<br>    };<br><br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> concrete = <span style="color: rgba(0, 0, 255, 1)">new</span> ConcreteClass();<br><span style="color: rgba(0, 0, 255, 1)">var</span> decorator1 = <span style="color: rgba(0, 0, 255, 1)">new</span> ConcreteDecoratorClass(concrete);<br><span style="color: rgba(0, 0, 255, 1)">var</span> decorator2 = <span style="color: rgba(0, 0, 255, 1)">new</span> ConcreteDecoratorClass(decorator1);<br>decorator2.performTask();</pre>
+</div>
+<p>再来一个彻底的例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> tree = {};<br>tree.decorate = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    console.log('Make sure the tree won\'t fall');<br>};<br><br>tree.getDecorator = <span style="color: rgba(0, 0, 255, 1)">function</span> (deco) {<br>    tree[deco].prototype = <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">new</span> tree[deco];<br>};<br><br>tree.RedBalls = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decorate = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.RedBalls.prototype.decorate(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第7步：先执行原型（这时候是Angel了）的decorate方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        console.log('Put on some red balls'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第8步 再输出 red</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将这2步作为RedBalls的decorate方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    }<br>};<br><br>tree.BlueBalls = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decorate = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.BlueBalls.prototype.decorate(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第1步：先执行原型的decorate方法，也就是tree.decorate()</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        console.log('Add blue balls'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第2步 再输出blue</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将这2步作为BlueBalls的decorate方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    }<br>};<br><br>tree.Angel = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decorate = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.Angel.prototype.decorate(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第4步：先执行原型（这时候是BlueBalls了）的decorate方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        console.log('An angel on the top'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第5步 再输出angel</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将这2步作为Angel的decorate方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    }<br>};<br><br>tree = tree.getDecorator('BlueBalls'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第3步：将BlueBalls对象赋给tree，这时候父原型里的getDecorator依然可用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>tree = tree.getDecorator('Angel'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第6步：将Angel对象赋给tree，这时候父原型的父原型里的getDecorator依然可用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>tree = tree.getDecorator('RedBalls'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第9步：将RedBalls对象赋给tree</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>tree.decorate(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 第10步：执行RedBalls对象的decorate方法</span></pre>
+</div>
+<h1>总结</h1>
+<p>装饰者模式是为已有功能动态地添加更多功能的一种方式，把每个要装饰的功能放在单独的函数里，然后用该函数包装所要装饰的已有函数对象，因此，当需要执行特殊行为的时候，调用代码就可以根据需要有选择地、按顺序地使用装饰功能来包装对象。优点是把类（函数）的核心职责和装饰功能区分开了。</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%A3%85%E9%A5%B0%E8%80%85/">装饰者</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Decorator%20Pattern/">Decorator Pattern</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2353434, cb_entryCreatedDate = '2012-02-24 08:59', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjuc3kGOYp29EPv2Dh2Z9O1ReLNrzpZ6VWiBxdL82aOS8TpnVEUa-3I0CMPH7NU9QueICNptyU8b6lO-kqSWXNxrUQg897As6xcajjwe86to1FP08uU1Zaag46NOUJ5X8ro" />
+</body>
+</html>

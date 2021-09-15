@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言写这篇文章的目的是经常看到开发人员说：把字符串转化为JSON对象，把JSON对象转化成字符串等类似的话题，所以把之前收藏的一篇老外的文章整理翻译了一下，供大家讨论，如有错误，请大家指出，多谢。正文" />
+    <meta property="og:description" content="前言写这篇文章的目的是经常看到开发人员说：把字符串转化为JSON对象，把JSON对象转化成字符串等类似的话题，所以把之前收藏的一篇老外的文章整理翻译了一下，供大家讨论，如有错误，请大家指出，多谢。正文" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（9）：根本没有“JSON对象”这回事！ - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-11 09:08';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/11/2311956.html">
+    <span>深入理解JavaScript系列（9）：根本没有“JSON对象”这回事！</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-11 09:08</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">43009</span>)&nbsp;
+评论(<span id="post_comment_count">21</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2311956" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2311956);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>写这篇文章的目的是经常看到开发人员说：把字符串转化为JSON对象，把JSON对象转化成字符串等类似的话题，所以把之前收藏的一篇老外的文章整理翻译了一下，供大家讨论，如有错误，请大家指出，多谢。</p>
+<h1>正文</h1>
+<p>本文的主题是基于ECMAScript262-3来写的，2011年的262-5新规范增加了JSON对象，和我们平时所说的JSON有关系，但是不是同一个东西，文章最后一节会讲到新增加的JSON对象。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://benalman.com/news/2010/03/theres-no-such-thing-as-a-json/</span></pre>
+</div>
+<p>我想给大家澄清一下一个非常普遍的误解，我认为很多JavaScript开发人员都错误地把JavaScript<span style="color: rgba(255, 102, 0, 1)">对象字面量</span>（Object Literals）称为<span style="color: rgba(255, 102, 0, 1)">JSON对象</span>（JSON Objects），因为他的语法和<a href="http://json.org/" target="_blank">JSON规范</a>里描述的一样，但是该规范里也明确地说了JSON只是一个<span style="color: rgba(255, 102, 0, 1)">数据交换语言</span>，只有我们将之用在string上下文的时候它才叫JSON。</p>
+<h1>序列化与反序列化</h1>
+<p>2个程序（或服务器、语言等）需要交互通信的时候，他们倾向于使用string字符串因为string在很多语言里解析的方式都差不多。复杂的数据结构经常需要用到，并且通过各种各样的中括号{}，小括号()，叫括号&lt;&gt;和空格来组成，这个字符串仅仅是按照要求规范好的字符。</p>
+<p>为此，我们为了描述这些复杂的数据结构作为一个string字符串，制定了标准的规则和语法。JSON只是其中一种语法，它可以在string上下文里描述对象，数组，字符串，数字，布尔型和null，然后通过程序间传输，并且反序列化成所需要的格式。<a href="http://en.wikipedia.org/wiki/YAML" target="_blank">YAML</a>和<a href="http://en.wikipedia.org/wiki/XML" target="_blank">XML</a>（甚至<a href="http://benalman.com/news/2009/12/jquery-14-param-demystified/" target="_blank">request params</a>）也是流行的数据交换格式，但是，我们喜欢JSON，谁叫我们是JavaScript开发人员呢！</p>
+<h1>字面量</h1>
+<p>引用Mozilla Developer Center里的几句话，供大家参考：</p>
+<ol>
+<li>他们是固定的值，不是变量，让你从“字面上”理解脚本。 (<a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Core_Language_Features#Literals" target="_blank">Literals</a>)</li>
+<li>字符串字面量是由双引号（"）或单引号（'）包围起来的零个或多个字符组成的。(<a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Core_Language_Features#String_Literals" target="_blank">Strings Literals</a>)</li>
+<li>对象字面量是由大括号（{}）括起来的零个或多个对象的属性名-值对。(<a href="https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Core_Language_Features#Object_Literals" target="_blank">Object Literals</a>)</li>
+</ol>
+<h1>何时是JSON，何时不是JSON？</h1>
+<p>JSON是设计成描述数据交换格式的，他也有自己的语法，这个语法是JavaScript的一个子集。<br>{ "prop": "val" } 这样的声明有可能是JavaScript对象字面量也有可能是JSON字符串，取决于什么上下文使用它，如果是用在string上下文（用单引号或双引号引住，或者从text文件读取）的话，那它就是JSON字符串，如果是用在对象字面量上下文中，那它就是对象字面量。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这是JSON字符串</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> foo = '<span style="color: rgba(255, 0, 255, 1)">{ "prop": "val" }</span>';<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这是对象字面量</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> bar = { "prop": "val" };</pre>
+</div>
+<p>而且要注意，JSON有非常严格的语法，在string上下文里<span style="color: rgba(255, 0, 255, 1)">{ "prop": "val" }</span> 是个合法的JSON，但<span style="color: rgba(255, 0, 255, 1)">{ prop: "val" }</span>和<span style="color: rgba(255, 0, 255, 1)">{ 'prop': 'val' }</span>确实不合法的。所有属性名称和它的值都必须用双引号引住，不能使用单引号。另外，即便你用了转义以后的单引号也是不合法的，详细的语法规则可以到<a href="http://json.org/" target="_blank">这里查看</a>。</p>
+<h1>放到上下文里来看</h1>
+<p>大家伙可能嗤之以鼻：难道JavaScript代码不是一个大的字符串？</p>
+<p>当然是，所有的JavaScript代码和HTML（可能还有其他东西）都是字符串，直到浏览器对他们进行解析。这时候.jf文件或者inline的JavaScript代码已经不是字符串了，而是被当成真正的JavaScript源代码了，就像页面里的innterHTML一样，这时候也不是字符串了，而是被解析成DOM结构了。</p>
+<p>再次说一下，这取决于上下文，在string上下文里使用带有大括号的JavaScript对象，那它就是JSON字符串，而如果在对象字面量上下文里使用的话，那它就是对象字面量。</p>
+<h1>真正的JSON对象</h1>
+<p>开头已经提到，对象字面量不是JSON对象，但是有<a href="https://developer.mozilla.org/en/Using_native_JSON" target="_blank">真正的JSON对象</a>。但是两者完全不一样概念，在新版的浏览器里JSON对象已经被原生的内置对象了，目前有2个静态方法：<span style="color: rgba(255, 0, 255, 1)">JSON.parse</span>用来将JSON字符串反序列化成对象，<span style="color: rgba(255, 0, 255, 1)">JSON.stringify</span>用来将对象序列化成JSON字符串。老版本的浏览器不支持这个对象，但你可以通过<a href="http://json.org/" target="_blank">json2.js</a>来实现同样的功能。</p>
+<p>如果还不理解，别担心，参考一下的例子就知道了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这是JSON字符串，比如从AJAX获取字符串信息</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> my_json_string = '{ "prop": "val" }';<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将字符串反序列化成对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> my_obj = JSON.parse( my_json_string );<br> <br>alert( my_obj.prop == 'val' ); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">  提示 true, 和想象的一样!</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将对象序列化成JSON字符串</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> my_other_json_string = JSON.stringify( my_obj );</pre>
+</div>
+<p>另外，<a href="http://paulirish.com/" target="_blank">Paul Irish</a>提到Douglas Crockford在<a href="http://www.ietf.org/rfc/rfc4627.txt?number=4627" target="_blank">JSON RFC</a>里用到了“JSON object”，但是在那个上下文里，他的意思是“对象描述成JSON字符串”不是“对象字面量”。</p>
+<h1>更多资料</h1>
+<p>如果你想了解更多关于JSON的资料，下面的连接对你绝对有用：</p>
+<ul>
+<li><a href="http://json.org/" target="_blank">JSON specification</a></li>
+<li><a href="http://www.ietf.org/rfc/rfc4627.txt?number=4627" target="_blank">JSON RFC</a></li>
+<li><a href="http://en.wikipedia.org/wiki/JSON" target="_blank">JSON on Wikipedia</a></li>
+<li><a href="http://www.jsonlint.com/" target="_blank">JSONLint - The JSON Validator</a></li>
+<li><a href="http://james.padolsey.com/javascript/json-is-not-the-same-as-json/" target="_blank">JSON is not the same as JSON</a></li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JSON/">JSON</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%AF%B9%E8%B1%A1%E5%AD%97%E9%9D%A2%E9%87%8F/">对象字面量</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2311956, cb_entryCreatedDate = '2012-01-11 09:08', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsvLIDg-v-W0UlTm9RGpDhiaqIa6nV7AkGAtHX_gsIFKu5N6FvPs6ztKC6Vc66VnwC86KkZ-Tp3Kiy6KDIMcWQfdvRb7Ex5sRsOCjz87pu3-6Og87iK4t5DERI0BrjdfRU" />
+</body>
+</html>

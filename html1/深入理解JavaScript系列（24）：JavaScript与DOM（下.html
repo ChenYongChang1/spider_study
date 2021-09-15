@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍上一章我们介绍了JavaScript的基本内容和DOM对象的各个方面，包括如何访问node节点。本章我们将讲解如何通过DOM操作元素并且讨论浏览器事件模型。本文参考：http://net.tuts" />
+    <meta property="og:description" content="介绍上一章我们介绍了JavaScript的基本内容和DOM对象的各个方面，包括如何访问node节点。本章我们将讲解如何通过DOM操作元素并且讨论浏览器事件模型。本文参考：http://net.tuts" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（24）：JavaScript与DOM（下） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-17 09:58';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/17/2351938.html">
+    <span>深入理解JavaScript系列（24）：JavaScript与DOM（下）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-17 09:58</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">18473</span>)&nbsp;
+评论(<span id="post_comment_count">21</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2351938" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2351938);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>上一章我们介绍了JavaScript的基本内容和DOM对象的各个方面，包括如何访问node节点。本章我们将讲解如何通过DOM操作元素并且讨论浏览器事件模型。</p>
+<p>本文参考：http://net.tutsplus.com/tutorials/javascript-ajax/javascript-and-the-dom-lesson-2/</p>
+<h1>操作元素</h1>
+<p>上一章节我们提到了DOM节点集合或单个节点的访问步骤，每个DOM节点都包括一个属性集合，大多数的属性都提供为相应的功能提供了抽象。例如，如果有一个带有ID属性intro的文本元素，你可以很容易地通过DOM API来改变该元素的颜色：</p>
+<div class="cnblogs_code">
+<pre>document.getElementById('intro').style.color = '#FF0000';</pre>
+</div>
+<p>为了理解这个API的功能，我们一步一步分开来看就非常容易理解了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myDocument = document;  <br><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = myDocument.getElementById('intro');  <br><span style="color: rgba(0, 0, 255, 1)">var</span> myIntroStyles = myIntro.style;  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 现在，我们可以设置颜色了:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntroStyles.color = '#FF0000';</pre>
+</div>
+<p>现在，我们有了该文本的style对象的引用了，所以我们可以添加其它的CSS样式：</p>
+<div class="cnblogs_code">
+<pre>myIntroStyles.padding = '2px 3px 0 3px';  <br>myIntroStyles.backgroundColor = '#FFF';  <br>myIntroStyles.marginTop = '20px'; </pre>
+</div>
+<p>这里我们只是要了基本的CSS属性名称，唯一区别是CSS属性的名称如果带有-的话，就需要去除，比如用marginTop代替margin-top。例如，下面的代码是不工作的，并且会抛出语法错误：</p>
+<div class="cnblogs_code">
+<pre>myIntroStyles.padding-top = '10em';  <br>      <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 产生语法错误：</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 在JavaScript里横线-是减法操作符</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 而且也没有这样的属性名称</span></pre>
+</div>
+<p>属性可以像数组一样访问，所以利用这个知识我们可以创建一个函数来改变任何给定元素的样式：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> changeStyle(elem, property, val) {<br>    elem.style[property] = val; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用[]来访问属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用上述的函数：  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 获取intro文本对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>changeStyle(myIntro, 'color', 'red');  </pre>
+</div>
+<p>这仅仅是个例子，所以该函数也许没什么用，语法上来说，直接用还是会快点，例如（elem.style.color = ‘red’）。除了style属性以外，一个节点（或元素）也还有其他很多属性可以操作，如果你使用Firebug，点击DOM选项卡可以看到所有该节点（或元素）的所有属性：</p>
+<p><img src="https://pic002.cnblogs.com/images/2012/349491/2012021422301835.png" alt=""></p>
+<p>所有的属性都可以通过点标示符来访问（例如：Element.tabIndex）。不是所有的属性都是原始数据类型（strings, numbers, Booleans等等），sytle属性也是一个包含自己属性的对象，很多元素的属性都是只读的，也就是说不能修改他们的值。例如，你不能直接修改一个节点的parentNode属性，如果你修改只读属性的时候浏览器会抛出错误：例如，抛出错误“setting a property that has only a getter”，只是我们需要注意的。</p>
+<p>通常DOM操作都是改变原始的内容，这里有几种方式来实现这个，最简单的是使用innerHTML属性，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 替换当前的内容</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.innerHTML = 'New content for the &lt;strong&gt;amazing&lt;/strong&gt; paragraph!';  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加内容到当前的内容里 </span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.innerHTML += '... some more content...';</pre>
+</div>
+<p>唯一的问题是该方法没在规范里定义，而且在DOM规范里也没有定义，如果你不反感的话请继续使用，因为它比我们下面要讨论其它的方法快多了。</p>
+<h2><strong>Node节点</strong></h2>
+<p>通过DOM API创建内容的时候需要注意node节点的2种类型，一种是元素节点，一种是text节点，上一章节已经列出了所有的节点类型，这两种需要我们现在特别注意。创建元素可以通过createElement方法，而创建text节点可以使用createTextNode，相应代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加内容</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> someText = 'This is the text I want to add';  <br><span style="color: rgba(0, 0, 255, 1)">var</span> textNode = document.createTextNode(someText);  <br>myIntro.appendChild(textNode);</pre>
+</div>
+<p>这里我们使用了appendChild方法将新text节点附件到文本字段，这样做比非标准的innerHTML方法显得有点长，但了解这些原理依然很重要，这里有一个使用DOM方法的更详细例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加新连接到文本节点</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 首先，创建新连接元素</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myNewLink = document.createElement('a'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> &lt;a/&gt;  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>myNewLink.href = 'http://google.com'; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> &lt;a href="http://google.com"/&gt;  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>myNewLink.appendChild(document.createTextNode('Visit Google')); <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> &lt;a href="http://google.com"&gt;Visit Google&lt;/a&gt;  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将内容附件到文本节点</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.appendChild(myNewLink);</pre>
+</div>
+<p>另外DOM里还有一个insertBefore方法用于再节点前面附件内容，通过insertBefore和appendChild我们可以实现自己的insertAfter函数：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 'Target'是DOM里已经存在的元素</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 'Bullet'是要插入的新元素</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <br><span style="color: rgba(0, 0, 255, 1)">function</span> insertAfter(target, bullet) {  <br>    target.nextSibling ?  <br>        target.parentNode.insertBefore(bullet, target.nextSibling)  <br>        : target.parentNode.appendChild(bullet);  <br>}  <br>  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用了3目表达式:  </span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 格式：条件?条件为true时的表达式：条件为false时的表达式</span></pre>
+</div>
+<p>上面的函数首先检查target元素的同级下一个节点是否存在，如果存在就在该节点前面添加bullet节点，如果不存在，就说明target是最后一个节点了，直接在后面append新节点就可以了。DOM API没有给提供insertAfter是因为真的没必要了——我们可以自己创建。</p>
+<p>DOM操作有很多内容，上面你看到的只是其中一部分。</p>
+<h1>Event事件</h1>
+<p>浏览器事件是所有web程序的核心，通过这些事件我们定义将要发生的行为，如果在页面里有个按钮，那点击此按钮之前你需要验证表单是否合法，这时候就可以使用click事件，下面列出的最标准的事件列表：</p>
+<p>注：正如我们上章所说的，DOM和JavaScript语言是2个单独的东西，浏览器事件是DOM API的一部分，而不是JavaScript的一部分。</p>
+<h2><strong>鼠标事件</strong></h2>
+<ol>
+<li>&nbsp;‘<strong>mousedown</strong>’ – 鼠标设备按下一个元素的时候触发mousedown事件。</li>
+<li>&nbsp;‘<strong>mouseup</strong>’ – 鼠标设备从按下的元素上弹起的时候触发mouseup事件。</li>
+<li>&nbsp;‘<strong>click</strong>’ – 鼠标点击元素的时候触发click事件。</li>
+<li>&nbsp;‘<strong>dblclick</strong>’ – 鼠标双击元素的时候触发dblclick事件。</li>
+<li>‘<strong>mouseover</strong>’ – 鼠标移动到某元素上的时候触发mouseover事件。</li>
+<li>&nbsp;‘<strong>mouseout</strong>’ – 鼠标从某元素离开的时候触发mouseout事件。</li>
+<li>&nbsp;‘<strong>mousemove</strong>’ – 鼠标在某元素上移动但未离开的时候触发mousemove事件。</li>
+</ol>
+<h2><strong>键盘事件</strong></h2>
+<ol>
+<li>‘<strong>keypress</strong>’ – 按键按下的时候触发该事件。</li>
+<li>‘<strong>keydown</strong>’ – 按键按下的时候触发该事件，并且在keypress事件之前。</li>
+<li>‘<strong>keyup</strong>’ – 按键松开的时候触发该事件，在keydown和keypress事件之后。</li>
+</ol>
+<h2>表单事件</h2>
+<ol>
+<li>‘<strong>select</strong>’ – 文本字段（input, textarea等）的文本被选择的时候触发该事件。</li>
+<li>‘<strong>change</strong>’ – 控件失去input焦点的时候触发该事件（或者值被改变的时候）。</li>
+<li>‘<strong>submit</strong>’ – 表单提交的时候触发该事件。</li>
+<li>‘<strong>reset</strong>’ – 表单重置的时候触发该事件。</li>
+<li>‘<strong>focus</strong>’ – 元素获得焦点的时候触发该事件，通常来自鼠标设备或Tab导航。</li>
+<li>‘<strong>blur</strong>’ – 元素失去焦点的时候触发该事件，通常来自鼠标设备或Tab导航。</li>
+</ol>
+<h2><strong>其它事件</strong></h2>
+<ol>
+<li>‘<strong>load</strong>’ – 页面加载完毕（包括内容、图片、frame、object）的时候触发该事件。</li>
+<li>‘<strong>resize</strong>’ – 页面大小改变的时候触发该事件（例如浏览器缩放）。</li>
+<li>‘<strong>scroll</strong>’ – 页面滚动的时候触发该事件。</li>
+<li>‘<strong>unload</strong>’ – 从页面或frame删除所有内容的时候触发该事件（例如离开一个页面）。</li>
+</ol>
+<p>还有很多各种各样的事件，上面展示的事件是我们在JavaScript里最常用的事件，有些事件在跨浏览器方面可能有所不同。还有其它浏览器实现的一些属性事件，例如Gecko实现的DOMContentLoaded或DOMMouseScroll等，Gecko的详细事件列表请<a href="https://developer.mozilla.org/en/Gecko-Specific_DOM_Events" target="_blank">查看这里</a>。</p>
+<h2><strong>事件处理</strong></h2>
+<p>我们将了事件，但是还没有将到如何将处理函数和事件管理起来，使用这些事件之前，你首先要注册这些事件句柄，然后描述该事件发生的时候该如何处理，下面的例子展示了一个基本的事件注册模型：</p>
+<p>基本事件注册：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">&lt;!--</span><span style="color: rgba(0, 128, 0, 1)"> HTML </span><span style="color: rgba(0, 128, 0, 1)">--&gt;</span>  <br><span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">button </span><span style="color: rgba(255, 0, 0, 1)">id</span><span style="color: rgba(0, 0, 255, 1)">="my-button"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>Click me!<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">button</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  </pre>
+</div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> JavaScript:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myElement = document.getElementById('my-button');<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 事件处理句柄:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> buttonClick() {<br>    alert('You just clicked the button!');<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注册事件</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myElement.onclick = buttonClick; </pre>
+</div>
+<p>使用document.getElementById命令，通过ID=my-button获取该button对象，然后创建一个处理函数，随后将该函数赋值给该DOM的onclick属性。就这么简单！</p>
+<p>基本事件注册是非常简单的，在事件名称前面添加前缀on作为DOM的属性就可以使用了，这是事件处理的基本核心，但下面的代码我不推荐使用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">button </span><span style="color: rgba(255, 0, 0, 1)">onclick</span><span style="color: rgba(0, 0, 255, 1)">="return buttonClick()"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>Click me!<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">button</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span></pre>
+</div>
+<p>上述Inline的事件处理方式不利用页面维护，建议将这些处理函数都封装在单独的js文件，原因和CSS样式的一样的。</p>
+<p>高级事件注册：</p>
+<p>别被标题迷惑了，“高级”不意味着好用，实际上上面讨论的基本事件注册是我们大部分时候用的方式，但有一个限制：不能绑定多个处理函数到一个事件上。这也是我们要讲解该小节原因：</p>
+<p>该模型运行你绑定多个处理句柄到一个事件上，也就是说一个事件触发的时候多个函数都可以执行，另外，该模型也可以让你很容易里删除某个已经绑定的句柄。</p>
+<p>严格来说，有2中不同的模型：W3C模型和微软模型，除IE之外W3C模型支持所有的现代浏览器，而微软模型只支持IE，使用<a href="https://developer.mozilla.org/En/DOM/Element.addEventListener" target="_blank">W3C模型</a>的代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 格式：target.addEventListener( type, function, useCapture );  </span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 例子:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');<br>myIntro.addEventListener('click', introClick, <span style="color: rgba(0, 0, 255, 1)">false</span>);</pre>
+</div>
+<p>使用<a href="http://msdn.microsoft.com/en-us/library/ms536343(VS.85).aspx" target="_blank">IE模型</a>的代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 格式: target.attachEvent ( 'on' + type, function );  </span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 例子:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');<br>myIntro.attachEvent('onclick', introClick);</pre>
+</div>
+<p>introClick的代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> introClick() {  <br>    alert('You clicked the paragraph!');  <br>}</pre>
+</div>
+<p>事实上，要做出通用的话，我们可以自定义一个函数以支持跨浏览器：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> addEvent(elem, type, fn) {<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (elem.attachEvent) {<br>        elem.attachEvent('on' + type, fn);<br>        <span style="color: rgba(0, 0, 255, 1)">return</span>;<br>    }<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (elem.addEventListener) {<br>        elem.addEventListener(type, fn, <span style="color: rgba(0, 0, 255, 1)">false</span>);<br>    }<br>}</pre>
+</div>
+<p>该函数首先检查attachEvent和addEventListener属性，谁可以就用谁，这两种类型的模型都支持删除句柄功能，参考下面的removeEvent函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> removeEvent(elem, type, fn) {<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (elem.detachEvent) {<br>        elem.detachEvent('on' + type, fn);<br>        <span style="color: rgba(0, 0, 255, 1)">return</span>;<br>    }<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (elem.removeEventListener) {<br>        elem.removeEventListener(type, fn, <span style="color: rgba(0, 0, 255, 1)">false</span>);<br>    }<br>}</pre>
+</div>
+<p>你可以这样使用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');<br>addEvent(myIntro, 'click', <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert('YOU CLICKED ME!!!');<br>});</pre>
+</div>
+<p>注意到我们传入了一个匿名函数作为第三个参数，JavaScript运行我们定义和执行匿名函数，这种匿名函数特别适合作为参数传递，实际上我们也可以传递有名的函数（代码如下），但是你们函数更容易做。</p>
+<p>如果你只想在第一次click的时候触发一个函数，你可以这么做：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注意：前提是我们已经定于好了addEvent/removeEvent函数</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> (定义好了才能使用哦)  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> myIntro = document.getElementById('intro');<br>addEvent(myIntro, 'click', oneClickOnly);<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> oneClickOnly() {<br>    alert('WOW!');<br>    removeEvent(myIntro, 'click', oneClickOnly);<br>} </pre>
+</div>
+<p>当第一次触发以后，我们就立即删除该句柄，但是有匿名函数的话却很难将自身的引用删除，不过实际上可以通过如下的形式来做（只不过有点麻烦）：</p>
+<div class="cnblogs_code">
+<pre>addEvent(myIntro, 'click', <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert('WOW!');<br>    removeEvent(myIntro, 'click', arguments.callee);<br>}); </pre>
+</div>
+<p>这里我们是有了arguments对象的callee属性，arguments对象包含了所有传递进来的参数以及该函数自身(callee)，这样我们就可以放心地删除自身的引用了。<br>关于W3C和微软模型还有其他的少许差异，比如this，在触发事件的时候函数中的this一般都是该元素上下文，，也就说this引用该元素自身，在基本事件注册和W3C模型中都没有问题，但在微软模型的实现里却可能出错，请参考如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> myEventHandler() {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.style.display = 'none';<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 正常工作，this是代表该元素</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.onclick = myEventHandler;<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 正常工作，this是代表该元素</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.addEventListener('click', myEventHandler, <span style="color: rgba(0, 0, 255, 1)">false</span>);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不正常，这时候的this是代表Window对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myIntro.attachEvent('onclick', myEventHandler);</pre>
+</div>
+<p>这里有一些方式可以避免这个问题，最简单的方式是使用前面的基本事件注册方式，或者是再做一个通用的addEvent，通用代码请参考<a href="http://ejohn.org/apps/jselect/event.html" target="_blank">John Resig</a>或<a href="http://dean.edwards.name/weblog/2005/10/add-event2/" target="_blank">Dean Edward</a>的文章。</p>
+<h1>Event对象</h1>
+<p>另外一个非常重要的内容是Event对象，当事件发生的时候出发某个函数，该Event对象将自动在函数内可用，该对象包含了很多事件触发时候的信息，但IE却没有这么实现，而是自己实现的，IE浏览器是通过全局对象window下的event属性来包含这些信息，虽然不是大问题，但我们也需要注意一下，下面的代码是兼容性的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> myEventHandler(e) {<br><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注意参数e</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 该函数调用的时候e是event对象（W3C实现）</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 兼容IE的代码</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    e = e || window.event;<br><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 现在e就可以兼容各种浏览器了</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这里可以自由地绑定事件了</span></pre>
+</div>
+<p>这里判断e对象（Event对象）是否存在我们使用了OR操作符：如果e不存在（为null, undefined,0等）的时候，将window.event赋值给e，否则的话继续使用e。通过这方式很快就能在多浏览器里得到真正的Event对象，如果你不喜欢这种方式的话，你可以使用if语句来处理：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (!e) {<br>    e = window.event;<br>} <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 没有else语句，因为e在其它浏览器已经定义了</span></pre>
+</div>
+<p>另外Event对象下的命令和属性都很有用，遗憾的是不不能全兼容浏览器，例如当你想取消默认的行为的时候你可以使用Event对象里的preventDefault()方法，但IE里不得不使用对象的returnValue属性值来控制，兼容代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> myEventHandler(e) {<br>    e = e || window.event;<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 防止默认行为</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">if</span> (e.preventDefault) {<br>        e.preventDefault();<br>    } <span style="color: rgba(0, 0, 255, 1)">else</span> {<br>        e.returnValue = <span style="color: rgba(0, 0, 255, 1)">false</span>;<br>    }<br>}</pre>
+</div>
+<p>例如，当你点击一个连接的时候，默认行为是导航到href里定义的地址，但有时候你想禁用这个默认行为，通过returnValue和preventDefault就可以实现，Event对象里的很多属性在浏览器里都不兼容，所以很多时候需要处理这些兼容性代码。</p>
+<p>注意：现在很多JS类库都已经封装好了e.preventDefault代码，也就是说在IE里可用了，但是原理上依然是使用returnValue来实现的。</p>
+<h2><strong>事件冒泡</strong></h2>
+<p>事件冒泡，就是事件触发的时候通过DOM向上冒泡，首先要知道不是所有的事件都有冒泡。事件在一个目标元素上触发的时候，该事件将触发一一触发祖先节点元素，直到最顶层的元素：</p>
+<p><img src="https://pic002.cnblogs.com/images/2012/349491/2012021515265084.png" alt=""></p>
+<p>如图所示，如果a连接被点击，触发触发连接的click事件，然后触发p的click事件，以此再触发div和body的click事件。顺序不变，而且不一定是在同时触发的。<br>这样你就可以利用该特性去处理自己的逻辑了，并且再任何时候都可以停止冒泡，比如，如果你只想冒泡到文本节点上，而不再进一步冒泡，你可以在p的click事件处理函数里丁停止冒泡：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> myParagraphEventHandler(e) {<br><br>    e = e || window.event;<br><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 停止向上冒泡</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">if</span> (e.stopPropagation) {<br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> W3C实现  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>        e.stopPropagation();<br>    } <span style="color: rgba(0, 0, 255, 1)">else</span> {<br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> IE实现  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>        e.cancelBubble = <span style="color: rgba(0, 0, 255, 1)">true</span>;<br>    }<br><br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用我们自定义的addEvent函数将myParagraphEventHandler绑定到click事件上：  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>addEvent(document.getElementsByTagName('p')[0], 'click', myParagraphEventHandler);</pre>
+</div>
+<p>事件委托</p>
+<p>举例来说，如果你有一个很多行的大表格，在每个&lt;tr&gt;上绑定点击事件是个非常危险的想法，因为性能是个大问题。流行的做法是使用事件委托。事件委托描述的是将事件绑定在容器元素上，然后通过判断点击的target子元素的类型来触发相应的事件。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> myTable = document.getElementById('my-table');<br><br>myTable.onclick = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 处理浏览器兼容</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    e = e || window.event;<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> targetNode = e.target || e.srcElement;<br><br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 测试如果点击的是TR就触发</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">if</span> (targetNode.nodeName.toLowerCase() === 'tr') {<br>        alert('You clicked a table row!');<br>    }<br><br>}</pre>
+</div>
+<p>事件委托依赖于事件冒泡，如果事件冒泡到table之前被禁用的话，那上面的代码就无法工作了。</p>
+<h1>总结</h1>
+<p>本章我们覆盖到了DOM元素的操作以及相关的浏览器事件模型，希望大家能对DOM有了进一步的了解。有任何问题，请留言讨论。</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/DOM/">DOM</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2351938, cb_entryCreatedDate = '2012-02-17 09:58', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjulCNk_ulw8JUFfRTuaWJZvZuSzDobMGgDXlGbj8XtxKv_TSPR0TtjVADNFo5BJvCANb1mQq5d1jK-m9gsqCNKHg5-qN-Ibxji_CfZUs0vnVuwj2wxSX4NSV2oYcVKw2XE" />
+</body>
+</html>

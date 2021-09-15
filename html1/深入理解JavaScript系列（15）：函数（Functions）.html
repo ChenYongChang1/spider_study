@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍本章节我们要着重介绍的是一个非常常见的ECMAScript对象——函数（function),我们将详细讲解一下各种类型的函数是如何影响上下文的变量对象以及每个函数的作用域链都包含什么，以及回答诸如" />
+    <meta property="og:description" content="介绍本章节我们要着重介绍的是一个非常常见的ECMAScript对象——函数（function),我们将详细讲解一下各种类型的函数是如何影响上下文的变量对象以及每个函数的作用域链都包含什么，以及回答诸如" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（15）：函数（Functions） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-30 08:37';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/30/2326372.html">
+    <span>深入理解JavaScript系列（15）：函数（Functions）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-30 08:37</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">34273</span>)&nbsp;
+评论(<span id="post_comment_count">31</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2326372" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2326372);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>本章节我们要着重介绍的是一个非常常见的ECMAScript对象——函数（function),我们将详细讲解一下各种类型的函数是如何影响上下文的变量对象以及每个函数的作用域链都包含什么，以及回答诸如像下面这样的问题：下面声明的函数有什么区别么？（如果有，区别是什么）。</p>
+<div class="cnblogs_code">
+<pre>原文：http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/chapter-5-functions/</span></pre>
+</div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  ...<br>};</pre>
+</div>
+<p>平时的惯用方式：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  ...<br>}</pre>
+</div>
+<p>或者，下面的函数为什么要用括号括住？</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  ...<br>})();</pre>
+</div>
+<p>关于具体的介绍，早前面的<a href="http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html" target="_blank">12章变量对象</a>和<a href="http://www.cnblogs.com/TomXu/archive/2012/01/18/2312463.html" target="_blank">14章作用域链</a>都有介绍，如果需要详细了解这些内容，请查询上述2个章节的详细内容。</p>
+<p>但我们依然要一个一个分别看看，首先从函数的类型讲起：</p>
+<h1>函数类型</h1>
+<p>在ECMAScript 中有三种函数类型：函数声明，函数表达式和函数构造器创建的函数。每一种都有自己的特点。</p>
+<h2><strong>函数声明</strong></h2>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">函数声明（缩写为FD）是这样一种函数：</span></pre>
+<ol>
+<li>有一个特定的名称</li>
+<li>在源码中的位置：要么处于程序级（Program level），要么处于其它函数的主体（FunctionBody）中</li>
+<li>在进入上下文阶段创建</li>
+<li>影响变量对象</li>
+<li>以下面的方式声明</li>
+</ol></div>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> exampleFunc() {<br>  ...<br>}</pre>
+</div>
+<p>这种函数类型的主要特点在于它们仅仅影响变量对象（即存储在上下文的VO中的变量对象）。该特点也解释了第二个重要点（它是变量对象特性的结果）——在代码执行阶段它们已经可用（因为FD在进入上下文阶段已经存在于VO中——代码执行之前）。</p>
+<p>例如（函数在其声明之前被调用）</p>
+<div class="cnblogs_code">
+<pre>foo();<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert('foo');<br>}</pre>
+</div>
+<p>另外一个重点知识点是上述定义中的第二点——函数声明在源码中的位置：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数可以在如下地方声明：</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 1) 直接在全局上下文中</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> globalFD() {<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2) 或者在一个函数的函数体内</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">function</span> innerFD() {}<br>}</pre>
+</div>
+<p>只有这2个位置可以声明函数，也就是说:不可能在表达式位置或一个代码块中定义它。</p>
+<p>另外一种可以取代函数声明的方式是函数表达式，解释如下：</p>
+<h2><strong>函数表达式</strong></h2>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">函数表达式（缩写为FE）是这样一种函数：</span></pre>
+<ol>
+<li>在源码中须出现在表达式的位置</li>
+<li>有可选的名称</li>
+<li>不会影响变量对象</li>
+<li>在代码执行阶段创建</li>
+</ol></div>
+<p>这种函数类型的主要特点在于它在源码中总是处在表达式的位置。最简单的一个例子就是一个赋值声明：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  ...<br>};</pre>
+</div>
+<p>该例演示是让一个匿名函数表达式赋值给变量foo，然后该函数可以用foo这个名称进行访问——foo()。</p>
+<p>同时和定义里描述的一样，函数表达式也可以拥有可选的名称：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> _foo() {<br>  ...<br>};</pre>
+</div>
+<p>需要注意的是，在外部FE通过变量“foo”来访问——foo()，而在函数内部（如递归调用），有可能使用名称“_foo”。</p>
+<p>如果FE有一个名称，就很难与FD区分。但是，如果你明白定义，区分起来就简单明了：FE总是处在表达式的位置。在下面的例子中我们可以看到各种ECMAScript 表达式：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 圆括号（分组操作符）内只能是表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() {});<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 在数组初始化器内只能是表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>[<span style="color: rgba(0, 0, 255, 1)">function</span> bar() {}];<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 逗号也只能操作表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>1, <span style="color: rgba(0, 0, 255, 1)">function</span> baz() {};</pre>
+</div>
+<p>表达式定义里说明：FE只能在代码执行阶段创建而且不存在于变量对象中，让我们来看一个示例行为：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> FE在定义阶段之前不可用（因为它是在代码执行阶段创建）</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo" 未定义</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() {});<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 定义阶段之后也不可用，因为他不在变量对象VO中</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(foo);  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo" 未定义</span></pre>
+</div>
+<p>相当一部分问题出现了，我们为什么需要函数表达式？答案很明显——在表达式中使用它们，”不会污染”变量对象。最简单的例子是将一个函数作为参数传递给其它函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo(callback) {<br>  callback();<br>}<br> <br>foo(<span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>  alert('foo.bar');<br>});<br> <br>foo(<span style="color: rgba(0, 0, 255, 1)">function</span> baz() {<br>  alert('foo.baz');<br>});</pre>
+</div>
+<p>在上述例子里，FE赋值给了一个变量（也就是参数），函数将该表达式保存在内存中，并通过变量名来访问（因为变量影响变量对象)，如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert('foo');<br>};<br> <br>foo();</pre>
+</div>
+<p>另外一个例子是创建封装的闭包从外部上下文中隐藏辅助性数据（在下面的例子中我们使用FE，它在创建后立即调用）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {};<br> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> initialize() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br>  foo.bar = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(x);<br>  };<br> <br>})();<br> <br>foo.bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10;</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "x" 未定义</span></pre>
+</div>
+<p>我们看到函数foo.bar（通过[[Scope]]属性）访问到函数initialize的内部变量“x”。同时，“x”在外部不能直接访问。在许多库中，这种策略常用来创建”私有”数据和隐藏辅助实体。在这种模式中，初始化的FE的名称通常被忽略：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>   <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 初始化作用域</span> <br>})();</pre>
+</div>
+<p>还有一个例子是：在代码执行阶段通过条件语句进行创建FE，不会污染变量对象VO。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> bar = (foo % 2 == 0<br>  ? <span style="color: rgba(0, 0, 255, 1)">function</span> () { alert(0); }<br>  : <span style="color: rgba(0, 0, 255, 1)">function</span> () { alert(1); }<br>);<br> <br>bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0</span></pre>
+</div>
+<p>关于圆括号的问题</p>
+<p>让我们回头并回答在文章开头提到的问题——”为何在函数创建后的立即调用中必须用圆括号来包围它？”，答案就是：表达式句子的限制就是这样的。</p>
+<p>按照标准，表达式语句不能以一个大括号{开始是因为他很难与代码块区分，同样，他也不能以函数关键字开始，因为很难与函数声明进行区分。即，所以，如果我们定义一个立即执行的函数，在其创建后立即按以下方式调用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  ...<br>}();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 即便有名称</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  ...<br>}();</pre>
+</div>
+<p>我们使用了函数声明，上述2个定义，解释器在解释的时候都会报错，但是可能有多种原因。</p>
+<p>如果在全局代码里定义（也就是程序级别），解释器会将它看做是函数声明，因为他是以function关键字开头，第一个例子，我们会得到SyntaxError错误，是因为函数声明没有名字（我们前面提到了函数声明必须有名字）。</p>
+<p>第二个例子，我们有一个名称为foo的一个函数声明正常创建，但是我们依然得到了一个语法错误——没有任何表达式的分组操作符错误。在函数声明后面他确实是一个分组操作符，而不是一个函数调用所使用的圆括号。所以如果我们声明如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo" 是一个函数声明，在进入上下文的时候创建</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo(x) {<br>  alert(x);<br>}(1); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这只是一个分组操作符，不是函数调用！</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo(10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这才是一个真正的函数调用，结果是10</span></pre>
+</div>
+<p>上述代码是没有问题的，因为声明的时候产生了2个对象：一个函数声明，一个带有1的分组操作，上面的例子可以理解为如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> foo(x) {<br>  alert(x);<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 一个分组操作符，包含一个表达式1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(1);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 另外一个操作符，包含一个function表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {});<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这个操作符里，包含的也是一个表达式"foo"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>("foo");<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等等</span></pre>
+</div>
+<p>如果我们定义一个如下代码（定义里包含一个语句），我们可能会说，定义歧义，会得到报错：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">true</span>) <span style="color: rgba(0, 0, 255, 1)">function</span> foo() {alert(1)}</pre>
+</div>
+<p>根据规范，上述代码是错误的（一个表达式语句不能以function关键字开头），但下面的例子就没有报错，想想为什么？</p>
+<p>我们如果来告诉解释器：我就像在函数声明之后立即调用，答案是很明确的，你得声明函数表达式function expression，而不是函数声明function declaration，并且创建表达式最简单的方式就是用分组操作符括号，里边放入的永远是表达式，所以解释器在解释的时候就不会出现歧义。在代码执行阶段这个的function就会被创建，并且立即执行，然后自动销毁（如果没有引用的话）。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo(x) {<br>  alert(x);<br>})(1); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这才是调用，不是分组操作符</span></pre>
+</div>
+<p>上述代码就是我们所说的在用括号括住一个表达式，然后通过（1）去调用。</p>
+<p>注意，下面一个立即执行的函数，周围的括号不是必须的，因为函数已经处在表达式的位置，解析器知道它处理的是在函数执行阶段应该被创建的FE，这样在函数创建后立即调用了函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {<br> <br>  bar: <span style="color: rgba(0, 0, 255, 1)">function</span> (x) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x % 2 != 0 ? 'yes' : 'no';<br>  }(1)<br> <br>};<br> <br>alert(foo.bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 'yes'</span></pre>
+</div>
+<p>就像我们看到的，foo.bar是一个字符串而不是一个函数，这里的函数仅仅用来根据条件参数初始化这个属性——它创建后并立即调用。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">因此，”关于圆括号”问题完整的答案如下：当函数不在表达式的位置的时候，分组操作符圆括号是必须的——也就是手工将函数转化成FE。</span><br><span style="color: rgba(255, 102, 0, 1)">如果解析器知道它处理的是FE，就没必要用圆括号。</span></pre>
+</div>
+<p>除了大括号以外，如下形式也可以将函数转化为FE类型，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注意是1,后面的声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span>1, <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert('anonymous function is called');<br>}();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 或者这个</span><span style="color: rgba(0, 128, 0, 1)"><br></span>!<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert('ECMAScript');<br>}();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它手工转化的形式</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>...</pre>
+</div>
+<p>但是，在这个例子中，圆括号是最简洁的方式。</p>
+<p>顺便提一句，组表达式包围函数描述可以没有调用圆括号，也可包含调用圆括号，即，下面的两个表达式都是正确的FE。</p>
+<p>实现扩展：函数语句</p>
+<p>下面的代码，根据贵方任何一个function声明都不应该被执行：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">true</span>) {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>    alert(0);<br>  }<br> <br>} <span style="color: rgba(0, 0, 255, 1)">else</span> {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>    alert(1);<br>  }<br> <br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1 or 0 ?实际在上不同环境下测试得出个结果不一样</span></pre>
+</div>
+<p>这里有必要说明的是，按照标准，这种句法结构通常是不正确的，因为我们还记得，一个函数声明（FD）不能出现在代码块中（这里if和else包含代码块）。我们曾经讲过，FD仅出现在两个位置：程序级（Program level）或直接位于其它函数体中。</p>
+<p>因为代码块仅包含语句，所以这是不正确的。可以出现在块中的函数的唯一位置是这些语句中的一个——上面已经讨论过的表达式语句。但是，按照定义它不能以大括号开始(既然它有别于代码块)或以一个函数关键字开始（既然它有别于FD）。</p>
+<p>但是，在标准的错误处理章节中，它允许程序语法的扩展执行。这样的扩展之一就是我们见到的出现在代码块中的函数。在这个例子中，现今的所有存在的执行都不会抛出异常，都会处理它。但是它们都有自己的方式。</p>
+<p>if-else分支语句的出现意味着一个动态的选择。即，从逻辑上来说，它应该是在代码执行阶段动态创建的函数表达式（FE）。但是，大多数执行在进入上下文阶段时简单的创建函数声明（FD），并使用最后声明的函数。即，函数foo将显示”1″，事实上else分支将永远不会执行。</p>
+<p>但是，SpiderMonkey （和TraceMonkey）以两种方式对待这种情况：一方面它不会将函数作为声明处理（即，函数在代码执行阶段根据条件创建），但另一方面，既然没有括号包围（再次出现解析错误——”与FD有别”），他们不能被调用，所以也不是真正的函数表达式，它储存在变量对象中。</p>
+<p>我个人认为这个例子中SpiderMonkey 的行为是正确的，拆分了它自身的函数中间类型——（FE+FD）。这些函数在合适的时间创建，根据条件，也不像FE，倒像一个可以从外部调用的FD，SpiderMonkey将这种语法扩展 称之为函数语句（缩写为FS）;该语法在MDC中提及过。</p>
+<p><strong>命名函数表达式的特性</strong></p>
+<p>当函数表达式FE有一个名称（称为命名函数表达式，缩写为NFE）时，将会出现一个重要的特点。从定义（正如我们从上面示例中看到的那样）中我们知道函数表达式不会影响一个上下文的变量对象（那样意味着既不可能通过名称在函数声明之前调用它，也不可能在声明之后调用它）。但是，FE在递归调用中可以通过名称调用自身。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo(bar) {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (bar) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span>;<br>  }<br> <br>  foo(<span style="color: rgba(0, 0, 255, 1)">true</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo" 是可用的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>})();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 在外部，是不可用的</span> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo" 未定义</span></pre>
+</div>
+<p>“foo”储存在什么地方？在foo的活动对象中？不是，因为在foo中没有定义任何”foo”。在上下文的父变量对象中创建foo？也不是，因为按照定义——FE不会影响VO(变量对象)——从外部调用foo我们可以实实在在的看到。那么在哪里呢？</p>
+<p>以下是关键点。当解释器在代码执行阶段遇到命名的FE时，在FE创建之前，它创建了辅助的特定对象，并添加到当前作用域链的最前端。然后它创建了FE，此时（正如我们在第四章 作用域链知道的那样）函数获取了[[Scope]] 属性——创建这个函数上下文的作用域链）。此后，FE的名称添加到特定对象上作为唯一的属性；这个属性的值是引用到FE上。最后一步是从父作用域链中移除那个特定的对象。让我们在伪码中看看这个算法：</p>
+<div class="cnblogs_code">
+<pre>specialObject = {};<br> <br>Scope = specialObject + Scope;<br> <br>foo = <span style="color: rgba(0, 0, 255, 1)">new</span> FunctionExpression;<br>foo.[[Scope]] = Scope;<br>specialObject.foo = foo; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {DontDelete}, {ReadOnly}</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">delete</span> Scope[0]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 从作用域链中删除定义的特殊对象specialObject</span></pre>
+</div>
+<p>因此，在函数外部这个名称不可用的（因为它不在父作用域链中），但是，特定对象已经存储在函数的[[scope]]中，在那里名称是可用的。</p>
+<p>但是需要注意的是一些实现（如Rhino）不是在特定对象中而是在FE的激活对象中存储这个可选的名称。Microsoft 中的执行完全打破了FE规则，它在父变量对象中保持了这个名称，这样函数在外部变得可以访问。</p>
+<p><strong>NFE 与SpiderMonkey</strong></p>
+<p>我们来看看NFE和SpiderMonkey的区别，SpiderMonkey 的一些版本有一个与特定对象相关的属性，它可以作为bug来对待（虽然按照标准所有的都那样实现了，但更像一个ECMAScript标准上的bug）。它与标识符的解析机制相关：作用域链的分析是二维的，在标识符的解析中，同样考虑到作用域链中每个对象的原型链。</p>
+<p>如果我们在Object.prototype中定义一个属性，并引用一个”不存在（nonexistent）”的变量。我们就能看到这种执行机制。这样，在下面示例的”x”解析中，我们将到达全局对象，但是没发现”x”。但是，在SpiderMonkey 中全局对象继承了Object.prototype中的属性，相应地，”x”也能被解析。</p>
+<div class="cnblogs_code">
+<pre>Object.prototype.x = 10;<br> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>})();</pre>
+</div>
+<p>活动对象没有原型。按照同样的起始条件，在上面的例子中，不可能看到内部函数的这种行为。如果定义一个局部变量”x”，并定义内部函数（FD或匿名的FE），然后再内部函数中引用”x”。那么这个变量将在父函数上下文（即，应该在哪里被解析）中而不是在Object.prototype中被解析。</p>
+<div class="cnblogs_code">
+<pre>Object.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    alert(x);<br>  }<br> <br>  bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20, 从foo的变量对象AO中查询</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 匿名函数表达式也是一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  (<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20, 也是从foo的变量对象AO中查询</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  })();<br> <br>}<br> <br>foo();</pre>
+</div>
+<p>尽管如此，一些执行会出现例外，它给活动对象设置了一个原型。因此，在Blackberry 的执行中，上面例子中的”x”被解析为”10″。也就是说，既然在Object.prototype中已经找到了foo的值，那么它就不会到达foo的活动对象。</p>
+<div class="cnblogs_code">
+<pre>AO(bar FD or anonymous FE) -&gt; no -&gt;<br>AO(bar FD or anonymous FE).[[Prototype]] -&gt; yes - 10</pre>
+</div>
+<p>在SpiderMonkey 中，同样的情形我们完全可以在命名FE的特定对象中看到。这个特定的对象（按照标准）是普通对象——”就像表达式new Object()“，相应地，它应该从Object.prototype 继承属性，这恰恰是我们在SpiderMonkey （1.7以上的版本）看到的执行。其余的执行（包括新的TraceMonkey）不会为特定的对象设置一个原型。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br>  (<span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br> <br>    alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20, 不上10,不是从foo的活动对象上得到的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "x"从链上查找:</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> AO(bar) - no -&gt; __specialObject(bar) -&gt; no</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> __specialObject(bar).[[Prototype]] - yes: 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  })();<br>}<br> <br>Object.prototype.x = 20;<br> <br>foo();</pre>
+</div>
+<p><strong>NFE与Jscript</strong></p>
+<p>当前IE浏览器(直到JScript 5.8 — IE8)中内置的JScript 执行有很多与函数表达式（NFE）相关的bug。所有的这些bug都完全与ECMA-262-3标准矛盾；有些可能会导致严重的错误。</p>
+<p>首先，这个例子中JScript 破坏了FE的主要规则，它不应该通过函数名存储在变量对象中。可选的FE名称应该存储在特定的对象中，并只能在函数自身(而不是别的地方)中访问。但IE直接将它存储在父变量对象中。此外，命名的FE在JScript 中作为函数声明（FD）对待。即创建于进入上下文的阶段，在源代码中的定义之前可以访问。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> FE 在变量对象里可见</span><span style="color: rgba(0, 128, 0, 1)"><br></span>testNFE();<br> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> testNFE() {<br>  alert('testNFE');<br>});<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> FE 在定义结束以后也可见</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 就像函数声明一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span>testNFE();</pre>
+</div>
+<p>正如我们所见，它完全违背了规则。</p>
+<p>其次，在声明中将命名FE赋给一个变量时，JScript 创建了两个不同的函数对象。逻辑上（特别注意的是在NFE的外部它的名称根本不应该被访问）很难命名这种行为。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>  alert('foo');<br>};<br> <br>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "function", </span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 有趣的是</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(foo === bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false!</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.x = 10;<br>alert(bar.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 未定义</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但执行的时候结果一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo"</span></pre>
+</div>
+<p>再次看到，已经乱成一片了。</p>
+<p>但是，需要注意的是，如果与变量赋值分开，单独描述NFE（如通过组运算符），然后将它赋给一个变量，并检查其相等性，结果为true，就好像是一个对象。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> bar() {});<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = bar;<br> <br>alert(foo === bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.x = 10;<br>alert(bar.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<p>此时是可以解释的。实际上，再次创建两个对象，但那样做事实上仍保持一个。如果我们再次认为这里的NFE被作为FD对待，然后在进入上下文阶段创建FD bar。此后，在代码执行阶段第二个对象——函数表达式（FE）bar 被创建，它不会被存储。相应地，没有FE bar的任何引用，它被移除了。这样就只有一个对象——FD bar，对它的引用赋给了变量foo。</p>
+<p>第三，就通过arguments.callee间接引用一个函数而言，它引用的是被激活的那个对象的名称（确切的说——再这里有两个函数对象。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br> <br>  alert([<br>    arguments.callee === foo,<br>    arguments.callee === bar<br>  ]);<br> <br>};<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [true, false]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [false, true]</span></pre>
+</div>
+<p>第四，JScript 像对待普通的FD一样对待NFE，他不服从条件表达式规则。即，就像一个FD,NFE在进入上下文时创建，在代码中最后的定义被使用。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>  alert(1);<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">false</span>) {<br> <br>  foo = <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    alert(2);<br>  };<br> <br>}<br>bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1</span></pre>
+</div>
+<p>这种行为从”逻辑上”也可以解释。在进入上下文阶段，最后遇到的FD bar被创建，即包含alert(2)的函数。此后，在代码执行阶段，新的函数——FE bar创建，对它的引用赋给了变量foo。这样foo激活产生alert(1)。逻辑很清楚，但考虑到IE的bug，既然执行明显被破坏，并依赖于JScript 的bug，我给单词”逻辑上(logically)”加上了引号。</p>
+<p>JScript 的第五个bug与全局对象的属性创建相关，全局对象由赋值给一个未限定的标识符（即，没有var关键字）来生成。既然NFE在这被作为FD对待，相应地，它存储在变量对象中，赋给一个未限定的标识符（即不是赋给变量而是全局对象的普通属性），万一函数的名称与未限定的标识符相同，这样该属性就不是全局的了。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不用var的话，就不是当前上下文的一个变量了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 而是全局对象的一个属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  foo = <span style="color: rgba(0, 0, 255, 1)">function</span> foo() {};<br> <br>})();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">  但，在匿名函数的外部，foo这个名字是不可用的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 未定义</span></pre>
+</div>
+<p>“逻辑”已经很清楚了：在进入上下文阶段，函数声明foo取得了匿名函数局部上下文的活动对象。在代码执行阶段，名称foo在AO中已经存在，即，它被作为局部变量。相应地，在赋值操作中，只是简单的更新已存在于AO中的属性foo，而不是按照ECMA-262-3的逻辑创建全局对象的新属性。</p>
+<h2><strong>通过函数构造器创建的函数</strong></h2>
+<p>既然这种函数对象也有自己的特色，我们将它与FD和FE区分开来。其主要特点在于这种函数的[[Scope]]属性仅包含全局对象：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 30;<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> bar = <span style="color: rgba(0, 0, 255, 1)">new</span> Function('alert(x); alert(y);');<br> <br>  bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, "y" 未定义</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>}</pre>
+</div>
+<p>我们看到，函数bar的[[Scope]]属性不包含foo上下文的Ao——变量”y”不能访问，变量”x”从全局对象中取得。顺便提醒一句，Function构造器既可使用new 关键字，也可以没有，这样说来，这些变体是等价的。</p>
+<p>这些函数的其他特点与<a href="http://bclary.com/2004/11/07/#a-13.1.1" target="_blank">Equated Grammar Productions</a> 和<a href="http://bclary.com/2004/11/07/#a-13.1.2" target="_blank">Joined Objects</a>相关。作为优化建议（但是，实现上可以不使用优化）,规范提供了这些机制。如，如果我们有一个100个元素的数组，在函数的一个循环中，执行可能使用Joined Objects 机制。结果是数组中的所有元素仅一个函数对象可以使用。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = [];<br> <br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 100; k++) {<br>  a[k] = <span style="color: rgba(0, 0, 255, 1)">function</span> () {}; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 可能使用了joined objects</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>但是通过函数构造器创建的函数不会被连接。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = [];<br> <br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 100; k++) {<br>  a[k] = Function(''); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 一直是100个不同的函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>另外一个与联合对象（joined objects）相关的例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar(z) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> z * z;<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">return</span> bar;<br>}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> x = foo();<br><span style="color: rgba(0, 0, 255, 1)">var</span> y = foo();</pre>
+</div>
+<p>这里的实现，也有权利连接对象x和对象y（使用同一个对象），因为函数（包括它们的内部[[Scope]] 属性）在根本上是没有区别的。因此，通过函数构造器创建的函数总是需要更多的内存资源。</p>
+<h1>创建函数的算法</h1>
+<p>下面的伪码描述了函数创建的算法（与联合对象相关的步骤除外）。这些描述有助于你理解ECMAScript中函数对象的更多细节。这种算法适合所有的函数类型。</p>
+<div class="cnblogs_code">
+<pre>F = <span style="color: rgba(0, 0, 255, 1)">new</span> NativeObject();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 属性[[Class]]是"Function"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Class]] = "Function"<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数对象的原型是Function的原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Prototype]] = Function.prototype<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 医用到函数自身</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 调用表达式F的时候激活[[Call]]</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 并且创建新的执行上下文</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Call]] = &lt;reference to <span style="color: rgba(0, 0, 255, 1)">function</span>&gt;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 在对象的普通构造器里编译</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> [[Construct]] 通过new关键字激活</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 并且给新对象分配内存</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 然后调用F.[[Call]]初始化作为this传递的新创建的对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Construct]] = internalConstructor<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 当前执行上下文的作用域链</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 例如，创建F的上下文</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Scope]] = activeContext.Scope<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果函数通过new Function(...)来创建，</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 那么</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.[[Scope]] = globalContext.Scope<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 传入参数的个数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.length = countParameters<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> F对象创建的原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>__objectPrototype = <span style="color: rgba(0, 0, 255, 1)">new</span> Object();<br>__objectPrototype.constructor = F <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {DontEnum}, 在循环里不可枚举x</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.prototype = __objectPrototype<br> <br><span style="color: rgba(0, 0, 255, 1)">return</span> F</pre>
+</div>
+<p>注意，F.[[Prototype]]是函数（构造器）的一个原型，F.prototype是通过这个函数创建的对象的原型（因为术语常常混乱，一些文章中F.prototype被称之为“构造器的原型”，这是不正确的）。</p>
+<h1>结论</h1>
+<p>这篇文章有些长。但是，当我们在接下来关于对象和原型章节中将继续讨论函数，同样，我很乐意在评论中回答您的任何问题。</p>
+<h1>其它参考</h1>
+<ul>
+<li>13. — <a title="Function Definition" href="http://bclary.com/2004/11/07/#a-13">Function Definition</a>;</li>
+<li>15.3 — <a title="Function Objects" href="http://bclary.com/2004/11/07/#a-15.3">Function Objects</a>.</li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E5%87%BD%E6%95%B0%E8%A1%A8%E8%BE%BE%E5%BC%8F/">函数表达式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%87%BD%E6%95%B0%E5%A3%B0%E6%98%8E/">函数声明</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/FE/">FE</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/FD/">FD</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2326372, cb_entryCreatedDate = '2012-01-30 08:37', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjuPSchBrhShm-4Rr1G-li_2w3YvYCBJ5XIVJe7IwDiWjh8q874aC7AZ3S_kUXy3JgX0YZ_SNBsPoO-hEM2bRMJbwYhUVERnrtzIS6gKhKIFO1mAZ9cTja-qaKLNtM5rLBs" />
+</body>
+</html>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第5篇，依赖倒置原则LSP（TheDependency Inversion Principle ）。英文原文：http:/" />
+    <meta property="og:description" content="前言本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第5篇，依赖倒置原则LSP（TheDependency Inversion Principle ）。英文原文：http:/" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（22）：S.O.L.I.D五大原则之依赖倒置原则DIP - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-15 09:12';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/15/2330143.html">
+    <span>深入理解JavaScript系列（22）：S.O.L.I.D五大原则之依赖倒置原则DIP</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-15 09:12</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">11038</span>)&nbsp;
+评论(<span id="post_comment_count">10</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2330143" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2330143);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>本章我们要讲解的是S.O.L.I.D五大原则JavaScript语言实现的第5篇，依赖倒置原则LSP（The&nbsp;Dependency Inversion Principle ）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://freshbrewedcode.com/derekgreer/2012/01/22/solid-javascript-the-dependency-inversion-principle/</span></pre>
+</div>
+<h1>依赖倒置原则</h1>
+<p>依赖倒置原则的描述是：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">A. High-level modules should not depend on low-level modules.  Both should depend on abstractions.</span><br><span style="color: rgba(255, 102, 0, 1)">   高层模块不应该依赖于低层模块，二者都应该依赖于抽象</span><br><br><span style="color: rgba(255, 102, 0, 1)">B. Abstractions should not depend upon details.  Details should depend upon abstractions.</span><br><span style="color: rgba(255, 102, 0, 1)">   抽象不应该依赖于细节，细节应该依赖于抽象</span></pre>
+</div>
+<p>依赖倒置原则的最重要问题就是确保应用程序或框架的主要组件从非重要的底层组件实现细节解耦出来，这将确保程序的最重要的部分不会因为低层次组件的变化修改而受影响。</p>
+<p>该原则的第一部分是关于高层模块和低层模块之间的耦合方式，在传统的分成架构中，高层模块（封装了程序的核心业务逻辑）总依赖于低层的一些模块（一些基础点）。当应用依赖倒置原则的时候，关系就反过来了。和高层模块依赖于低层模块不同，依赖倒置是让低层模块依赖于高层模块里定义的接口。举例来说，如果要给程序进行数据持久化，传统的设计是核心模块依赖于一个持久化模块的API，而根据依赖倒置原则重构以后，则是核心模块需要定义持久化的API接口，然后持久化的实现实例需要实现核心模块定义的这个API接口。</p>
+<p>该原则的第二部分描述的是抽象和细节之间的正确关系。理解这一部分，通过了解C++语言比较有帮助，因为他的适用性比较明显。</p>
+<p>不像一些静态类型的语言，C++没有提供一个语言级别的概念来定义接口，那类定义和类实现之间到底是怎么样的呢，在C++里，类通过头文件的形式来定义，其中定义了源文件需要实现的类成员方法和变量。因为所有的变量和私有方法都定义在头文件里，所以可以用来抽象以便和实现细节之前解耦出来。通过定只定义抽象方法来实现（C++里是抽象基类）接口这个概念用于实现类来实现。</p>
+<h1>DIP and JavaScript</h1>
+<p>因为JavaScript是动态语言，所以不需要去为了解耦而抽象。所以抽象不应依赖于细节这个改变在JavaScript里没有太大的影响，但高层模块不应依赖于低层模块却有很大的影响。</p>
+<p>在当静态类型语言的上下文里讨论依赖倒置原则的时候，耦合的概念包括语义（semantic）和物理（physical）两种。这就是说，如果一个高层模块依赖于一个低层模块，也就是不仅耦合了语义接口，也耦合了在底层模块里定义的物理接口。也就是说高层模块不仅要从第三方类库解耦出来，也需要从原生的低层模块里解耦出来。</p>
+<p>为了解释这一点，想象一个.NET程序可能包含一个非常有用的高层模块，而该模块依赖于一个低层的持久化模块。当作者需要在持久化API里增加一个类似的接口的时候，不管依赖倒置原则有没有使用，高层模块在不重新实现这个低层模块的新接口之前是没有办法在其它的程序里得到重用的。</p>
+<p>在JavaScript里，依赖倒置原则的适用性仅仅限于高层模块和低层模块之间的语义耦合，比如，DIP可以根据需要去增加接口而不是耦合低层模块定义的隐式接口。</p>
+<p>为了来理解这个，我们看一下如下例子：</p>
+<div class="cnblogs_code">
+<pre>$.fn.trackMap = <span style="color: rgba(0, 0, 255, 1)">function</span>(options) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> defaults = {<br>        <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> defaults </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>    };<br>    options = $.extend({}, defaults, options);<br><br>    <span style="color: rgba(0, 0, 255, 1)">var</span> mapOptions = {<br>        center: <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(options.latitude,options.longitude),<br>        zoom: 12,<br>        mapTypeId: google.maps.MapTypeId.ROADMAP<br>    },<br>        map = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.Map(<span style="color: rgba(0, 0, 255, 1)">this</span>[0], mapOptions),<br>        pos = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(options.latitude,options.longitude);<br><br>    <span style="color: rgba(0, 0, 255, 1)">var</span> marker = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.Marker({<br>        position: pos,<br>        title: options.title,<br>        icon: options.icon<br>    });<br><br>    marker.setMap(map);<br><br>    options.feed.update(<span style="color: rgba(0, 0, 255, 1)">function</span>(latitude, longitude) {<br>        marker.setMap(<span style="color: rgba(0, 0, 255, 1)">null</span>);<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> newLatLng = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(latitude, longitude);<br>        marker.position = newLatLng;<br>        marker.setMap(map);<br>        map.setCenter(newLatLng);<br>    });<br><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> updater = (<span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> private properties</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> {<br>        update: <span style="color: rgba(0, 0, 255, 1)">function</span>(callback) {<br>            updateMap = callback;<br>        }<br>    };<br>})();<br><br>$("#map_canvas").trackMap({<br>    latitude: 35.044640193770725,<br>    longitude: -89.98193264007568,<br>    icon: 'http://bit.ly/zjnGDe',<br>    title: 'Tracking Number: 12345',<br>    feed: updater<br>});</pre>
+</div>
+<p>在上述代码里，有个小型的JS类库将一个DIV转化成Map以便显示当前跟踪的位置信息。trackMap函数有2个依赖：第三方的Google Maps API和Location feed。该feed对象的职责是当icon位置更新的时候调用一个callback回调（在初始化的时候提供的）并且传入纬度latitude和精度longitude。Google Maps API是用来渲染界面的。</p>
+<p>feed对象的接口可能按照装，也可能没有照装trackMap函数的要求去设计，事实上，他的角色很简单，着重在简单的不同实现，不需要和Google Maps这么依赖。介于trackMap语义上耦合了Google Maps API，如果需要切换不同的地图提供商的话那就不得不对trackMap函数进行重写以便可以适配不同的provider。</p>
+<p>为了将于Google maps类库的语义耦合翻转过来，我们需要重写设计trackMap函数，以便对一个隐式接口（抽象出地图提供商provider的接口）进行语义耦合，我们还需要一个适配Google Maps API的一个实现对象，如下是重构后的trackMap函数：</p>
+<div class="cnblogs_code">
+<pre>$.fn.trackMap = <span style="color: rgba(0, 0, 255, 1)">function</span>(options) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> defaults = {<br>        <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> defaults </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>    };<br><br>    options = $.extend({}, defaults, options);<br><br>    options.provider.showMap(<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>[0],<br>        options.latitude,<br>        options.longitude,<br>        options.icon,<br>        options.title);<br><br>    options.feed.update(<span style="color: rgba(0, 0, 255, 1)">function</span>(latitude, longitude) {<br>        options.provider.updateMap(latitude, longitude);<br>    });<br><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>};<br><br>$("#map_canvas").trackMap({<br>    latitude: 35.044640193770725,<br>    longitude: -89.98193264007568,<br>    icon: 'http://bit.ly/zjnGDe',<br>    title: 'Tracking Number: 12345',<br>    <span style="color: rgba(255, 102, 0, 1)">feed: updater,</span><br>    <span style="color: rgba(255, 102, 0, 1)">provider: trackMap.googleMapsProvider</span><br>});</pre>
+</div>
+<p>在该版本里，我们重新设计了trackMap函数以及需要的一个地图提供商接口，然后将实现的细节挪到了一个单独的googleMapsProvider组件，该组件可能独立封装成一个单独的JavaScript模块。如下是我的googleMapsProvider实现：</p>
+<div class="cnblogs_code">
+<pre>trackMap.googleMapsProvider = (<span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> marker, map;<br><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> {<br>        showMap: <span style="color: rgba(0, 0, 255, 1)">function</span>(element, latitude, longitude, icon, title) {<br>            <span style="color: rgba(0, 0, 255, 1)">var</span> mapOptions = {<br>                center: <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(latitude, longitude),<br>                zoom: 12,<br>                mapTypeId: google.maps.MapTypeId.ROADMAP<br>            },<br>                pos = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(latitude, longitude);<br><br>            map = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.Map(element, mapOptions);<br><br>            marker = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.Marker({<br>                position: pos,<br>                title: title,<br>                icon: icon<br>            });<br><br>            marker.setMap(map);<br>        },<br>        updateMap: <span style="color: rgba(0, 0, 255, 1)">function</span>(latitude, longitude) {<br>            marker.setMap(<span style="color: rgba(0, 0, 255, 1)">null</span>);<br>            <span style="color: rgba(0, 0, 255, 1)">var</span> newLatLng = <span style="color: rgba(0, 0, 255, 1)">new</span> google.maps.LatLng(latitude,longitude);<br>            marker.position = newLatLng;<br>            marker.setMap(map);<br>            map.setCenter(newLatLng);<br>        }<br>    };<br>})();</pre>
+</div>
+<p>做了上述这些改变以后，trackMap函数将变得非常有弹性了，不必依赖于Google Maps API，相反可以任意替换其它的地图提供商，那就是说可以按照程序的需求去适配任何地图提供商。</p>
+<h1>何时依赖注入？</h1>
+<p>有点不太相关，其实依赖注入的概念经常和依赖倒置原则混在一起，为了澄清这个不同，我们有必要来解释一下：</p>
+<p>依赖注入是控制反转的一个特殊形式，反转的意思一个组件如何获取它的依赖。依赖注入的意思就是：依赖提供给组件，而不是组件去获取依赖，意思是创建一个依赖的实例，通过工厂去请求这个依赖，通过Service Locator或组件自身的初始化去请求这个依赖。依赖倒置原则和依赖注入都是关注依赖，并且都是用于反转。不过，依赖倒置原则没有关注组件如何获取依赖，而是只关注高层模块如何从低层模块里解耦出来。某种意义上说，依赖倒置原则是控制反转的另外一种形式，这里反转的是哪个模块定义接口（从低层里定义，反转到高层里定义）。</p>
+<h1>总结</h1>
+<p>这是五大原则的最后一篇了，在这5篇文字里我们看到了SOLID如何在JavaScript里实现的，不同的原则在JavaScript里通过不同的角度来说明的。（大叔注：其实大叔觉得虽然是有点不伦不类，但从另外一个层面上说，大体的原则在各种语言上其实还是一样的。）</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BE%9D%E8%B5%96%E5%80%92%E7%BD%AE%E5%8E%9F%E5%88%99/">依赖倒置原则</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/DIP/">DIP</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Dependency%20Inversion%20Principle/">Dependency Inversion Principle</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/DI/">DI</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BE%9D%E8%B5%96%E6%B3%A8%E5%85%A5/">依赖注入</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2330143, cb_entryCreatedDate = '2012-02-15 09:12', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjv778uS-aFZAgHltfZIkTBFTwUp3IB5q_22RoBjQmxNvvdR5klxExH1zeJ1r-5ez55O7dNVNA-xjOxYYQW0wgRdz9yUoZunDUAFisFY0zV3_0HhAGkNitmlRjaMAZjgy_Q" />
+</body>
+</html>

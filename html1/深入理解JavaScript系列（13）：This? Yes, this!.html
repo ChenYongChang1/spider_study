@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍在这篇文章里，我们将讨论跟执行上下文直接相关的更多细节。讨论的主题就是this关键字。实践证明，这个主题很难，在不同执行上下文中this的确定经常会发生问题。许多程序员习惯的认为，在程序语言中，t" />
+    <meta property="og:description" content="介绍在这篇文章里，我们将讨论跟执行上下文直接相关的更多细节。讨论的主题就是this关键字。实践证明，这个主题很难，在不同执行上下文中this的确定经常会发生问题。许多程序员习惯的认为，在程序语言中，t" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（13）：This? Yes,this! - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-17 08:50';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/17/2310479.html">
+    <span>深入理解JavaScript系列（13）：This? Yes,this!</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-17 08:50</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">43444</span>)&nbsp;
+评论(<span id="post_comment_count">78</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2310479" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2310479);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>在这篇文章里，我们将讨论跟执行上下文直接相关的更多细节。讨论的主题就是this关键字。实践证明，这个主题很难，在不同执行上下文中this的确定经常会发生问题。</p>
+<p>许多程序员习惯的认为，在程序语言中，this关键字与面向对象程序开发紧密相关，其完全指向由构造器新创建的对象。在ECMAScript规范中也是这样实现的，但正如我们将看到那样，在ECMAScript中，this并不限于只用来指向新创建的对象。</p>
+<div class="cnblogs_code">
+<pre>英文翻译: Dmitry A. Soshnikov在Stoyan Stefanov的帮助下<br>发布: 2010-03-07<br>http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/chapter-3-this/</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>俄文原文: Dmitry A. Soshnikov<br>修正: Zeroglif<br>发布: 2009-06-28; <br>更新：2010-03-07<br>http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/ru-chapter-3-this/</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>本文绝大部分内容参考了：http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">www.denisdeng.com/?p=900</span><span style="color: rgba(0, 128, 0, 1)"><br></span>部分句子参考了：<a href="http://www.cnblogs.com/justinw/archive/2010/05/04/1727295.html#this-value-in-the-global-code" target="_blank">justin的中文翻译</a></pre>
+</div>
+<p>让我们更详细的了解一下，在ECMAScript中this到底是什么？</p>
+<h1>定义</h1>
+<p>this是执行上下文中的一个属性：</p>
+<div class="cnblogs_code">
+<pre>activeExecutionContext = {<br>  VO: {...},<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>: thisValue<br>};</pre>
+</div>
+<p>这里VO是我们前一章讨论的变量对象。</p>
+<p>this与上下文中可执行代码的类型有直接关系，this值在进入上下文时确定，并且在上下文运行期间永久不变。</p>
+<p>下面让我们更详细研究这些案例：</p>
+<h1>全局代码中的this</h1>
+<p>在这里一切都简单。在全局代码中，this始终是全局对象本身，这样就有可能间接的引用到它了。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显示定义全局对象的属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">this</span>.a = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global.a = 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 通过赋值给一个无标示符隐式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>b = 20;<br>alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 也是通过变量声明隐式声明的</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 因为全局上下文的变量对象是全局对象自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> c = 30;<br>alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.c); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<h1>函数代码中的this</h1>
+<p>在函数代码中使用this时很有趣，这种情况很难且会导致很多问题。</p>
+<p>这种类型的代码中，this值的首要特点（或许是最主要的）是它不是静态的绑定到一个函数。</p>
+<p>正如我们上面曾提到的那样，this是进入上下文时确定，在一个函数代码中，这个值在每一次完全不同。</p>
+<p>不管怎样，在代码运行时的this值是不变的，也就是说，因为它不是一个变量，就不可能为其分配一个新值（相反，在Python编程语言中，它明确的定义为对象本身，在运行期间可以不断改变）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> bar = {<br>  x: 20,<br>  test: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br> <br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span> === bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>    <span style="color: rgba(0, 0, 255, 1)">this</span> = foo; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 错误，任何时候不能改变this的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果不出错的话，应该是10，而不是20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  }<br> <br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 在进入上下文的时候</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> this被当成bar对象</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> determined as "bar" object; why so - will</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> be discussed below in detail</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>bar.test(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.test = bar.test;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不过，这里this依然不会是foo</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 尽管调用的是相同的function</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.test(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false, 10</span></pre>
+</div>
+<p>那么，影响了函数代码中this值的变化有几个因素：</p>
+<p>首先，在通常的函数调用中，this是由激活上下文代码的调用者来提供的，即调用函数的父上下文(parent context )。this取决于调用函数的方式。</p>
+<p>为了在任何情况下准确无误的确定this值，有必要理解和记住这重要的一点。正是调用函数的方式影响了调用的上下文中的this值，没有别的什么（我们可以在一些文章，甚至是在关于javascript的书籍中看到，它们声称：“this值取决于函数如何定义，如果它是全局函数，this设置为全局对象，如果函数是一个对象的方法，this将总是指向这个对象。–这绝对不正确”）。继续我们的话题，可以看到，即使是正常的全局函数也会被调用方式的不同形式激活，这些不同的调用方式导致了不同的this值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(foo === foo.prototype.constructor); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但是同一个function的不同的调用表达式，this是不同的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.prototype.constructor(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo.prototype</span></pre>
+</div>
+<p>有可能作为一些对象定义的方法来调用函数，但是this将不会设置为这个对象。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {<br>  bar: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span> === foo);<br>  }<br>};<br> <br>foo.bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo, true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> exampleFunc = foo.bar;<br> <br>alert(exampleFunc === foo.bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 再一次，同一个function的不同的调用表达式，this是不同的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>exampleFunc(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global, false</span></pre>
+</div>
+<p>那么，调用函数的方式如何影响this值？为了充分理解this值的确定，需要详细分析其内部类型之一——引用类型（Reference type）。</p>
+<h2><strong>引用类型（Reference type）</strong></h2>
+<p>使用伪代码我们可以将引用类型的值可以表示为拥有两个属性的对象——base（即拥有属性的那个对象），和base中的propertyName 。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> valueOfReferenceType = {<br>  base: &lt;base object&gt;,<br>  propertyName: &lt;property name&gt;<br>};</pre>
+</div>
+<p>引用类型的值只有两种情况：</p>
+<ol>
+<li>&nbsp;&nbsp;&nbsp; 当我们处理一个标示符时</li>
+<li>&nbsp;&nbsp;&nbsp; 或一个属性访问器</li>
+</ol>
+<p>标示符的处理过程在下一篇文章里详细讨论，在这里我们只需要知道，在该算法的返回值中，总是一个引用类型的值（这对this来说很重要）。</p>
+<p>标识符是变量名，函数名，函数参数名和全局对象中未识别的属性名。例如，下面标识符的值：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = 10;<br><span style="color: rgba(0, 0, 255, 1)">function</span> bar() {}</pre>
+</div>
+<p>在操作的中间结果中，引用类型对应的值如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> fooReference = {<br>  base: global,<br>  propertyName: 'foo'<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> barReference = {<br>  base: global,<br>  propertyName: 'bar'<br>};</pre>
+</div>
+<p>为了从引用类型中得到一个对象真正的值，伪代码中的GetValue方法可以做如下描述：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> GetValue(value) {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (Type(value) != Reference) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> value;<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> base = GetBase(value);<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (base === <span style="color: rgba(0, 0, 255, 1)">null</span>) {<br>    <span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">new</span> ReferenceError;<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">return</span> base.[[Get]](GetPropertyName(value));<br> <br>}</pre>
+</div>
+<p>内部的[[Get]]方法返回对象属性真正的值，包括对原型链中继承的属性分析。</p>
+<div class="cnblogs_code">
+<pre>GetValue(fooReference); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>GetValue(barReference); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function object "bar"</span></pre>
+</div>
+<p>属性访问器都应该熟悉。它有两种变体：点（.）语法（此时属性名是正确的标示符，且事先知道），或括号语法（[]）。</p>
+<div class="cnblogs_code">
+<pre>foo.bar();<br>foo['bar']();</pre>
+</div>
+<p>在中间计算的返回值中，我们有了引用类型的值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> fooBarReference = {<br>  base: foo,<br>  propertyName: 'bar'<br>};<br> <br>GetValue(fooBarReference); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function object "bar"</span></pre>
+</div>
+<p>引用类型的值与函数上下文中的this值如何相关？——从最重要的意义上来说。 这个关联的过程是这篇文章的核心。 一个函数上下文中确定this值的通用规则如下：</p>
+<p>在一个函数上下文中，this由调用者提供，由调用函数的方式来决定。如果调用括号()的左边是引用类型的值，this将设为引用类型值的base对象（base object），在其他情况下（与引用类型不同的任何其它属性），这个值为null。不过，实际不存在this的值为null的情况，因为当this的值为null的时候，其值会被隐式转换为全局对象。<em><span style="color: rgba(255, 102, 0, 1)">注：第5版的ECMAScript中，已经不强迫转换成全局变量了，而是赋值为undefined。</span></em></p>
+<p>我们看看这个例子中的表现：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span></pre>
+</div>
+<p>我们看到在调用括号的左边是一个引用类型值（因为foo是一个标示符）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> fooReference = {<br>  base: global,<br>  propertyName: 'foo'<br>};</pre>
+</div>
+<p>相应地，this也设置为引用类型的base对象。即全局对象。</p>
+<p>同样，使用属性访问器：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {<br>  bar: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>  }<br>};<br> <br>foo.bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo</span></pre>
+</div>
+<p>我们再次拥有一个引用类型，其base是foo对象，在函数bar激活时用作this。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> fooBarReference = {<br>  base: foo,<br>  propertyName: 'bar'<br>};</pre>
+</div>
+<p>但是，用另外一种形式激活相同的函数，我们得到其它的this值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> test = foo.bar;<br>test(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span></pre>
+</div>
+<p>因为test作为标示符，生成了引用类型的其他值，其base（全局对象）用作this 值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> testReference = {<br>  base: global,<br>  propertyName: 'test'<br>};</pre>
+</div>
+<p>现在，我们可以很明确的告诉你，为什么用表达式的不同形式激活同一个函数会不同的this值，答案在于引用类型（type Reference）不同的中间值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global, because</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> fooReference = {<br>  base: global,<br>  propertyName: 'foo'<br>};<br> <br>alert(foo === foo.prototype.constructor); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 另外一种形式的调用表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.prototype.constructor(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo.prototype, because</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> fooPrototypeConstructorReference = {<br>  base: foo.prototype,<br>  propertyName: 'constructor'<br>};</pre>
+</div>
+<p>另外一个通过调用方式动态确定this值的经典例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.bar);<br>}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> x = {bar: 10};<br><span style="color: rgba(0, 0, 255, 1)">var</span> y = {bar: 20};<br> <br>x.test = foo;<br>y.test = foo;<br> <br>x.test(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>y.test(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span></pre>
+</div>
+<h2><strong>函数调用和非引用类型</strong></h2>
+<p>因此，正如我们已经指出，当调用括号的左边不是引用类型而是其它类型，这个值自动设置为null，结果为全局对象。</p>
+<p>让我们再思考这种表达式：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> null =&gt; global</span><span style="color: rgba(0, 128, 0, 1)"><br></span>})();</pre>
+</div>
+<p>在这个例子中，我们有一个函数对象但不是引用类型的对象（它不是标示符，也不是属性访问器），相应地，this值最终设为全局对象。</p>
+<p>更多复杂的例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {<br>  bar: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>  }<br>};<br> <br>foo.bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Reference, OK =&gt; foo</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(foo.bar)(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Reference, OK =&gt; foo</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>(foo.bar = foo.bar)(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global?</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">false</span> || foo.bar)(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global?</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(foo.bar, foo.bar)(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global?</span></pre>
+</div>
+<p>为什么我们有一个属性访问器，它的中间值应该为引用类型的值，在某些调用中我们得到的this值不是base对象，而是global对象？</p>
+<p>问题在于后面的三个调用，在应用一定的运算操作之后，在调用括号的左边的值不在是引用类型。</p>
+<ol>
+<li>第一个例子很明显———明显的引用类型，结果是，this为base对象，即foo。</li>
+<li>在第二个例子中，组运算符并不适用，想想上面提到的，从引用类型中获得一个对象真正的值的方法，如GetValue。相应的，在组运算的返回中———我们得到仍是一个引用类型。这就是this值为什么再次设为base对象，即foo。</li>
+<li>第三个例子中，与组运算符不同，赋值运算符调用了GetValue方法。返回的结果是函数对象（但不是引用类型），这意味着this设为null，结果是global对象。</li>
+<li>第四个和第五个也是一样——逗号运算符和逻辑运算符（OR）调用了GetValue 方法，相应地，我们失去了引用而得到了函数。并再次设为global。</li>
+</ol>
+<h2><strong>引用类型和this为null</strong></h2>
+<p>有一种情况是这样的：当调用表达式限定了call括号左边的引用类型的值， 尽管this被设定为null，但结果被隐式转化成global。当引用类型值的base对象是被活动对象时，这种情况就会出现。</p>
+<p>下面的实例中，内部函数被父函数调用，此时我们就能够看到上面说的那种特殊情况。正如我们在第12章知道的一样，局部变量、内部函数、形式参数储存在给定函数的激活对象中。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  }<br>  bar(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> the same as AO.bar()</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>活动对象总是作为this返回，值为null——（即伪代码的AO.bar()相当于null.bar()）。这里我们再次回到上面描述的例子，this设置为全局对象。</p>
+<p>有一种情况除外：如果with对象包含一个函数名属性，在with语句的内部块中调用函数。With语句添加到该对象作用域的最前端，即在活动对象的前面。相应地，也就有了引用类型（通过标示符或属性访问器）， 其base对象不再是活动对象，而是with语句的对象。顺便提一句，它不仅与内部函数相关，也与全局函数相关，因为with对象比作用域链里的最前端的对象(全局对象或一个活动对象)还要靠前。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">with</span> ({<br> <br>  foo: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.x);<br>  },<br>  x: 20<br> <br>}) {<br> <br>  foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> because</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span>  fooReference = {<br>  base: __withObject,<br>  propertyName: 'foo'<br>};</pre>
+</div>
+<p>同样的情况出现在catch语句的实际参数中函数调用：在这种情况下，catch对象添加到作用域的最前端，即在活动对象或全局对象的前面。但是，这个特定的行为被确认为ECMA-262-3的一个bug，这个在新版的ECMA-262-5中修复了。这样，在特定的活动对象中，this指向全局对象。而不是catch对象。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">try</span> {<br>  <span style="color: rgba(0, 0, 255, 1)">throw</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>  };<br>} <span style="color: rgba(0, 0, 255, 1)">catch</span> (e) {<br>  e(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ES3标准里是__catchObject, ES5标准里是global </span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> on idea</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> eReference = {<br>  base: __catchObject,<br>  propertyName: 'e'<br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ES5新标准里已经fix了这个bug，</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所以this就是全局对象了</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> eReference = {<br>  base: global,<br>  propertyName: 'e'<br>};</pre>
+</div>
+<p>同样的情况出现在命名函数（函数的更对细节参考第15章Functions）的递归调用中。在函数的第一次调用中，base对象是父活动对象（或全局对象），在递归调用中，base对象应该是存储着函数表达式可选名称的特定对象。但是，在这种情况下，this总是指向全局对象。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo(bar) {<br> <br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br> <br>  !bar &amp;&amp; foo(1); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "should" be special object, but always (correct) global</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>})(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span></pre>
+</div>
+<h2><strong>作为构造器调用的函数中的this</strong></h2>
+<p>还有一个与this值相关的情况是在函数的上下文中，这是一个构造函数的调用。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "a"对象下创建一个新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = 10;<br>}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<p>在这个例子中，new运算符调用“A”函数的内部的[[Construct]] 方法，<span style="color: rgba(255, 0, 0, 1)">接着</span>，在对象创建后，调用内部的[[Call]] 方法。 <span style="color: rgba(255, 0, 0, 1)">所有相同的函数“A”都将this的值设置为新创建的对象。</span></p>
+<h2><strong>函数调用中手动设置this</strong></h2>
+<p>在函数原型中定义的两个方法（因此所有的函数都可以访问它）允许去手动设置函数调用的this值。它们是.apply和.call方法。他们用接受的第一个参数作为this值，this 在调用的作用域中使用。这两个方法的区别很小，对于.apply，第二个参数必须是数组（或者是类似数组的对象，如arguments，反过来，.call能接受任何参数。两个方法必须的参数是第一个——this。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> b = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> a(c) {<br>  alert(<span style="color: rgba(0, 0, 255, 1)">this</span>.b);<br>  alert(c);<br>}<br> <br>a(20); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> this === global, this.b == 10, c == 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a.call({b: 20}, 30); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> this === {b: 20}, this.b == 20, c == 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.apply({b: 30}, [40]) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> this === {b: 30}, this.b == 30, c == 40</span></pre>
+</div>
+<h1>结论</h1>
+<p>在这篇文章中，我们讨论了ECMAScript中this关键字的特征（对比于C++ 和 Java，它们的确是特色）。我希望这篇文章有助于你准确的理解ECMAScript中this关键字如何工作。同样，我很乐意在评论中回到你的问题。</p>
+<h1>其它参考</h1>
+<ul>
+<li>10.1.7 – <a title="This" href="http://bclary.com/2004/11/07/#a-10.1.7">This</a></li>
+<li>11.1.1 – <a title="The this keyword" href="http://bclary.com/2004/11/07/#a-11.1.1">The this keyword</a></li>
+<li>11.2.2 – <a title="The new operator" href="http://bclary.com/2004/11/07/#a-11.2.2">The new operator</a></li>
+<li>11.2.3 – <a title="Function calls" href="http://bclary.com/2004/11/07/#a-11.2.3">Function calls</a></li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/this/">this</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2310479, cb_entryCreatedDate = '2012-01-17 08:50', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjuQItZnO5Dqxl6F3akzv8c53L_PA11WfFjWcQznVf9srV954PsamyqjnJ5KYvC89JRVD4Xos1zcN7Gb4yecL-c-go7YxTX7DKnSjEjTnX_p8VoTV1vZpn_Sn4gb_w-nxDo" />
+</body>
+</html>

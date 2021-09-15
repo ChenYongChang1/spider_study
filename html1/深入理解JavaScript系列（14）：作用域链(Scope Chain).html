@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言在第12章关于变量对象的描述中，我们已经知道一个执行上下文 的数据（变量、函数声明和函数的形参）作为属性存储在变量对象中。同时我们也知道变量对象在每次进入上下文时创建，并填入初始值，值的更新出现在" />
+    <meta property="og:description" content="前言在第12章关于变量对象的描述中，我们已经知道一个执行上下文 的数据（变量、函数声明和函数的形参）作为属性存储在变量对象中。同时我们也知道变量对象在每次进入上下文时创建，并填入初始值，值的更新出现在" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（14）：作用域链(Scope Chain) - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-18 09:35';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/18/2312463.html">
+    <span>深入理解JavaScript系列（14）：作用域链(Scope Chain)</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-18 09:35</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">54552</span>)&nbsp;
+评论(<span id="post_comment_count">36</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2312463" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2312463);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>在第12章关于变量对象的描述中，我们已经知道一个执行上下文 的数据（变量、函数声明和函数的形参）作为属性存储在变量对象中。</p>
+<p>同时我们也知道变量对象在每次进入上下文时创建，并填入初始值，值的更新出现在代码执行阶段。</p>
+<p>这一章专门讨论与执行上下文直接相关的更多细节，这次我们将提及一个议题——作用域链。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://dmitrysoshnikov.com/ecmascript/chapter-4-scope-chain/<br>中文参考：http://www.denisdeng.com/?p=908<br>本文绝大部分内容来自上述地址，仅做少许修改，感谢作者</span></pre>
+</div>
+<h1>定义</h1>
+<p>如果要简要的描述并展示其重点，那么作用域链大多数与内部函数相关。</p>
+<p>我们知道，ECMAScript 允许创建内部函数，我们甚至能从父函数中返回这些函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() { <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20; <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    alert(x + y);<br>  } <br>  <span style="color: rgba(0, 0, 255, 1)">return</span> bar; <br>}<br> <br>foo()(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>这样，很明显每个上下文拥有自己的变量对象：对于全局上下文，它是全局对象自身；对于函数，它是活动对象。</p>
+<p>作用域链正是内部上下文所有变量对象（包括父变量对象）的列表。此链用来变量查询。即在上面的例子中，“bar”上下文的作用域链包括AO(bar)、AO(foo)和VO(global)。</p>
+<p>但是，让我们仔细研究这个问题。</p>
+<p>让我们从定义开始，并进深一步的讨论示例。</p>
+<div class="cnblogs_code">
+<pre>作用域链与一个执行上下文相关，变量对象的链用于在标识符解析中变量查找。</pre>
+</div>
+<p>函数上下文的作用域链在函数调用时创建的，包含活动对象和这个函数内部的[[scope]]属性。下面我们将更详细的讨论一个函数的[[scope]]属性。</p>
+<p>在上下文中示意如下：</p>
+<div class="cnblogs_code">
+<pre>activeExecutionContext = {<br>    VO: {...}, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> or AO</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>: thisValue,<br>    Scope: [ <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Scope chain</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 所有变量对象的列表</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> for identifiers lookup</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    ]<br>};</pre>
+</div>
+<p>其scope定义如下：</p>
+<div class="cnblogs_code">
+<pre>Scope = AO + [[Scope]]</pre>
+</div>
+<p>这种联合和标识符解析过程，我们将在下面讨论，这与函数的生命周期相关。</p>
+<h1>函数的生命周期</h1>
+<p>函数的的生命周期分为创建和激活阶段（调用时），让我们详细研究它。</p>
+<h2><strong>函数创建</strong></h2>
+<p>众所周知，在进入上下文时函数声明放到变量/活动（VO/AO）对象中。让我们看看在全局上下文中的变量和函数声明（这里变量对象是全局对象自身，我们还记得，是吧？）</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20;<br>  alert(x + y);<br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>在函数激活时，我们得到正确的（预期的）结果－－30。但是，有一个很重要的特点。<br><br>此前，我们仅仅谈到有关当前上下文的变量对象。这里，我们看到变量“y”在函数“foo”中定义（意味着它在foo上下文的AO中），但是变量“x”并未在“foo”上下文中定义，相应地，它也不会添加到“foo”的AO中。乍一看，变量“x”相对于函数“foo”根本就不存在；但正如我们在下面看到的——也仅仅是“一瞥”，我们发现，“foo”上下文的活动对象中仅包含一个属性－－“y”。</p>
+<div class="cnblogs_code">
+<pre>fooContext.AO = {<br>  y: undefined <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined – 进入上下文的时候是20 – at activation</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};</pre>
+</div>
+<p>函数“foo”如何访问到变量“x”？理论上函数应该能访问一个更高一层上下文的变量对象。实际上它正是这样，这种机制是通过函数内部的[[scope]]属性来实现的。</p>
+<p>[[scope]]是所有父变量对象的层级链，处于当前函数上下文之上，在函数创建时存于其中。</p>
+<p>注意这重要的一点－－[[scope]]在函数创建时被存储－－静态（不变的），永远永远，直至函数销毁。即：函数可以永不调用，但[[scope]]属性已经写入，并存储在函数对象中。</p>
+<p>另外一个需要考虑的是－－与作用域链对比，[[scope]]是函数的一个属性而不是上下文。考虑到上面的例子，函数“foo”的[[scope]]如下：</p>
+<div class="cnblogs_code">
+<pre>foo.[[Scope]] = [<br>  globalContext.VO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> === Global</span><span style="color: rgba(0, 128, 0, 1)"><br></span>];</pre>
+</div>
+<p>举例来说，我们用通常的ECMAScript 数组展现作用域和[[scope]]。</p>
+<p>继续，我们知道在函数调用时进入上下文，这时候活动对象被创建，this和作用域（作用域链）被确定。让我们详细考虑这一时刻。</p>
+<h2><strong>函数激活</strong></h2>
+<p>正如在定义中说到的，进入上下文创建AO/VO之后，上下文的Scope属性（变量查找的一个作用域链）作如下定义：</p>
+<div class="cnblogs_code">
+<pre>Scope = AO|VO + [[Scope]]</pre>
+</div>
+<p>上面代码的意思是：活动对象是作用域数组的第一个对象，即添加到作用域的前端。</p>
+<div class="cnblogs_code">
+<pre>Scope = [AO].concat([[Scope]]);</pre>
+</div>
+<p>这个特点对于标示符解析的处理来说很重要。</p>
+<p>标示符解析是一个处理过程，用来确定一个变量（或函数声明）属于哪个变量对象。</p>
+<p>这个算法的返回值中，我们总有一个引用类型，它的base组件是相应的变量对象（或若未找到则为null）,属性名组件是向上查找的标示符的名称。引用类型的详细信息在第13章.this中已讨论。</p>
+<p>标识符解析过程包含与变量名对应属性的查找，即作用域中变量对象的连续查找，从最深的上下文开始，绕过作用域链直到最上层。</p>
+<p>这样一来，在向上查找中，一个上下文中的局部变量较之于父作用域的变量拥有较高的优先级。万一两个变量有相同的名称但来自不同的作用域，那么第一个被发现的是在最深作用域中。</p>
+<p>我们用一个稍微复杂的例子描述上面讲到的这些。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20;<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> z = 30;<br>    alert(x +  y + z);<br>  }<br> <br>  bar();<br>}<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 60</span></pre>
+</div>
+<p>对此，我们有如下的变量/活动对象，函数的的[[scope]]属性以及上下文的作用域链：</p>
+<p>全局上下文的变量对象是：</p>
+<div class="cnblogs_code">
+<pre>globalContext.VO === Global = {<br>  x: 10<br>  foo: &lt;reference to <span style="color: rgba(0, 0, 255, 1)">function</span>&gt;<br>};</pre>
+</div>
+<p>在“foo”创建时，“foo”的[[scope]]属性是：</p>
+<div class="cnblogs_code">
+<pre>foo.[[Scope]] = [<br>  globalContext.VO<br>];</pre>
+</div>
+<p>在“foo”激活时（进入上下文），“foo”上下文的活动对象是：</p>
+<div class="cnblogs_code">
+<pre>fooContext.AO = {<br>  y: 20,<br>  bar: &lt;reference to <span style="color: rgba(0, 0, 255, 1)">function</span>&gt;<br>};</pre>
+</div>
+<p>“foo”上下文的作用域链为：</p>
+<div class="cnblogs_code">
+<pre>fooContext.Scope = fooContext.AO + foo.[[Scope]] <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> i.e.:</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>fooContext.Scope = [<br>  fooContext.AO,<br>  globalContext.VO<br>];</pre>
+</div>
+<p>内部函数“bar”创建时，其[[scope]]为：</p>
+<div class="cnblogs_code">
+<pre>bar.[[Scope]] = [<br>  fooContext.AO,<br>  globalContext.VO<br>];</pre>
+</div>
+<p>在“bar”激活时，“bar”上下文的活动对象为：</p>
+<div class="cnblogs_code">
+<pre>barContext.AO = {<br>  z: 30<br>};</pre>
+</div>
+<p>“bar”上下文的作用域链为：</p>
+<div class="cnblogs_code">
+<pre>barContext.Scope = barContext.AO + bar.[[Scope]] <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> i.e.:</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>barContext.Scope = [<br>  barContext.AO,<br>  fooContext.AO,<br>  globalContext.VO<br>];</pre>
+</div>
+<p>对“x”、“y”、“z”的标识符解析如下：</p>
+<div class="cnblogs_code">
+<pre>- "x"<br>-- barContext.AO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> not found</span><span style="color: rgba(0, 128, 0, 1)"><br></span>-- fooContext.AO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> not found</span><span style="color: rgba(0, 128, 0, 1)"><br></span>-- globalContext.VO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> found - 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>- "y"<br>-- barContext.AO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> not found</span><span style="color: rgba(0, 128, 0, 1)"><br></span>-- fooContext.AO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> found - 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>- "z"<br>-- barContext.AO <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> found - 30</span></pre>
+</div>
+<h1>作用域特征</h1>
+<p>让我们看看与作用域链和函数[[scope]]属性相关的一些重要特征。</p>
+<h2><strong>闭包</strong></h2>
+<p>在ECMAScript中，闭包与函数的[[scope]]直接相关，正如我们提到的那样，[[scope]]在函数创建时被存储，与函数共存亡。实际上，闭包是函数代码和其[[scope]]的结合。因此，作为其对象之一，[[Scope]]包括在函数内创建的词法作用域（父变量对象）。当函数进一步激活时，在变量对象的这个词法链（静态的存储于创建时）中，来自较高作用域的变量将被搜寻。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(x);<br>}<br> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br>  foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, but not 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>})();</pre>
+</div>
+<p>我们再次看到，在标识符解析过程中，使用函数创建时定义的词法作用域－－变量解析为10，而不是30。此外，这个例子也清晰的表明，一个函数（这个例子中为从函数“foo”返回的匿名函数）的[[scope]]持续存在，即使是在函数创建的作用域已经完成之后。</p>
+<p>关于ECMAScript中闭包的理论和其执行机制的更多细节，阅读16章闭包。</p>
+<h2><strong>通过构造函数创建的函数的[[scope]]</strong></h2>
+<p>在上面的例子中，我们看到，在函数创建时获得函数的[[scope]]属性，通过该属性访问到所有父上下文的变量。但是，这个规则有一个重要的例外，它涉及到通过函数构造函数创建的函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20;<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> barFD() { <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    alert(x);<br>    alert(y);<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> barFE = <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    alert(x);<br>    alert(y);<br>  };<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> barFn = Function('alert(x); alert(y);');<br> <br>  barFD(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  barFE(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  barFn(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, "y" is not defined</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>}<br> <br>foo();</pre>
+</div>
+<p>我们看到，通过函数构造函数（Function constructor）创建的函数“bar”，是不能访问变量“y”的。但这并不意味着函数“barFn”没有[[scope]]属性（否则它不能访问到变量“x”）。问题在于通过函构造函数创建的函数的[[scope]]属性总是唯一的全局对象。考虑到这一点，如通过这种函数创建除全局之外的最上层的上下文闭包是不可能的。</p>
+<h2><strong>二维作用域链查找</strong></h2>
+<p>在作用域链中查找最重要的一点是变量对象的属性（如果有的话）须考虑其中－－源于ECMAScript 的原型特性。如果一个属性在对象中没有直接找到，查询将在原型链中继续。即常说的二维链查找。（1）作用域链环节；（2）每个作用域链－－深入到原型链环节。如果在Object.prototype 中定义了属性，我们能看到这种效果。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(x);<br>}<br> <br>Object.prototype.x = 10;<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<p>活动对象没有原型，我们可以在下面的例子中看到：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> bar() {<br>    alert(x);<br>  }<br> <br>  bar();<br>}<br> <br>Object.prototype.x = 10;<br> <br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span></pre>
+</div>
+<p>如果函数“bar”上下文的激活对象有一个原型，那么“x”将在Object.prototype 中被解析，因为它在AO中不被直接解析。但在上面的第一个例子中，在标识符解析中，我们到达全局对象（在一些执行中并不全是这样），它从Object.prototype继承而来，响应地，“x”解析为10。</p>
+<p>同样的情况出现在一些版本的SpiderMokey 的命名函数表达式（缩写为NFE）中，在那里特定的对象存储从Object.prototype继承而来的函数表达式的可选名称，在Blackberry中的一些版本中，执行时激活对象从Object.prototype继承。但是，关于该特色的更多细节在第15章函数讨论。</p>
+<h2><strong>全局和eval上下文中的作用域链</strong></h2>
+<p>这里不一定很有趣，但必须要提示一下。全局上下文的作用域链仅包含全局对象。代码eval的上下文与当前的调用上下文（calling context）拥有同样的作用域链。</p>
+<div class="cnblogs_code">
+<pre>globalContext.Scope = [<br>  Global<br>];<br> <br>evalContext.Scope === callingContext.Scope;</pre>
+</div>
+<h2><strong>代码执行时对作用域链的影响</strong></h2>
+<p>在ECMAScript 中，在代码执行阶段有两个声明能修改作用域链。这就是with声明和catch语句。它们添加到作用域链的最前端，对象须在这些声明中出现的标识符中查找。如果发生其中的一个，作用域链简要的作如下修改：</p>
+<div class="cnblogs_code">
+<pre>Scope = withObject|catchObject + AO|VO + [[Scope]]</pre>
+</div>
+<p>在这个例子中添加对象，对象是它的参数（这样，没有前缀，这个对象的属性变得可以访问）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10, y: 20};<br> <br><span style="color: rgba(0, 0, 255, 1)">with</span> (foo) {<br>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>作用域链修改成这样：</p>
+<div class="cnblogs_code">
+<pre>Scope = foo + AO|VO + [[Scope]]</pre>
+</div>
+<p>我们再次看到，通过with语句，对象中标识符的解析添加到作用域链的最前端：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10, y = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">with</span> ({x: 20}) {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 30, y = 30;<br> <br>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br> <br>alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>在进入上下文时发生了什么？标识符“x”和“y”已被添加到变量对象中。此外，在代码运行阶段作如下修改：</p>
+<ol>
+<li>x = 10, y = 10;</li>
+<li>对象{x:20}添加到作用域的前端;</li>
+<li>在with内部，遇到了var声明，当然什么也没创建，因为在进入上下文时，所有变量已被解析添加;</li>
+<li>在第二步中，仅修改变量“x”，实际上对象中的“x”现在被解析，并添加到作用域链的最前端，“x”为20，变为30;</li>
+<li>同样也有变量对象“y”的修改，被解析后其值也相应的由10变为30;</li>
+<li>此外，在with声明完成后，它的特定对象从作用域链中移除（已改变的变量“x”－－30也从那个对象中移除），即作用域链的结构恢复到with得到加强以前的状态。</li>
+<li>在最后两个alert中，当前变量对象的“x”保持同一，“y”的值现在等于30，在with声明运行中已发生改变。</li>
+</ol>
+<p>同样，catch语句的异常参数变得可以访问，它创建了只有一个属性的新对象－－异常参数名。图示看起来像这样：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">try</span> {<br>  ...<br>} <span style="color: rgba(0, 0, 255, 1)">catch</span> (ex) {<br>  alert(ex);<br>}</pre>
+</div>
+<p>作用域链修改为：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> catchObject = {<br>  ex: &lt;exception object&gt;<br>};<br> <br>Scope = catchObject + AO|VO + [[Scope]]</pre>
+</div>
+<p>在catch语句完成运行之后，作用域链恢复到以前的状态。</p>
+<h1>结论</h1>
+<p>在这个阶段，我们几乎考虑了与执行上下文相关的所有常用概念，以及与它们相关的细节。按照计划－－函数对象的详细分析：函数类型（函数声明，函数表达式）和闭包。顺便说一下，在这篇文章中，闭包直接与[[scope]]属性相关，但是，关于它将在合适的篇章中讨论。我很乐意在评论中回答你的问题。</p>
+<h1>其它参考</h1>
+<ul>
+<li>8.6.2 – <a href="http://bclary.com/2004/11/07/#a-8.6.2" target="_blank">[[Scope]]</a></li>
+<li>10.1.4 – <a href="http://bclary.com/2004/11/07/#a-10.1.4" target="_blank">Scope Chain and Identifier Resolution</a></li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BD%9C%E7%94%A8%E5%9F%9F%E9%93%BE/">作用域链</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Scope%20Chain/">Scope Chain</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2312463, cb_entryCreatedDate = '2012-01-18 09:35', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjun3GWiXGubx_xBPKzBKIkF659OHYmafo9LrKl6b6Dr1_VCEflWlbKuCDLKPZln-CLtQoMJQmWbkSHsatvCKebqRjsV6U0_ElCv7xvttTTiLQUE_IkmewSNc1Gqq-EQVyY" />
+</body>
+</html>

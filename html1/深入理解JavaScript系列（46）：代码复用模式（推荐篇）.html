@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍本文介绍的四种代码复用模式都是最佳实践，推荐大家在编程的过程中使用。模式1：原型继承原型继承是让父对象作为子对象的原型，从而达到继承的目的：function object(o) { functio" />
+    <meta property="og:description" content="介绍本文介绍的四种代码复用模式都是最佳实践，推荐大家在编程的过程中使用。模式1：原型继承原型继承是让父对象作为子对象的原型，从而达到继承的目的：function object(o) { functio" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（46）：代码复用模式（推荐篇） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-04-24 08:38';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/04/24/2438050.html">
+    <span>深入理解JavaScript系列（46）：代码复用模式（推荐篇）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-04-24 08:38</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">20888</span>)&nbsp;
+评论(<span id="post_comment_count">19</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2438050" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2438050);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>本文介绍的四种代码复用模式都是最佳实践，推荐大家在编程的过程中使用。</p>
+<h1>模式1：原型继承</h1>
+<p>原型继承是让父对象作为子对象的原型，从而达到继承的目的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> object(o) {<br>    <span style="color: rgba(0, 0, 255, 1)">function</span> F() {<br>    }<br><br>    F.prototype = o;<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">new</span> F();<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 要继承的父对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> parent = {<br>    name: "Papa"<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 新对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> child = object(parent);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 测试</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(child.name); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Papa"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 父构造函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> Person() {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> an "own" property</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>.name = "Adam";<br>}<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 给原型添加新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Person.prototype.getName = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.name;<br>};<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 创建新person</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> papa = <span style="color: rgba(0, 0, 255, 1)">new</span> Person();<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 继承</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> kid = object(papa);<br>console.log(kid.getName()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Adam"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 父构造函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> Person() {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> an "own" property</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>.name = "Adam";<br>}<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 给原型添加新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Person.prototype.getName = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.name;<br>};<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 继承</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> kid = object(Person.prototype);<br>console.log(<span style="color: rgba(0, 0, 255, 1)">typeof</span> kid.getName); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "function",因为是在原型里定义的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(<span style="color: rgba(0, 0, 255, 1)">typeof</span> kid.name); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "undefined", 因为只继承了原型</span></pre>
+</div>
+<p>同时，ECMAScript5也提供了类似的一个方法叫做Object.create用于继承对象，用法如下：<br><br></p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 使用新版的ECMAScript 5提供的功能 </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">var</span> child = Object.create(parent);<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> child = Object.create(parent, {<br>    age: { value: 2} <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ECMA5 descriptor</span><span style="color: rgba(0, 128, 0, 1)"><br></span>});<br>console.log(child.hasOwnProperty("age")); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>而且，也可以更细粒度地在第二个参数上定义属性：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 首先，定义一个新对象man</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> man = Object.create(<span style="color: rgba(0, 0, 255, 1)">null</span>);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 接着，创建包含属性的配置设置</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 属性设置为可写，可枚举，可配置</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> config = {<br>    writable: <span style="color: rgba(0, 0, 255, 1)">true</span>,<br>    enumerable: <span style="color: rgba(0, 0, 255, 1)">true</span>,<br>    configurable: <span style="color: rgba(0, 0, 255, 1)">true</span><br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 通常使用Object.defineProperty()来添加新属性(ECMAScript5支持）</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 现在，为了方便，我们自定义一个封装函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> defineProp = <span style="color: rgba(0, 0, 255, 1)">function</span> (obj, key, value) {<br>    config.value = value;<br>    Object.defineProperty(obj, key, config);<br>}<br><br>defineProp(man, 'car', 'Delorean');<br>defineProp(man, 'dob', '1981');<br>defineProp(man, 'beard', <span style="color: rgba(0, 0, 255, 1)">false</span>);</pre>
+</div>
+<p>所以，继承就这么可以做了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> driver = Object.create( man );<br>defineProp (driver, 'topSpeed', '100mph');<br>driver.topSpeed <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 100mph</span></pre>
+</div>
+<p>但是有个地方需要注意，就是<span style="color: rgba(255, 102, 0, 1)">Object.create(null)</span>创建的对象的原型为<span style="color: rgba(255, 102, 0, 1)">undefined</span>，也就是没有<span style="color: rgba(255, 102, 0, 1)">toString</span>和<span style="color: rgba(255, 102, 0, 1)">valueOf</span>方法，所以<span style="color: rgba(255, 102, 0, 1)">alert(man);</span>的时候会出错，但<span style="color: rgba(255, 102, 0, 1)">alert(man.car);</span>是没问题的。</p>
+<h1>模式2：复制所有属性进行继承</h1>
+<p>这种方式的继承就是将父对象里所有的属性都复制到子对象上，一般子对象可以使用父对象的数据。</p>
+<p>先来看一个浅拷贝的例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 浅拷贝 </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">function</span> extend(parent, child) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> i;<br>    child = child || {};<br>    <span style="color: rgba(0, 0, 255, 1)">for</span> (i <span style="color: rgba(0, 0, 255, 1)">in</span> parent) {<br>        <span style="color: rgba(0, 0, 255, 1)">if</span> (parent.hasOwnProperty(i)) {<br>            child[i] = parent[i];<br>        }<br>    }<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> dad = { name: "Adam" };<br><span style="color: rgba(0, 0, 255, 1)">var</span> kid = extend(dad);<br>console.log(kid.name); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Adam"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> dad = {<br>    counts: [1, 2, 3],<br>    reads: { paper: <span style="color: rgba(0, 0, 255, 1)">true</span> }<br>};<br><span style="color: rgba(0, 0, 255, 1)">var</span> kid = extend(dad);<br>kid.counts.push(4);<br>console.log(dad.counts.toString()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "1,2,3,4"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(dad.reads === kid.reads); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>代码的最后一行，你可以发现dad和kid的reads是一样的，也就是他们使用的是同一个引用，这也就是浅拷贝带来的问题。</p>
+<p>我们再来看一下深拷贝：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 深拷贝 </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">function</span> extendDeep(parent, child) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> i,<br>        toStr = Object.prototype.toString,<br>        astr = "[object Array]";<br><br>    child = child || {};<br><br>    <span style="color: rgba(0, 0, 255, 1)">for</span> (i <span style="color: rgba(0, 0, 255, 1)">in</span> parent) {<br>        <span style="color: rgba(0, 0, 255, 1)">if</span> (parent.hasOwnProperty(i)) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">typeof</span> parent[i] === 'object') {<br>                child[i] = (toStr.call(parent[i]) === astr) ? [] : {};<br>                extendDeep(parent[i], child[i]);<br>            } <span style="color: rgba(0, 0, 255, 1)">else</span> {<br>                child[i] = parent[i];<br>            }<br>        }<br>    }<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> dad = {<br>    counts: [1, 2, 3],<br>    reads: { paper: <span style="color: rgba(0, 0, 255, 1)">true</span> }<br>};<br><span style="color: rgba(0, 0, 255, 1)">var</span> kid = extendDeep(dad);<br><br>kid.counts.push(4);<br>console.log(kid.counts.toString()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "1,2,3,4"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(dad.counts.toString()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "1,2,3"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>console.log(dad.reads === kid.reads); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>kid.reads.paper = <span style="color: rgba(0, 0, 255, 1)">false</span>;</pre>
+</div>
+<p>深拷贝以后，两个值就不相等了，bingo！</p>
+<h1>模式3：混合（mix-in）</h1>
+<p>混入就是将一个对象的一个或多个（或全部）属性（或方法）复制到另外一个对象，我们举一个例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> mix() {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> arg, prop, child = {};<br>    <span style="color: rgba(0, 0, 255, 1)">for</span> (arg = 0; arg &lt; arguments.length; arg += 1) {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (prop <span style="color: rgba(0, 0, 255, 1)">in</span> arguments[arg]) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (arguments[arg].hasOwnProperty(prop)) {<br>                child[prop] = arguments[arg][prop];<br>            }<br>        }<br>    }<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> cake = mix(<br>                { eggs: 2, large: <span style="color: rgba(0, 0, 255, 1)">true</span> },<br>                { butter: 1, salted: <span style="color: rgba(0, 0, 255, 1)">true</span> },<br>                { flour: '3 cups' },<br>                { sugar: 'sure!' }<br>                );<br><br>console.dir(cake);</pre>
+</div>
+<p>mix函数将所传入的所有参数的子属性都复制到child对象里，以便产生一个新对象。</p>
+<p>那如何我们只想混入部分属性呢？该个如何做？其实我们可以使用多余的参数来定义需要混入的属性，例如mix（child,parent,method1,method2)这样就可以只将parent里的method1和method2混入到child里。上代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Car </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> Car = <span style="color: rgba(0, 0, 255, 1)">function</span> (settings) {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.model = settings.model || 'no model provided';<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.colour = settings.colour || 'no colour provided';<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Mixin</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> Mixin = <span style="color: rgba(0, 0, 255, 1)">function</span> () { };<br>Mixin.prototype = {<br>    driveForward: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        console.log('drive forward');<br>    },<br>    driveBackward: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        console.log('drive backward');<br>    }<br>};<br><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 定义的2个参数分别是被混入的对象（reciving）和从哪里混入的对象（giving)</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> augment(receivingObj, givingObj) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果提供了指定的方法名称的话，也就是参数多余3个</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">if</span> (arguments[2]) {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 2, len = arguments.length; i &lt; len; i++) {<br>            receivingObj.prototype[arguments[i]] = givingObj.prototype[arguments[i]];<br>        }<br>    }<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果不指定第3个参数，或者更多参数，就混入所有的方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">else</span> {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> methodName <span style="color: rgba(0, 0, 255, 1)">in</span> givingObj.prototype) {<br>            <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 检查receiving对象内部不包含要混入的名字，如何包含就不混入了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>            <span style="color: rgba(0, 0, 255, 1)">if</span> (!receivingObj.prototype[methodName]) {<br>                receivingObj.prototype[methodName] = givingObj.prototype[methodName];<br>            }<br>        }<br>    }<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 给Car混入属性，但是值混入'driveForward' 和 'driveBackward'*/</span><span style="color: rgba(0, 128, 0, 1)"><br></span>augment(Car, Mixin, 'driveForward', 'driveBackward');<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 创建新对象Car</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> vehicle = <span style="color: rgba(0, 0, 255, 1)">new</span> Car({ model: 'Ford Escort', colour: 'blue' });<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 测试是否成功得到混入的方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>vehicle.driveForward();<br>vehicle.driveBackward();</pre>
+</div>
+<p>该方法使用起来就比较灵活了。</p>
+<h1>模式4：借用方法</h1>
+<p>一个对象借用另外一个对象的一个或两个方法，而这两个对象之间不会有什么直接联系。不用多解释，直接用代码解释吧：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> one = {<br>    name: 'object',<br>    say: <span style="color: rgba(0, 0, 255, 1)">function</span> (greet) {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> greet + ', ' + <span style="color: rgba(0, 0, 255, 1)">this</span>.name;<br>    }<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 测试</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(one.say('hi')); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "hi, object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> two = {<br>    name: 'another object'<br>};<br><br>console.log(one.say.apply(two, ['hello'])); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "hello, another object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将say赋值给一个变量，this将指向到全局变量</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> say = one.say;<br>console.log(say('hoho')); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "hoho, undefined"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 传入一个回调函数callback</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> yetanother = {<br>    name: 'Yet another object',<br>    method: <span style="color: rgba(0, 0, 255, 1)">function</span> (callback) {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> callback('Hola');<br>    }<br>};<br>console.log(yetanother.method(one.say)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Holla, undefined"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">function</span> bind(o, m) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> m.apply(o, [].slice.call(arguments));<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> twosay = bind(two, one.say);<br>console.log(twosay('yo')); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "yo, another object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ECMAScript 5给Function.prototype添加了一个bind()方法，以便很容易使用apply()和call()。</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">typeof</span> Function.prototype.bind === 'undefined') {<br>    Function.prototype.bind = <span style="color: rgba(0, 0, 255, 1)">function</span> (thisArg) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> fn = <span style="color: rgba(0, 0, 255, 1)">this</span>,<br>slice = Array.prototype.slice,<br>args = slice.call(arguments, 1);<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> fn.apply(thisArg, args.concat(slice.call(arguments)));<br>        };<br>    };<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> twosay2 = one.say.bind(two);<br>console.log(twosay2('Bonjour')); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Bonjour, another object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> twosay3 = one.say.bind(two, 'Enchanté');<br>console.log(twosay3()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Enchanté, another object"</span></pre>
+</div>
+<h1>总结</h1>
+<p>就不用总结了吧。</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BB%A3%E7%A0%81%E5%A4%8D%E7%94%A8%E6%A8%A1%E5%BC%8F/">代码复用模式</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2438050, cb_entryCreatedDate = '2012-04-24 08:38', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvD2rvgmgLzG0Epqn9km0m1yWyynUA5Yw3RiVGqKKxc58szm2W51ezk7MpoQjSFtY-lWoyMX42eiH7sjNHkngzP3kD8vLqhj9pAxa7JwyvNaElJpcJMHaVZMZ0ca4BKOZ0" />
+</body>
+</html>

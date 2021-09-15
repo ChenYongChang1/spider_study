@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍JavaScript编程的时候总避免不了声明函数和变量，以成功构建我们的系统，但是解释器是如何并且在什么地方去查找这些函数和变量呢？我们引用这些对象的时候究竟发生了什么？原始发布：Dmitry A" />
+    <meta property="og:description" content="介绍JavaScript编程的时候总避免不了声明函数和变量，以成功构建我们的系统，但是解释器是如何并且在什么地方去查找这些函数和变量呢？我们引用这些对象的时候究竟发生了什么？原始发布：Dmitry A" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（12）：变量对象（Variable Object） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-16 09:03';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html">
+    <span>深入理解JavaScript系列（12）：变量对象（Variable Object）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-16 09:03</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">51616</span>)&nbsp;
+评论(<span id="post_comment_count">61</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2309728" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2309728);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>JavaScript编程的时候总避免不了声明函数和变量，以成功构建我们的系统，但是解释器是如何并且在什么地方去查找这些函数和变量呢？我们引用这些对象的时候究竟发生了什么？</p>
+<div class="cnblogs_code">
+<pre>原始发布：Dmitry A. Soshnikov<br>发布时间：2009-06-27<br>俄文地址：http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/ru-chapter-2-variable-object/</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>英文翻译：Dmitry A. Soshnikov<br>发布时间：2010-03-15<br>英文地址：http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/chapter-2-variable-object/</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>部分难以翻译的句子参考了<a href="http://www.cnblogs.com/justinw/archive/2010/04/23/1718733.html" target="_blank">justinw的中文翻译</a></pre>
+</div>
+<p>大多数ECMAScript程序员应该都知道变量与执行上下文有密切关系：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 全局上下文中的变量</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> b = 20; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function上下文中的局部变量</span><span style="color: rgba(0, 128, 0, 1)"><br></span>})();<br> <br>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 全局变量 "b" 没有声明</span></pre>
+</div>
+<p>并且，很多程序员也都知道，当前ECMAScript规范指出独立作用域只能通过“函数(function)”代码类型的执行上下文创建。也就是说，相对于C/C++来说，ECMAScript里的for循环并不能创建一个局部的上下文。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k <span style="color: rgba(0, 0, 255, 1)">in</span> {a: 1, b: 2}) {<br>  alert(k);<br>}<br> <br>alert(k); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 尽管循环已经结束但变量k依然在当前作用域</span></pre>
+</div>
+<p>我们来看看一下，我们声明数据的时候到底都发现了什么细节。</p>
+<h1>数据声明</h1>
+<p>如果变量与执行上下文相关，那变量自己应该知道它的数据存储在哪里，并且知道如何访问。这种机制称为变量对象(variable object)。</p>
+<div class="cnblogs_code">
+<pre>变量对象(缩写为VO)是一个与执行上下文相关的特殊对象，它存储着在上下文中声明的以下内容：<br>    变量 (<span style="color: rgba(0, 0, 255, 1)">var</span>, 变量声明);<br>    函数声明 (FunctionDeclaration, 缩写为FD);<br>    函数的形参</pre>
+</div>
+<p>举例来说，我们可以用普通的ECMAScript对象来表示一个变量对象：</p>
+<div class="cnblogs_code">
+<pre>VO = {};</pre>
+</div>
+<p>就像我们所说的, VO就是执行上下文的属性(property)：</p>
+<div class="cnblogs_code">
+<pre>activeExecutionContext = {<br>  VO: {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 上下文数据（var, FD, function arguments)</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  }<br>};</pre>
+</div>
+<p>只有全局上下文的变量对象允许通过VO的属性名称来间接访问(因为在全局上下文里，全局对象自身就是变量对象，稍后会详细介绍)，在其它上下文中是不能直接访问VO对象的，因为它只是内部机制的一个实现。</p>
+<p>当我们声明一个变量或一个函数的时候，和我们创建VO新属性的时候一样没有别的区别（即：有名称以及对应的值）。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> test(x) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> b = 20;<br>};<br> <br>test(30);</pre>
+</div>
+<p>对应的变量对象是：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 全局上下文的变量对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>VO(globalContext) = {<br>  a: 10,<br>  test: &lt;reference to <span style="color: rgba(0, 0, 255, 1)">function</span>&gt;<br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> test函数上下文的变量对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>VO(test functionContext) = {<br>  x: 30,<br>  b: 20<br>};</pre>
+</div>
+<p>在具体实现层面(以及规范中)变量对象只是一个抽象概念。(从本质上说，在具体执行上下文中，VO名称是不一样的，并且初始结构也不一样。</p>
+<h1>不同执行上下文中的变量对象</h1>
+<p>对于所有类型的执行上下文来说，变量对象的一些操作(如变量初始化)和行为都是共通的。从这个角度来看，把变量对象作为抽象的基本事物来理解更为容易。同样在函数上下文中也定义和变量对象相关的额外内容。</p>
+<div class="cnblogs_code">
+<pre>抽象变量对象VO (变量初始化过程的一般行为)<br>  ║<br>  ╠══&gt; 全局上下文变量对象GlobalContextVO<br>  ║        (VO === <span style="color: rgba(0, 0, 255, 1)">this</span> === global)<br>  ║<br>  ╚══&gt; 函数上下文变量对象FunctionContextVO<br>           (VO === AO, 并且添加了&lt;arguments&gt;和&lt;formal parameters&gt;)</pre>
+</div>
+<p>我们来详细看一下：</p>
+<h2><strong>全局上下文中的变量对象</strong></h2>
+<p>首先，我们要给全局对象一个明确的定义：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(51, 153, 102, 1)">全局对象(Global object) 是在进入任何执行上下文之前就已经创建了的对象；</span><br><span style="color: rgba(51, 153, 102, 1)">这个对象只存在一份，它的属性在程序中任何地方都可以访问，全局对象的生命周期终止于程序退出那一刻。</span></pre>
+</div>
+<p>全局对象初始创建阶段将Math、String、Date、parseInt作为自身属性，等属性初始化，同样也可以有额外创建的其它对象作为属性（其可以指向到全局对象自身）。例如，在DOM中，全局对象的window属性就可以引用全局对象自身(当然，并不是所有的具体实现都是这样)：</p>
+<div class="cnblogs_code">
+<pre>global = {<br>  Math: &lt;...&gt;,<br>  String: &lt;...&gt;<br>  ...<br>  ...<br>  window: global <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">引用自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};</pre>
+</div>
+<p>当访问全局对象的属性时通常会忽略掉前缀，这是因为全局对象是不能通过名称直接访问的。不过我们依然可以通过全局上下文的this来访问全局对象，同样也可以递归引用自身。例如，DOM中的window。综上所述，代码可以简写为：</p>
+<div class="cnblogs_code">
+<pre>String(10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 就是global.String(10);</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 带有前缀</span><span style="color: rgba(0, 128, 0, 1)"><br></span>window.a = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> === global.window.a = 10 === global.a = 10;</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">this</span>.b = 20; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global.b = 20;</span></pre>
+</div>
+<p>因此，回到全局上下文中的变量对象——在这里，变量对象就是全局对象自己：</p>
+<div class="cnblogs_code">
+<pre>VO(globalContext) === global;</pre>
+</div>
+<p>非常有必要要理解上述结论，基于这个原理，在全局上下文中声明的对应，我们才可以间接通过全局对象的属性来访问它（例如，事先不知道变量名称）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> String('test');<br> <br>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 直接访问，在VO(globalContext)里找到："test"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(window['a']); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 间接通过global访问：global === VO(globalContext): "test"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a === <span style="color: rgba(0, 0, 255, 1)">this</span>.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> aKey = 'a';<br>alert(window[aKey]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 间接通过动态属性名称访问："test"</span></pre>
+</div>
+<h2><strong>函数上下文中的变量对象</strong></h2>
+<p>在函数执行上下文中，VO是不能直接访问的，此时由活动对象(activation object,缩写为AO)扮演VO的角色。</p>
+<div class="cnblogs_code">
+<pre>VO(functionContext) === AO;</pre>
+</div>
+<p>活动对象是在进入函数上下文时刻被创建的，它通过函数的arguments属性初始化。arguments属性的值是Arguments对象：</p>
+<div class="cnblogs_code">
+<pre>AO = {<br>  arguments: &lt;ArgO&gt;<br>};</pre>
+</div>
+<p>Arguments对象是活动对象的一个属性，它包括如下属性：</p>
+<ol>
+<li>callee — 指向当前函数的引用</li>
+<li>length — 真正传递的参数个数</li>
+<li>properties-indexes (字符串类型的整数) 属性的值就是函数的参数值(按参数列表从左到右排列)。 properties-indexes内部元素的个数等于arguments.length. properties-indexes 的值和实际传递进来的参数之间是共享的。</li>
+</ol>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> foo(x, y, z) {<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 声明的函数参数数量arguments (x, y, z)</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(foo.length); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 真正传进来的参数个数(only x, y)</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(arguments.length); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 参数的callee是函数自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(arguments.callee === foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 参数共享</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  alert(x === arguments[0]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  arguments[0] = 20;<br>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  x = 30;<br>  alert(arguments[0]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不过，没有传进来的参数z，和参数的第3个索引值是不共享的</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>  z = 40;<br>  alert(arguments[2]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  arguments[2] = 50;<br>  alert(z); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 40</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>}<br> <br>foo(10, 20);</pre>
+</div>
+<p>这个例子的代码，在当前版本的Google Chrome浏览器里有一个bug&nbsp; — 即使没有传递参数z，z和arguments[2]仍然是共享的。</p>
+<h1>处理上下文代码的2个阶段</h1>
+<p>现在我们终于到了本文的核心点了。执行上下文的代码被分成两个基本的阶段来处理：</p>
+<ol>
+<li>&nbsp;&nbsp;&nbsp; 进入执行上下文</li>
+<li>&nbsp;&nbsp;&nbsp; 执行代码</li>
+</ol>
+<p>变量对象的修改变化与这两个阶段紧密相关。</p>
+<p>注：这2个阶段的处理是一般行为，和上下文的类型无关（也就是说，在全局上下文和函数上下文中的表现是一样的）。</p>
+<h2><strong>进入执行上下文</strong></h2>
+<p>当进入执行上下文(代码执行之前)时，VO里已经包含了下列属性(前面已经说了)：</p>
+<p>&nbsp;&nbsp;&nbsp; <strong>函数的所有形参(如果我们是在函数执行上下文中)</strong></p>
+<p>&nbsp;&nbsp;&nbsp; — 由名称和对应值组成的一个变量对象的属性被创建；没有传递对应参数的话，那么由名称和undefined值组成的一种变量对象的属性也将被创建。</p>
+<p>&nbsp;&nbsp;&nbsp; <strong>所有函数声明(FunctionDeclaration, FD)</strong></p>
+<p>&nbsp;&nbsp;&nbsp; —由名称和对应值（函数对象(function-object)）组成一个变量对象的属性被创建；如果变量对象已经存在相同名称的属性，则完全替换这个属性。</p>
+<p>&nbsp;&nbsp;&nbsp; <strong>所有变量声明(var, VariableDeclaration)</strong></p>
+<p>&nbsp;&nbsp;&nbsp; — 由名称和对应值（undefined）组成一个变量对象的属性被创建；如果变量名称跟已经声明的形式参数或函数相同，则变量声明不会干扰已经存在的这类属性。</p>
+<p>让我们看一个例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> test(a, b) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> c = 10;<br>  <span style="color: rgba(0, 0, 255, 1)">function</span> d() {}<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> e = <span style="color: rgba(0, 0, 255, 1)">function</span> _e() {};<br>  (<span style="color: rgba(0, 0, 255, 1)">function</span> x() {});<br>}<br> <br>test(10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> call</span></pre>
+</div>
+<p>当进入带有参数10的test函数上下文时，AO表现为如下：</p>
+<div class="cnblogs_code">
+<pre>AO(test) = {<br>  a: 10,<br>  b: undefined,<br>  c: undefined,<br>  d: &lt;reference to FunctionDeclaration "d"&gt;<br>  e: undefined<br>};</pre>
+</div>
+<p>注意，AO里并不包含函数“x”。这是因为“x” 是一个函数表达式(FunctionExpression, 缩写为 FE) 而不是函数声明，函数表达式不会影响VO。 不管怎样，函数“_e” 同样也是函数表达式，但是就像我们下面将看到的那样，因为它分配给了变量 “e”，所以它可以通过名称“e”来访问。 函数声明FunctionDeclaration与函数表达式FunctionExpression 的不同，将在第15章Functions进行详细的探讨，也可以参考本系列第2章<a href="http://www.cnblogs.com/TomXu/archive/2011/12/29/2290308.html" target="_blank">揭秘命名函数表达</a>式来了解。</p>
+<p>这之后，将进入处理上下文代码的第二个阶段 — 执行代码。</p>
+<h2><strong>代码执行</strong></h2>
+<p>这个周期内，AO/VO已经拥有了属性(不过，并不是所有的属性都有值，大部分属性的值还是系统默认的初始值undefined )。</p>
+<p>还是前面那个例子, AO/VO在代码解释期间被修改如下：</p>
+<div class="cnblogs_code">
+<pre>AO['c'] = 10;<br>AO['e'] = &lt;reference to FunctionExpression "_e"&gt;;</pre>
+</div>
+<p>再次注意，因为FunctionExpression“_e”保存到了已声明的变量“e”上，所以它仍然存在于内存中。而FunctionExpression “x”却不存在于AO/VO中，也就是说如果我们想尝试调用“x”函数，不管在函数定义之前还是之后，都会出现一个错误“x is not defined”，未保存的函数表达式只有在它自己的定义或递归中才能被调用。</p>
+<p>另一个经典例子：</p>
+<div class="cnblogs_code">
+<pre>alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br>alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>x = 20;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> x() {};<br> <br>alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span></pre>
+</div>
+<p>为什么第一个alert “x” 的返回值是function，而且它还是在“x” 声明之前访问的“x” 的？为什么不是10或20呢？因为，根据规范函数声明是在当<strong>进入上下文</strong>时填入的； 同意周期，在进入上下文的时候还有一个变量声明“x”，那么正如我们在上一个阶段所说，变量声明在顺序上跟在函数声明和形式参数声明之后，而且在这个<strong>进入上下文</strong>阶段，变量声明不会干扰VO中已经存在的同名函数声明或形式参数声明，因此，在进入上下文时，VO的结构如下：</p>
+<div class="cnblogs_code">
+<pre>VO = {};<br> <br>VO['x'] = &lt;reference to FunctionDeclaration "x"&gt;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 找到var x = 10;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 如果function "x"没有已经声明的话</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 这时候"x"的值应该是undefined</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但是这个case里变量声明没有影响同名的function的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>VO['x'] = &lt;the value is not disturbed, still <span style="color: rgba(0, 0, 255, 1)">function</span>&gt;</pre>
+</div>
+<p>紧接着，在执行代码阶段，VO做如下修改：</p>
+<div class="cnblogs_code">
+<pre>VO['x'] = 10;<br>VO['x'] = 20;</pre>
+</div>
+<p>我们可以在第二、三个alert看到这个效果。</p>
+<p>在下面的例子里我们可以再次看到，变量是在进入上下文阶段放入VO中的。(因为，虽然else部分代码永远不会执行，但是不管怎样，变量“b”仍然存在于VO中。)</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">true</span>) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> a = 1;<br>} <span style="color: rgba(0, 0, 255, 1)">else</span> {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> b = 2;<br>}<br> <br>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined,不是b没有声明，而是b的值是undefined</span></pre>
+</div>
+<h1>关于变量</h1>
+<p>通常，各类文章和JavaScript相关的书籍都声称：“不管是使用var关键字(在全局上下文)还是不使用var关键字(在任何地方)，都可以声明一个变量”。请记住，这是错误的概念：</p>
+<p><span style="color: rgba(255, 102, 0, 1)">任何时候，变量只能通过使用var关键字才能声明。</span></p>
+<p>上面的赋值语句：</p>
+<div class="cnblogs_code">
+<pre>a = 10;</pre>
+</div>
+<p>这仅仅是给全局对象创建了一个新属性(但它不是变量)。“不是变量”并不是说它不能被改变，而是指它不符合ECMAScript规范中的变量概念，所以它“不是变量”(它之所以能成为全局对象的属性，完全是因为VO(globalContext) === global，大家还记得这个吧？)。</p>
+<p>让我们通过下面的实例看看具体的区别吧：</p>
+<div class="cnblogs_code">
+<pre>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "b" 没有声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>b = 10;<br><span style="color: rgba(0, 0, 255, 1)">var</span> a = 20;</pre>
+</div>
+<p>所有根源仍然是VO和进入上下文阶段和代码执行阶段：</p>
+<p>进入上下文阶段：</p>
+<div class="cnblogs_code">
+<pre>VO = {<br>  a: undefined<br>};</pre>
+</div>
+<p>我们可以看到，因为“b”不是一个变量，所以在这个阶段根本就没有“b”，“b”将只在代码执行阶段才会出现(但是在我们这个例子里，还没有到那就已经出错了)。</p>
+<p>让我们改变一下例子代码：</p>
+<div class="cnblogs_code">
+<pre>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined, 这个大家都知道，</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>b = 10;<br>alert(b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 代码执行阶段创建</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = 20;<br>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20, 代码执行阶段修改</span></pre>
+</div>
+<p>关于变量，还有一个重要的知识点。变量相对于简单属性来说，变量有一个特性(attribute)：{DontDelete},这个特性的含义就是不能用delete操作符直接删除变量属性。</p>
+<div class="cnblogs_code">
+<pre>a = 10;<br>alert(window.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(<span style="color: rgba(0, 0, 255, 1)">delete</span> a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(window.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = 20;<br>alert(window.b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(<span style="color: rgba(0, 0, 255, 1)">delete</span> b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(window.b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> still 20</span></pre>
+</div>
+<p>但是这个规则在有个上下文里不起走样，那就是eval上下文，变量没有{DontDelete}特性。</p>
+<div class="cnblogs_code">
+<pre>eval('var a = 10;');<br>alert(window.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(<span style="color: rgba(0, 0, 255, 1)">delete</span> a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(window.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span></pre>
+</div>
+<p>使用一些调试工具(例如：Firebug)的控制台测试该实例时，请注意，Firebug同样是使用eval来执行控制台里你的代码。因此，变量属性同样没有{<span style="color: rgba(255, 102, 0, 1)">DontDelete</span>}特性，可以被删除。</p>
+<h1>特殊实现: __parent__ 属性</h1>
+<p>前面已经提到过，按标准规范，活动对象是不可能被直接访问到的。但是，一些具体实现并没有完全遵守这个规定，例如SpiderMonkey和Rhino；的实现中，函数有一个特殊的属性 __parent__，通过这个属性可以直接引用到活动对象（或全局变量对象），在此对象里创建了函数。</p>
+<p>例如 (SpiderMonkey, Rhino)：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> global = <span style="color: rgba(0, 0, 255, 1)">this</span>;<br><span style="color: rgba(0, 0, 255, 1)">var</span> a = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {}<br> <br>alert(foo.__parent__); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> global</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> VO = foo.__parent__;<br> <br>alert(VO.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(VO === global); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>在上面的例子中我们可以看到，函数foo是在全局上下文中创建的，所以属性__parent__ 指向全局上下文的变量对象，即全局对象。</p>
+<p>然而，在SpiderMonkey中用同样的方式访问活动对象是不可能的：在不同版本的SpiderMonkey中，内部函数的__parent__ 有时指向null ，有时指向全局对象。</p>
+<p>在Rhino中，用同样的方式访问活动对象是完全可以的。</p>
+<p>例如 (Rhino)：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> global = <span style="color: rgba(0, 0, 255, 1)">this</span>;<br><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br> <br>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20;<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "foo"上下文里的活动对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">var</span> AO = (<span style="color: rgba(0, 0, 255, 1)">function</span> () {}).__parent__;<br> <br>  print(AO.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 当前活动对象的__parent__ 是已经存在的全局对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 变量对象的特殊链形成了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 所以我们叫做作用域链</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  print(AO.__parent__ === global); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  print(AO.__parent__.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>})();</pre>
+</div>
+<h1>总结</h1>
+<p>在这篇文章里，我们深入学习了跟执行上下文相关的对象。我希望这些知识对您来说能有所帮助，能解决一些您曾经遇到的问题或困惑。按照计划，在后续的章节中，我们将探讨作用域链，标识符解析，闭包。</p>
+<p>有任何问题，我很高兴在下面评论中能帮你解答。</p>
+<h1>其它参考</h1>
+<ul>
+<li>10.1.3 – <a title="Variable Instantiation" href="http://bclary.com/2004/11/07/#a-10.1.3" target="_blank">Variable Instantiation</a>;</li>
+<li>10.1.5 – <a title="Global Object" href="http://bclary.com/2004/11/07/#a-10.1.5" target="_blank">Global Object</a>;</li>
+<li>10.1.6 – <a title="Activation Object" href="http://bclary.com/2004/11/07/#a-10.1.6" target="_blank">Activation Object</a>;</li>
+<li>10.1.8 – <a title="Arguments Object" href="http://bclary.com/2004/11/07/#a-10.1.8" target="_blank">Arguments Object</a>.</li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E5%8F%98%E9%87%8F%E5%AF%B9%E8%B1%A1/">变量对象</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Variable%20object/">Variable object</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2309728, cb_entryCreatedDate = '2012-01-16 09:03', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsjxWYz78157zZXXOslx_SE4aaDgPHxGk5X4U0nGfsaUclbH2w9Gudn96Tuu3QXrv051ccczODxw5gjXBUiYmcCnhhT0uhbExr08hjCb2g_ef6qxHwGA8ZMm4DBXw2lEdA" />
+</body>
+</html>

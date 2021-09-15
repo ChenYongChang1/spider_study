@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言JavaScript 不包含传统的类继承模型，而是使用 prototypal 原型模型。虽然这经常被当作是 JavaScript 的缺点被提及，其实基于原型的继承模型比传统的类继承还要强大。实现传" />
+    <meta property="og:description" content="前言JavaScript 不包含传统的类继承模型，而是使用 prototypal 原型模型。虽然这经常被当作是 JavaScript 的缺点被提及，其实基于原型的继承模型比传统的类继承还要强大。实现传" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（5）：强大的原型和原型链 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-05 09:12';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/05/2305453.html">
+    <span>深入理解JavaScript系列（5）：强大的原型和原型链</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-05 09:12</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">115440</span>)&nbsp;
+评论(<span id="post_comment_count">66</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2305453" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2305453);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>JavaScript 不包含传统的类继承模型，而是使用 prototypal 原型模型。</p>
+<p>虽然这经常被当作是 JavaScript 的缺点被提及，其实基于原型的继承模型比传统的类继承还要强大。实现传统的类继承模型是很简单，但是实现 JavaScript 中的原型继承则要困难的多。</p>
+<p>由于 JavaScript 是唯一一个被广泛使用的基于原型继承的语言，所以理解两种继承模式的差异是需要一定时间的，今天我们就来了解一下原型和原型链。</p>
+<h1>原型</h1>
+<p>10年前，我刚学习JavaScript的时候，一般都是用如下方式来写代码：</p>
+<div class="cnblogs_code">
+<pre>        <span style="color: rgba(0, 0, 255, 1)">var</span> decimalDigits = 2,<br>            tax = 5;<br><br>        <span style="color: rgba(0, 0, 255, 1)">function</span> add(x, y) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>        }<br><br>        <span style="color: rgba(0, 0, 255, 1)">function</span> subtract(x, y) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>        }<br><br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">alert(add(1, 3));</span></pre>
+</div>
+<p>通过执行各个function来得到结果，学习了原型之后，我们可以使用如下方式来<strong><span style="color: rgba(255, 102, 0, 1)">美化</span></strong>一下代码。</p>
+<h2><strong>原型使用方式1：</strong></h2>
+<p>在使用原型之前，我们需要先将代码做一下小修改：</p>
+<div class="cnblogs_code">
+<pre>        <span style="color: rgba(0, 0, 255, 1)">var</span> Calculator = <span style="color: rgba(0, 0, 255, 1)">function</span> (decimalDigits, tax) {<br>            <span style="color: rgba(0, 0, 255, 1)">this</span>.decimalDigits = decimalDigits;<br>            <span style="color: rgba(0, 0, 255, 1)">this</span>.tax = tax;<br>        };</pre>
+</div>
+<p>然后，通过给Calculator对象的<span style="color: rgba(255, 102, 0, 1)">prototype</span>属性赋值<strong><span style="color: rgba(255, 102, 0, 1)">对象字面量</span></strong>来设定Calculator对象的原型。</p>
+<div class="cnblogs_code">
+<pre>        Calculator.prototype = {<br>            add: <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>                <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>            },<br><br>            subtract: <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>                <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>            }<br>        };<br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">alert((new Calculator()).add(1, 3));</span></pre>
+</div>
+<p>这样，我们就可以new Calculator对象以后，就可以调用add方法来计算结果了。</p>
+<h2><strong>原型使用方式2：</strong></h2>
+<p>第二种方式是，在赋值原型prototype的时候使用function立即执行的表达式来赋值，即如下格式：</p>
+<div class="cnblogs_code">
+<pre>Calculator.prototype = <span style="color: rgba(0, 0, 255, 1)">function</span> () { } ();</pre>
+</div>
+<p>它的好处在前面的帖子里已经知道了，就是可以封装私有的function，通过return的形式暴露出简单的使用名称，以达到public/private的效果，修改后的代码如下：</p>
+<div class="cnblogs_code">
+<pre> Calculator.prototype = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>            add = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>                <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>            },<br><br>            subtract = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>                <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>            }<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> {<br>                add: add,<br>                subtract: subtract<br>            }<br>        } ();<br><br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">alert((new Calculator()).add(11, 3));</span></pre>
+</div>
+<p>同样的方式，我们可以new Calculator对象以后调用add方法来计算结果了。</p>
+<h1>再来一点</h1>
+<h2><strong>分步声明：</strong></h2>
+<p>上述使用原型的时候，有一个限制就是一次性设置了原型对象，我们再来说一下如何分来设置原型的每个属性吧。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> BaseCalculator = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">为每个实例都声明一个小数位数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decimalDigits = 2;<br>};<br>        <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">使用原型给BaseCalculator扩展2个对象方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>BaseCalculator.prototype.add = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>};<br><br>BaseCalculator.prototype.subtract = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>};</pre>
+</div>
+<p>首先，声明了一个BaseCalculator对象，构造函数里会初始化一个小数位数的属性decimalDigits，然后通过原型属性设置2个function，分别是add(x,y)和subtract(x,y)，当然你也可以使用前面提到的2种方式的任何一种，我们的主要目的是看如何将BaseCalculator对象设置到真正的Calculator的原型上。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> BaseCalculator = <span style="color: rgba(0, 0, 255, 1)">function</span>() {<span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>.decimalDigits = 2;<br>};<br><br>BaseCalculator.prototype = {<span style="color: rgba(0, 128, 0, 1)"><br></span>    add: <span style="color: rgba(0, 0, 255, 1)">function</span>(x, y) {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>    },<br>    subtract: <span style="color: rgba(0, 0, 255, 1)">function</span>(x, y) {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>    }<br>};</pre>
+</div>
+<p>创建完上述代码以后，我们来开始：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> Calculator = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"><span style="color: rgba(0, 128, 0, 1)">为每个实例都声明一个</span>税收数字</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">this</span>.tax = 5;<br>};<br>        <br>Calculator.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> BaseCalculator();</pre>
+</div>
+<p>我们可以看到Calculator的原型是指向到BaseCalculator的一个实例上，目的是让Calculator集成它的add(x,y)和subtract(x,y)这2个function，还有一点要说的是，由于它的原型是BaseCalculator的一个实例，所以不管你创建多少个Calculator对象实例，他们的原型指向的都是同一个实例。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> calc = <span style="color: rgba(0, 0, 255, 1)">new</span> Calculator();<br>alert(calc.add(1, 1));<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">BaseCalculator 里声明的decimalDigits属性，在 Calculator里是可以访问到的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(calc.decimalDigits); </pre>
+</div>
+<p>上面的代码，运行以后，我们可以看到因为Calculator的原型是指向BaseCalculator的实例上的，所以可以访问他的decimalDigits属性值，那如果我不想让Calculator访问BaseCalculator的构造函数里声明的属性值，那怎么办呢？这么办：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> Calculator = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.tax= 5;<br>};<br><br>Calculator.prototype = BaseCalculator.prototype;</pre>
+</div>
+<p>通过将BaseCalculator的原型赋给Calculator的原型，这样你在Calculator的实例上就访问不到那个decimalDigits值了，如果你访问如下代码，那将会提升出错。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> calc = <span style="color: rgba(0, 0, 255, 1)">new</span> Calculator();<br>alert(calc.add(1, 1));<br>alert(calc.decimalDigits);</pre>
+</div>
+<h2><strong>重写原型：</strong></h2>
+<p>在使用第三方JS类库的时候，往往有时候他们定义的原型方法是不能满足我们的需要，但是又离不开这个类库，所以这时候我们就需要重写他们的原型中的一个或者多个属性或function，我们可以通过继续声明的同样的add代码的形式来达到覆盖重写前面的add功能，代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">覆盖前面Calculator的add() function </span><span style="color: rgba(0, 128, 0, 1)"><br></span>Calculator.prototype.add = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x + y + <span style="color: rgba(0, 0, 255, 1)">this</span>.tax;<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> calc = <span style="color: rgba(0, 0, 255, 1)">new</span> Calculator();<br>alert(calc.add(1, 1));</pre>
+</div>
+<p>这样，我们计算得出的结果就比原来多出了一个tax的值，但是有一点需要注意：那就是重写的代码需要放在最后，这样才能覆盖前面的代码。</p>
+<h1>原型链</h1>
+<p>在将原型链之前，我们先上一段代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> Foo() {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.value = 42;<br>}<br>Foo.prototype = {<br>    method: <span style="color: rgba(0, 0, 255, 1)">function</span>() {}<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> Bar() {}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 设置Bar的prototype属性为Foo的实例对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Bar.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> Foo();<br>Bar.prototype.foo = 'Hello World';<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修正Bar.prototype.constructor为Bar本身</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Bar.prototype.constructor = Bar;<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> test = <span style="color: rgba(0, 0, 255, 1)">new</span> Bar() <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 创建Bar的一个新实例</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 原型链</span><span style="color: rgba(0, 128, 0, 1)"><br></span>test [Bar的实例]<br>    Bar.prototype [Foo的实例] <br>        { foo: 'Hello World' }<br>        Foo.prototype<br>            {method: ...};<br>            Object.prototype<br>                {toString: ... <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> etc. </span><span style="color: rgba(0, 128, 0, 1)">*/</span>};</pre>
+</div>
+<p>上面的例子中，<span style="color: rgba(255, 102, 0, 1)">test</span> 对象从 <span style="color: rgba(255, 102, 0, 1)">Bar.prototype</span> 和 <span style="color: rgba(255, 102, 0, 1)">Foo.prototype</span> 继承下来；因此，它能访问 <span style="color: rgba(255, 102, 0, 1)">Foo</span> 的原型方法 <span style="color: rgba(255, 102, 0, 1)">method</span>。同时，它也能够访问那个定义在原型上的 <span style="color: rgba(255, 102, 0, 1)">Foo</span> 实例属性 <span style="color: rgba(255, 102, 0, 1)">value</span>。需要注意的是 <span style="color: rgba(255, 102, 0, 1)">new Bar()</span> 不会创造出一个新的 <span style="color: rgba(255, 102, 0, 1)">Foo</span> 实例，而是重复使用它原型上的那个实例；因此，所有的 <span style="color: rgba(255, 102, 0, 1)">Bar</span> 实例都会共享相同的 <span style="color: rgba(255, 102, 0, 1)">value</span> 属性。</p>
+<h2><strong>属性查找：</strong></h2>
+<p>当查找一个对象的属性时，JavaScript 会向上遍历原型链，直到找到给定名称的属性为止，到查找到达原型链的顶部 - 也就是 Object.prototype - 但是仍然没有找到指定的属性，就会返回 undefined，我们来看一个例子：</p>
+<div class="cnblogs_code">
+<pre>        <span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>            <span style="color: rgba(0, 0, 255, 1)">this</span>.add = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>                <span style="color: rgba(0, 0, 255, 1)">return</span> x + y;<br>            }<br>        }<br><br>        foo.prototype.add = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> x + y + 10;<br>        }<br><br>        Object.prototype.subtract = <span style="color: rgba(0, 0, 255, 1)">function</span> (x, y) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> x - y;<br>        }<br><br>        <span style="color: rgba(0, 0, 255, 1)">var</span> f = <span style="color: rgba(0, 0, 255, 1)">new</span> foo();<br>        alert(f.add(1, 2)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">结果是3，而不是13</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        alert(f.subtract(1, 2)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">结果是-1</span></pre>
+</div>
+<p>通过代码运行，我们发现subtract是安装我们所说的向上查找来得到结果的，但是add方式有点小不同，这也是我想强调的，就是属性在查找的时候是先查找自身的属性，如果没有再查找原型，再没有，再往上走，一直插到Object的原型上，所以在某种层面上说，用 for in语句遍历属性的时候，效率也是个问题。</p>
+<p>还有一点我们需要注意的是，我们可以赋值任何类型的对象到原型上，但是不能赋值原子类型的值，比如如下代码是无效的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> Foo() {}<br>Foo.prototype = 1; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 无效</span></pre>
+</div>
+<h2><strong>hasOwnProperty函数：</strong></h2>
+<p>hasOwnProperty是Object.prototype的一个方法，它可是个好东西，他能判断一个对象是否包含自定义属性而不是原型链上的属性，因为hasOwnProperty 是 JavaScript 中唯一一个处理属性但是不查找原型链的函数。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修改Object.prototype</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Object.prototype.bar = 1; <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {goo: undefined};<br><br>foo.bar; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>'bar' <span style="color: rgba(0, 0, 255, 1)">in</span> foo; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>foo.hasOwnProperty('bar'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.hasOwnProperty('goo'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>只有 hasOwnProperty 可以给出正确和期望的结果，这在遍历对象的属性时会很有用。 没有其它方法可以用来排除原型链上的属性，而不是定义在对象自身上的属性。</p>
+<p>但有个恶心的地方是：JavaScript 不会保护 hasOwnProperty 被非法占用，因此如果一个对象碰巧存在这个属性，就需要使用外部的 hasOwnProperty 函数来获取正确的结果。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {<br>    hasOwnProperty: <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">false</span>;<br>    },<br>    bar: 'Here be dragons'<br>};<br><br>foo.hasOwnProperty('bar'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 总是返回 false</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用{}对象的 hasOwnProperty，并将其上下为设置为foo</span><span style="color: rgba(0, 128, 0, 1)"><br></span>{}.hasOwnProperty.call(foo, 'bar'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>当检查对象上某个属性是否存在时，hasOwnProperty 是唯一可用的方法。同时在使用 for in loop 遍历对象时，推荐总是使用 hasOwnProperty 方法，这将会避免原型对象扩展带来的干扰，我们来看一下例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修改 Object.prototype</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Object.prototype.bar = 1;<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {moo: 2};<br><span style="color: rgba(0, 0, 255, 1)">for</span>(<span style="color: rgba(0, 0, 255, 1)">var</span> i <span style="color: rgba(0, 0, 255, 1)">in</span> foo) {<br>    console.log(i); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 输出两个属性：bar 和 moo</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>我们没办法改变for in语句的行为，所以想过滤结果就只能使用hasOwnProperty 方法，代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo 变量是上例中的</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">for</span>(<span style="color: rgba(0, 0, 255, 1)">var</span> i <span style="color: rgba(0, 0, 255, 1)">in</span> foo) {<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (foo.hasOwnProperty(i)) {<br>        console.log(i);<br>    }<br>}</pre>
+</div>
+<p>这个版本的代码是唯一正确的写法。由于我们使用了 hasOwnProperty，所以这次只输出 moo。如果不使用 hasOwnProperty，则这段代码在原生对象原型（比如 Object.prototype）被扩展时可能会出错。</p>
+<p>总结：推荐使用 hasOwnProperty，不要对代码运行的环境做任何假设，不要假设原生对象是否已经被扩展了。</p>
+<h1>总结</h1>
+<p>原型极大地丰富了我们的开发代码，但是在平时使用的过程中一定要注意上述提到的一些注意事项。</p>
+<p>参考内容：http://bonsaiden.github.com/JavaScript-Garden/zh/</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。<br><br></p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E5%8E%9F%E5%9E%8B%E9%93%BE/">原型链</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%8E%9F%E5%9E%8B/">原型</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/hasOwnProperty/">hasOwnProperty</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2305453, cb_entryCreatedDate = '2012-01-05 09:12', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvUXw-Xng07Mbj8t9Udgv1eZzP8jAfPSBuhIn-5uBvhfjefuejp6CFBQrOn4Vg3YBoT2tAmlOkyiBWCuhtR_ySZhtKLTamziPbceyIga_1dtGEBk4A87pizd0jc8xtpTio" />
+</body>
+</html>

@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍享元模式（Flyweight），运行共享技术有效地支持大量细粒度的对象，避免大量拥有相同内容的小类的开销(如耗费内存)，使大家共享一个类(元类)。享元模式可以避免大量非常相似类的开销，在程序设计中" />
+    <meta property="og:description" content="介绍享元模式（Flyweight），运行共享技术有效地支持大量细粒度的对象，避免大量拥有相同内容的小类的开销(如耗费内存)，使大家共享一个类(元类)。享元模式可以避免大量非常相似类的开销，在程序设计中" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（37）：设计模式之享元模式 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-04-09 08:46';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/04/09/2379774.html">
+    <span>深入理解JavaScript系列（37）：设计模式之享元模式</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-04-09 08:46</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">14474</span>)&nbsp;
+评论(<span id="post_comment_count">10</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2379774" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2379774);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>享元模式（Flyweight），运行共享技术有效地支持大量细粒度的对象，避免大量拥有相同内容的小类的开销(如耗费内存)，使大家共享一个类(元类)。</p>
+<p>享元模式可以避免大量非常相似类的开销，在程序设计中，有时需要生产大量细粒度的类实例来表示数据，如果能发现这些实例除了几个参数以外，开销基本相同的 话，就可以大幅度较少需要实例化的类的数量。如果能把那些参数移动到类实例的外面，在方法调用的时候将他们传递进来，就可以通过共享大幅度第减少单个实例 的数目。</p>
+<p>那么如果在JavaScript中应用享元模式呢？有两种方式，第一种是应用在数据层上，主要是应用在内存里大量相似的对象上；第二种是应用在DOM层上，享元可以用在中央事件管理器上用来避免给父容器里的每个子元素都附加事件句柄。</p>
+<h1>享元与数据层</h1>
+<p>Flyweight中有两个重要概念--内部状态intrinsic和外部状态extrinsic之分，内部状态就是在对象里通过内部方法管理，而外部信息可以在通过外部删除或者保存。</p>
+<p>说白点,就是先捏一个的原始模型，然后随着不同场合和环境,再产生各具特征的具体模型，很显然,在这里需要产生不同的新对象，所以Flyweight模式中常出现Factory模式，Flyweight的内部状态是用来共享的，Flyweight factory负责维护一个Flyweight pool(模式池)来存放内部状态的对象。</p>
+<h2><strong>使用享元模式</strong></h2>
+<p>让我们来演示一下如果通过一个类库让系统来管理所有的书籍，每个书籍的元数据暂定为如下内容：</p>
+<div class="cnblogs_code">
+<pre>ID<br>Title<br>Author<br>Genre<br>Page count<br>Publisher ID<br>ISBN</pre>
+</div>
+<p>我们还需要定义每本书被借出去的时间和借书人，以及退书日期和是否可用状态：</p>
+<div class="cnblogs_code">
+<pre>checkoutDate<br>checkoutMember<br>dueReturnDate<br>availability</pre>
+</div>
+<p>因为book对象设置成如下代码，注意该代码还未被优化：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> Book = <span style="color: rgba(0, 0, 255, 1)">function</span>( id, title, author, genre, pageCount,publisherID, ISBN, checkoutDate, checkoutMember, dueReturnDate,availability ){<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.id = id;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.title = title;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.author = author;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.genre = genre;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.pageCount = pageCount;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.publisherID = publisherID;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.ISBN = ISBN;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.checkoutDate = checkoutDate;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.checkoutMember = checkoutMember;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.dueReturnDate = dueReturnDate;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.availability = availability;<br>};<br>Book.prototype = {<br>   getTitle:<span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>       <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.title;<br>   },<br>   getAuthor: <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>       <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.author;<br>   },<br>   getISBN: <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>       <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.ISBN;<br>   },<br><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">其它get方法在这里就不显示了</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 更新借出状态</span><span style="color: rgba(0, 128, 0, 1)"><br></span>updateCheckoutStatus: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID, newStatus, checkoutDate,checkoutMember, newReturnDate){<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.id  = bookID;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.availability = newStatus;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.checkoutDate = checkoutDate;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.checkoutMember = checkoutMember;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.dueReturnDate = newReturnDate;<br>},<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">续借</span><span style="color: rgba(0, 128, 0, 1)"><br></span>extendCheckoutPeriod: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID, newReturnDate){<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.id =  bookID;<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.dueReturnDate = newReturnDate;<br>},<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">是否到期</span><span style="color: rgba(0, 128, 0, 1)"><br></span>isPastDue: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID){<br>   <span style="color: rgba(0, 0, 255, 1)">var</span> currentDate = <span style="color: rgba(0, 0, 255, 1)">new</span> Date();<br>   <span style="color: rgba(0, 0, 255, 1)">return</span> currentDate.getTime() &gt; Date.parse(<span style="color: rgba(0, 0, 255, 1)">this</span>.dueReturnDate);<br> }<br>};</pre>
+</div>
+<p>程序刚开始可能没问题，但是随着时间的增加，图书可能大批量增加，并且每种图书都有不同的版本和数量，你将会发现系统变得越来越慢。几千个book对象在内存里可想而知，我们需要用享元模式来优化。</p>
+<p>我们可以将数据分成内部和外部两种数据，和book对象相关的数据（title, author 等）可以归结为内部属性，而（checkoutMember, dueReturnDate等）可以归结为外部属性。这样，如下代码就可以在同一本书里共享同一个对象了，因为不管谁借的书，只要书是同一本书，基本信息是一样的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">享元模式优化代码</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">var</span> Book = <span style="color: rgba(0, 0, 255, 1)">function</span>(title, author, genre, pageCount, publisherID, ISBN){<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.title = title;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.author = author;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.genre = genre;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.pageCount = pageCount;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.publisherID = publisherID;<br>   <span style="color: rgba(0, 0, 255, 1)">this</span>.ISBN = ISBN;<br>};</pre>
+</div>
+<h2><strong>定义基本工厂</strong></h2>
+<p>让我们来定义一个基本工厂，用来检查之前是否创建该book的对象，如果有就返回，没有就重新创建并存储以便后面可以继续访问，这确保我们为每一种书只创建一个对象：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> Book工厂 单例 </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">var</span> BookFactory = (<span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>   <span style="color: rgba(0, 0, 255, 1)">var</span> existingBooks = {};<br>   <span style="color: rgba(0, 0, 255, 1)">return</span>{<br>       createBook: <span style="color: rgba(0, 0, 255, 1)">function</span>(title, author, genre,pageCount,publisherID,ISBN){<br>       <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">查找之前是否创建</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>           <span style="color: rgba(0, 0, 255, 1)">var</span> existingBook = existingBooks[ISBN];<br>           <span style="color: rgba(0, 0, 255, 1)">if</span>(existingBook){<br>                   <span style="color: rgba(0, 0, 255, 1)">return</span> existingBook;<br>               }<span style="color: rgba(0, 0, 255, 1)">else</span>{<br>               <span style="color: rgba(0, 128, 0, 1)">/* 如果没有，就创建一个，然后保存</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>               <span style="color: rgba(0, 0, 255, 1)">var</span> book = <span style="color: rgba(0, 0, 255, 1)">new</span> Book(title, author, genre,pageCount,publisherID,ISBN);<br>               existingBooks[ISBN] =  book;<br>               <span style="color: rgba(0, 0, 255, 1)">return</span> book;<br>           }<br>       }<br>   }<br>});</pre>
+</div>
+<h2><strong>管理外部状态</strong></h2>
+<p>外部状态，相对就简单了，除了我们封装好的book，其它都需要在这里管理：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">BookRecordManager 借书管理类 单例</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br><span style="color: rgba(0, 0, 255, 1)">var</span> BookRecordManager = (<span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>   <span style="color: rgba(0, 0, 255, 1)">var</span> bookRecordDatabase = {};<br>   <span style="color: rgba(0, 0, 255, 1)">return</span>{<br>       <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)">添加借书记录</span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>       addBookRecord: <span style="color: rgba(0, 0, 255, 1)">function</span>(id, title, author, genre,pageCount,publisherID,ISBN, checkoutDate, checkoutMember, dueReturnDate, availability){<br>           <span style="color: rgba(0, 0, 255, 1)">var</span> <span style="color: rgba(255, 0, 255, 1)">book</span> = bookFactory.createBook(title, author, genre,pageCount,publisherID,ISBN);<br>            bookRecordDatabase[id] ={<br>               checkoutMember: checkoutMember,<br>               checkoutDate: checkoutDate,<br>               dueReturnDate: dueReturnDate,<br>               availability: availability,<br>               book: <span style="color: rgba(255, 0, 255, 1)">book</span>;<br><br>           };<br>       },<br>    updateCheckoutStatus: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID, newStatus, checkoutDate, checkoutMember,     newReturnDate){<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> record = bookRecordDatabase[bookID];<br>        record.availability = newStatus;<br>        record.checkoutDate = checkoutDate;<br>        record.checkoutMember = checkoutMember;<br>        record.dueReturnDate = newReturnDate;<br>   },<br>   extendCheckoutPeriod: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID, newReturnDate){<br>       bookRecordDatabase[bookID].dueReturnDate = newReturnDate;<br>   },<br>   isPastDue: <span style="color: rgba(0, 0, 255, 1)">function</span>(bookID){<br>       <span style="color: rgba(0, 0, 255, 1)">var</span> currentDate = <span style="color: rgba(0, 0, 255, 1)">new</span> Date();<br>       <span style="color: rgba(0, 0, 255, 1)">return</span> currentDate.getTime() &gt; Date.parse(bookRecordDatabase[bookID].dueReturnDate);<br>   }<br> };<br>});</pre>
+</div>
+<p>通过这种方式，我们做到了将同一种图书的相同信息保存在一个bookmanager对象里，而且只保存一份；相比之前的代码，就可以发现节约了很多内存。</p>
+<h1>享元模式与DOM</h1>
+<p>关于DOM的事件冒泡，在这里就不多说了，相信大家都已经知道了，我们举两个例子。</p>
+<h2><strong>例1：事件集中管理</strong></h2>
+<p>举例来说，如果我们又很多相似类型的元素或者结构（比如菜单，或者ul里的多个li）都需要监控他的click事件的话，那就需要多每个元素进行事件绑定，如果元素有非常非常多，那性能就可想而知了，而结合冒泡的知识，任何一个子元素有事件触发的话，那触发以后事件将冒泡到上一级元素，所以利用这个特性，我们可以使用享元模式，我们可以对这些相似元素的父级元素进行事件监控，然后再判断里面哪个子元素有事件触发了，再进行进一步的操作。</p>
+<p>在这里我们结合一下jQuery的bind/unbind方法来举例。</p>
+<p><strong>HTML</strong>:</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">div </span><span style="color: rgba(255, 0, 0, 1)">id</span><span style="color: rgba(0, 0, 255, 1)">="container"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>   <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">div </span><span style="color: rgba(255, 0, 0, 1)">class</span><span style="color: rgba(0, 0, 255, 1)">="toggle"</span><span style="color: rgba(255, 0, 0, 1)"> href</span><span style="color: rgba(0, 0, 255, 1)">="#"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>更多信息 (地址)<br>       <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">span </span><span style="color: rgba(255, 0, 0, 1)">class</span><span style="color: rgba(0, 0, 255, 1)">="info"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>          这里是更多信息<br>       <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">span</span><span style="color: rgba(0, 0, 255, 1)">&gt;&lt;/</span><span style="color: rgba(128, 0, 0, 1)">div</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>   <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">div </span><span style="color: rgba(255, 0, 0, 1)">class</span><span style="color: rgba(0, 0, 255, 1)">="toggle"</span><span style="color: rgba(255, 0, 0, 1)"> href</span><span style="color: rgba(0, 0, 255, 1)">="#"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>更多信息 (地图)<br>       <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">span </span><span style="color: rgba(255, 0, 0, 1)">class</span><span style="color: rgba(0, 0, 255, 1)">="info"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>          <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">iframe </span><span style="color: rgba(255, 0, 0, 1)">src</span><span style="color: rgba(0, 0, 255, 1)">="http://www.map-generator.net/extmap.php?name=London&amp;amp;address=london%2C%20england&amp;amp;width=500...gt;"</span><span style="color: rgba(255, 0, 0, 1)">&lt;/iframe</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>       <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">span</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br>   <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">div</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><br><span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">div</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span></pre>
+</div>
+<p><strong>JavaScript</strong>:</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>stateManager = {<br>   fly: <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>       <span style="color: rgba(0, 0, 255, 1)">var</span> self =  <span style="color: rgba(0, 0, 255, 1)">this</span>;<br>       $('#container').unbind().bind("click", <span style="color: rgba(0, 0, 255, 1)">function</span>(e){<br>           <span style="color: rgba(0, 0, 255, 1)">var</span> target = $(e.originalTarget || e.srcElement);<br>           <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 判断是哪一个子元素</span><span style="color: rgba(0, 128, 0, 1)"><br></span>           <span style="color: rgba(0, 0, 255, 1)">if</span>(target.is("div.toggle")){<br>               self.handleClick(target);<br>           }<br>       });<br>   },<br><br>   handleClick: <span style="color: rgba(0, 0, 255, 1)">function</span>(elem){<br>       elem.find('span').toggle('slow');<br>   }<br>});</pre>
+</div>
+<h2><strong>例2：应用享元模式提升性能</strong></h2>
+<p>另外一个例子，依然和jQuery有关，一般我们在事件的回调函数里使用元素对象是会后，经常会用到$(this)这种形式，其实它重复创建了新对象，因为本身回调函数里的this已经是DOM元素自身了，我们必要必要使用如下这样的代码：</p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre>$('div').bind('click', <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br> console.log('You clicked: ' + $(<span style="color: rgba(0, 0, 255, 1)">this</span>).attr('id'));<br>});<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 上面的代码，要避免使用，避免再次对DOM元素进行生成jQuery对象，因为这里可以直接使用DOM元素自身了。</span><span style="color: rgba(0, 128, 0, 1)"><br></span>$('div').bind('click', <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br> console.log('You clicked: ' + <span style="color: rgba(0, 0, 255, 1)">this</span>.id);<br>});</pre>
+</div>
+<p>其实，如果非要用$(this)这样的形式，我们也可以实现自己版本的单实例模式，比如我们来实现一个jQuery.signle(this)这样的函数以便返回DOM元素自身：</p>
+<div class="cnblogs_code">
+<pre>jQuery.single = (<span style="color: rgba(0, 0, 255, 1)">function</span>(o){<br><br>   <span style="color: rgba(0, 0, 255, 1)">var</span> collection = jQuery([1]);<br>   <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span>(element) {<br><br>       <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将元素放到集合里</span><span style="color: rgba(0, 128, 0, 1)"><br></span>       collection[0] = element;<br><br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 返回集合</span><span style="color: rgba(0, 128, 0, 1)"><br></span>       <span style="color: rgba(0, 0, 255, 1)">return</span> collection;<br><br>   };<br> });</pre>
+</div>
+<p>使用方法：</p>
+<div class="cnblogs_code">
+<pre>$('div').bind('click', <span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>   <span style="color: rgba(0, 0, 255, 1)">var</span> html = jQuery.single(<span style="color: rgba(0, 0, 255, 1)">this</span>).next().html();<br>   console.log(html);<br> });</pre>
+</div>
+<p>这样，就是原样返回DOM元素自身了，而且不进行jQuery对象的创建。</p>
+<h1>总结</h1>
+<p>Flyweight模式是一个提高程序效率和性能的模式,会大大加快程序的运行速度.应用场合很多:比如你要从一个数据库中读取一系列字符串,这些字符串中有许多是重复的,那么我们可以将这些字符串储存在Flyweight池(pool)中。</p>
+<p>如果一个应用程序使用了大量的对象，而这些大量的对象造成了很大的存储开心时就应该考虑使用享元模式；还有就是对象的大多数状态可以外部状态，如果删除对象的外部状态，那么就可以用相对较少的共享对象取代很多组对象，此时可以考虑使用享元模式。</p>
+<p>参考地址：http://www.addyosmani.com/resources/essentialjsdesignpatterns/book/#detailflyweight</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BA%AB%E5%85%83%E6%A8%A1%E5%BC%8F/">享元模式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/FlyWeight/">FlyWeight</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2379774, cb_entryCreatedDate = '2012-04-09 08:46', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsS3YK30p54Ep8qzeL7SaVmcM61KOo9yauGbRMKUZMjj1HH_WHa8patgh9BzaVRCH4q5dkutoKnszfGGuOKhLpDW04Q1EwDlmJfiORY_0-X_fUcfkBIX94xR1z82H_H8YM" />
+</body>
+</html>

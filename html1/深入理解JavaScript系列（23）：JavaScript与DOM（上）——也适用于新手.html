@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="文档对象模型Document Object ModelDOM（Document Object Model，文档对象模型）是一个通过和JavaScript进行内容交互的API。Javascript和DO" />
+    <meta property="og:description" content="文档对象模型Document Object ModelDOM（Document Object Model，文档对象模型）是一个通过和JavaScript进行内容交互的API。Javascript和DO" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（23）：JavaScript与DOM（上）——也适用于新手 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-16 08:56';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/16/2351331.html">
+    <span>深入理解JavaScript系列（23）：JavaScript与DOM（上）——也适用于新手</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-16 08:56</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">34638</span>)&nbsp;
+评论(<span id="post_comment_count">29</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2351331" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2351331);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>文档对象模型Document Object Model</h1>
+<p>DOM（Document Object Model，文档对象模型）是一个通过和JavaScript进行内容交互的API。Javascript和DOM一般经常作为一个整体，因为Javascript通常都是用来进行DOM操作和交互的。</p>
+<p><img src="https://pic002.cnblogs.com/images/2012/349491/2012021415450667.png" alt=""></p>
+<p>主要内容来自：http://net.tutsplus.com/tutorials/javascript-ajax/javascript-and-the-dom-series-lesson-1/</p>
+<p>关于DOM，有些知识需要注意：<br>1. window对象作为全局对象，也就是说你可以通过window来访问全局对象。</p>
+<ol>
+<li>&nbsp;属性在对象下面以变量的形式存放，在页面上创建的所有全局对象都会变成window对象的属性。</li>
+<li>方法在对象下面以函数的形式存放，因为左右的函数都存放在window对象下面，所以他们也可以称为方法。</li>
+</ol>
+<p>2. DOM为web文档创建带有层级的结果，这些层级是通过node节点组成，这里有几种DOM node类型，最重要的是Element, Text, Document。</p>
+<ol>
+<li>&nbsp;Element节点在页面里展示的是一个元素，所以如果你有段落元素(&lt;p&gt;)，你可以通过这个DOM节点来访问。</li>
+<li>&nbsp;Text节点在页面里展示的所有文本相关的元素，所以如果你的段落有文本在里面的话，你可以直接通过DOM的Text节点来访问这个文本</li>
+<li>&nbsp;Document节点代表是整个文档，它是DOM的根节点。</li>
+</ol>
+<p>3. 每个引擎对DOM标准的实现有一些轻微的不同。例如，Firefox浏览器使用的Gecko引擎有着很好的实现（尽管没有完全遵守W3C规范），但IE浏览器使用的Trident引擎的实现却不完整而且还有bug，给开发人言带来了很多问题。</p>
+<p><span style="color: rgba(255, 102, 0, 1)">如果你正在使用Firefox，我推荐你立即下载Firebug插件，对于你了解DOM结构非常有用。</span></p>
+<h1>Web上的JavaScript</h1>
+<h2><strong>Script元素</strong></h2>
+<p>当你在网站页面上使用JavaScript的时候，需要使用SCRIPT元素：</p>
+<div class="cnblogs_code">
+<pre>    <span style="color: rgba(0, 0, 255, 1)">&lt;!</span><span style="color: rgba(255, 0, 255, 1)">DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">html </span><span style="color: rgba(255, 0, 0, 1)">xmlns</span><span style="color: rgba(0, 0, 255, 1)">="http://www.w3.org/1999/xhtml"</span><span style="color: rgba(255, 0, 0, 1)"> lang</span><span style="color: rgba(0, 0, 255, 1)">="en"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">head</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>                <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">meta </span><span style="color: rgba(255, 0, 0, 1)">http-equiv</span><span style="color: rgba(0, 0, 255, 1)">="Content-Type"</span><span style="color: rgba(255, 0, 0, 1)"> content</span><span style="color: rgba(0, 0, 255, 1)">="text/html; charset=UTF-8"</span> <span style="color: rgba(0, 0, 255, 1)">/&gt;</span>  <br>                <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">title</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>JavaScript!<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">title</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">head</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">body</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>        <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">script </span><span style="color: rgba(255, 0, 0, 1)">type</span><span style="color: rgba(0, 0, 255, 1)">="text/javascript"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 0, 0, 1)">  <br>            </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)">//</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"> &lt;![CDATA[  </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"><br></span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 0, 0, 1)">      <br>            </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)">//</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"> ]]&gt;  </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">            &lt;/</span><span style="color: rgba(128, 0, 0, 1)">script</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>        <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">body</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">html</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  </pre>
+</div>
+<p>上述代码，严格来说SCRIPT的TYPE属性应该设置为application/javascript，但是由于IE不支持这个，所以平时我们不得不写成text/javascript或者直接去掉type。另外你也可以看到在SCRIPT元素里的注释行// &lt;![CDATA[ 是用来告诉支持XHTML的浏览器，这里面的代码是字符数据而不是XHTML标签，比如如果你在里面的数据使用了&lt;或&gt;，浏览器就不会再解析成XHTML标签了。</p>
+<h2><strong>Defer属性</strong></h2>
+<p>任何在SCRIPT元素里声明的代码在页面加载的时候都会运行，唯一一个例外是给SCRIPT元素加上一个defer属性。defer属性告诉浏览器加载完HTML文档以后再执行JS代码，但这个属性只能在IE下使用。</p>
+<h2><strong>连接外部脚本</strong></h2>
+<p>如果你想了解外部脚本，只需要简单地在SCRIPT上使用SRC属性就行了，使用单独的JS文件的好处是可以缓存，而且也不需要担心CDATA方面的问题：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">script </span><span style="color: rgba(255, 0, 0, 1)">type</span><span style="color: rgba(0, 0, 255, 1)">="text/javascript"</span><span style="color: rgba(255, 0, 0, 1)"> src</span><span style="color: rgba(0, 0, 255, 1)">="my-script.js"</span><span style="color: rgba(0, 0, 255, 1)">&gt;&lt;/</span><span style="color: rgba(128, 0, 0, 1)">script</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span></pre>
+</div>
+<h2><strong>JavaScript必备</strong></h2>
+<p>在我们继续DOM之前，我们来复习一下JavaScript的核心必备知识，如果你还不了解，也没关系，我们在这一章节将稍微花点时间来回顾一下。</p>
+<p>JavaScript有几种数据类型：Number, String, Boolean, Object, Undefined and Null。</p>
+<p>单行注释使用双斜杠//，双斜杠后面的所有文字都会被注释掉，多行注意使用/*和*/括住。</p>
+<h3><strong>Number</strong></h3>
+<p>在JavaScript里所有的Number都是浮点型的，当声明一个数字变量的时候，记得不要使用任何引号。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注：使用var类声明变量</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> leftSide = 100;  <br><span style="color: rgba(0, 0, 255, 1)">var</span> topSide = 50;  <br><span style="color: rgba(0, 0, 255, 1)">var</span> areaOfRectangle = leftSide * topSide; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> = 5000  </span></pre>
+</div>
+<h3><strong>String</strong></h3>
+<p>JavaScript里声明字符串特别简单，和其它语言一样，在JS里使用单引号或双引号都可以。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> firstPart = 'Hello';  <br><span style="color: rgba(0, 0, 255, 1)">var</span> secondPart = 'World!';  <br><span style="color: rgba(0, 0, 255, 1)">var</span> allOfIt = firstPart + ' ' + secondPart; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Hello World!  </span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> +符合是字符连接符。也用于数字相加</span></pre>
+</div>
+<h3><strong>Boolean</strong></h3>
+<p>布尔类型用于条件判断，布尔类型是只有2个值：true和false。任何使用逻辑操作符的比较都会返回布尔值。</p>
+<div class="cnblogs_code">
+<pre>5 === (3 + 2); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> = true  </span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 你也可以将布尔值赋给一个变量</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> veryTired = <span style="color: rgba(0, 0, 255, 1)">true</span>;<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这样使用</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> (veryTired) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 执行代码 </span><span style="color: rgba(0, 128, 0, 1)"><br></span>}   </pre>
+</div>
+<p>===也是比较操作符，不仅比较数值，还比较类型。</p>
+<h3><strong>Function</strong></h3>
+<p>函数是特殊的对象。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用function操作符来声明新函数  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> myFunctionName(arg1, arg2) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数代码</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 你也可以声明匿名函数 </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> (arg1, arg2) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Function code goes here.  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 运行函数很简单，直接在函数名称后面加上小括号就可以了</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 或者也可以带上参数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myFunctionName(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 无参</span><span style="color: rgba(0, 128, 0, 1)"><br></span>myFunctionName('foo', 'bar'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 有参数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 也可以使用自调用  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这里自调用函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>})();</pre>
+</div>
+<h3><strong>Array</strong></h3>
+<p>数组也是特殊的对象，它包含了一批值（或对象），访问这些数据的话需要使用数字索引：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2种方式声明数组</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 字面量:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> fruit = ['apple', 'lemon', 'banana'];<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Array构造函数:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> fruit = <span style="color: rgba(0, 0, 255, 1)">new</span> Array('apple', 'lemon', 'banana');<br><br>fruit[0]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 访问第1个项(apple)  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>fruit[1]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 访问第2个项(lemon)  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>fruit[2]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 访问第3个项(banana) </span></pre>
+</div>
+<h3><strong>Object</strong></h3>
+<p>一个对象是一个key-value的集合，和数组相似，唯一的不同是你可以为每个数据定义一个名称。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2种类型定义Object对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 字面量（大括号）</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> profile = {<br>    name: 'Bob',<br>    age: 99,<br>    job: 'Freelance Hitman'<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用Object构造函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> profile = <span style="color: rgba(0, 0, 255, 1)">new</span> Object();<br>profile.name = 'Bob';<br>profile.age = 99;<br>profile.job = 'Freelance Hitman';  </pre>
+</div>
+<h3><strong>IF/Else语句</strong></h3>
+<p>JS里使用最多的语句莫过于条件语句了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> legalDrinkingAge = 21;  <br><span style="color: rgba(0, 0, 255, 1)">var</span> yourAge = 29;  <br>  <br><span style="color: rgba(0, 0, 255, 1)">if</span> ( yourAge &gt;= legalDrinkingAge ) {   <br>    alert('You can drink.');  <br>} <span style="color: rgba(0, 0, 255, 1)">else</span> {  <br>    alert('Sorry, you cannot drink.');  </pre>
+</div>
+<h3><strong>JavaScript操作符</strong></h3>
+<p>建议你访问<a href="https://developer.mozilla.org/En/Core_JavaScript_1.5_Guide/Operators" target="_blank">这个页面</a>来查看所有的JS操作符，这里我仅仅给出一些例子：&nbsp;&nbsp;&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 加减乘除</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> someMaths = 2 + 3 + 4 - 10 * 100 / 2;  <br>      <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等于  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> ( 2 == (5 - 3 ) { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 代码 </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> == 比较是否相等</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不等于 </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> ( 2 != (5 - 3 ) { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> 代码 </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }   <br>      <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 严格等于（推荐） </span><span style="color: rgba(0, 128, 0, 1)"><br></span>2 === 2 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 代替 2 == 2  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>2 !== 3 <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 代替 2 != 3  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 赋值:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> numberOfFruit = 9;  <br>numberOfFruit -= 2; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于 "numberOfFruit = numberOfFruit - 2"  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>numberOfFruit += 2; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于 "numberOfFruit = numberOfFruit + 2"   </span></pre>
+</div>
+<h3><strong>Loop循环</strong></h3>
+<p>Loop循环在是遍历数组或者对象的所有成员的时候非常方便，JavaScript里使用最多的是FOR和WHILE语句。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> envatoTutSites = ['NETTUTS', 'PSDTUTS', 'AUDIOTUTS', 'AETUTS', 'VECTORTUTS'];<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> WHILE循环</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> counter = 0;<br><span style="color: rgba(0, 0, 255, 1)">var</span> lengthOfArray = envatoTutSites.length;<br><span style="color: rgba(0, 0, 255, 1)">while</span> (counter &lt; lengthOfArray) {<br>    alert(envatoTutSites[counter]);<br>    counter++; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于counter += 1;  </span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> FOR循环</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> i只是用于迭代，可以任意取名 </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0, length = envatoTutSites.length; i &lt; length; i++) {<br>    alert(envatoTutSites[i]);<br>}  </pre>
+</div>
+<h1>DOM正文</h1>
+<h2><strong>访问DOM节点</strong></h2>
+<p>我们来个例子，一个HTML里包含一段文本和一个无序的列表。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">&lt;!</span><span style="color: rgba(255, 0, 255, 1)">DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br><span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">html </span><span style="color: rgba(255, 0, 0, 1)">xmlns</span><span style="color: rgba(0, 0, 255, 1)">="http://www.w3.org/1999/xhtml"</span><span style="color: rgba(255, 0, 0, 1)"> lang</span><span style="color: rgba(0, 0, 255, 1)">="en"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">head</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">meta </span><span style="color: rgba(255, 0, 0, 1)">http-equiv</span><span style="color: rgba(0, 0, 255, 1)">="Content-Type"</span><span style="color: rgba(255, 0, 0, 1)"> content</span><span style="color: rgba(0, 0, 255, 1)">="text/html; charset=UTF-8"</span> <span style="color: rgba(0, 0, 255, 1)">/&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">title</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>JavaScript!<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">title</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">head</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">body</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">p </span><span style="color: rgba(255, 0, 0, 1)">id</span><span style="color: rgba(0, 0, 255, 1)">="intro"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>My first paragraph...<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">p</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">ul</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>List item 1<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>List item 1<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>List item 1<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>List item 1<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>            <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>List item 1<span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">li</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">ul</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>  <br>        <span style="color: rgba(0, 0, 255, 1)">&lt;</span><span style="color: rgba(128, 0, 0, 1)">script </span><span style="color: rgba(255, 0, 0, 1)">type</span><span style="color: rgba(0, 0, 255, 1)">="text/javascript"</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 0, 0, 1)">  <br>        </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)">//</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"> &lt;![CDATA[  </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"><br></span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 0, 0, 1)">  <br>        </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)">//</span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"> ]]&gt;  </span><span style="background-color: rgba(245, 245, 245, 1); color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">script</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br>  <br>    <span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">body</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span>  <br><span style="color: rgba(0, 0, 255, 1)">&lt;/</span><span style="color: rgba(128, 0, 0, 1)">html</span><span style="color: rgba(0, 0, 255, 1)">&gt;</span> </pre>
+</div>
+<p>上面例子里，我们使用getElementById DOM方法来访问p段落，在SCRIPT里添加如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> introParagraph = document.getElementById('intro');  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 现在有了该DOM节点，这个DOM节点展示的是该信息段落</span></pre>
+</div>
+<p>变量introParagraph现在已经引用到该DOM节点上了，我们可以对该节点做很多事情，比如查询内容和属性，或者其它任何操作，甚至可以删除它，克隆它，或者将它移到到DOM树的其它节点上。</p>
+<p>文档上的任何内容，我们都可以使用JavaScript和DOM API来访问，所以类似地，我们也可以访问上面的无序列表，唯一的问题是该元素没有ID属性，如果ID的话就可以使用相同的方式，或者使用如下getElementsByTagName方式：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> allUnorderedLists = document.getElementsByTagName('ul');  <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 'getElementsByTagName'返回的是一个节点集合</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> - 和数组有点相似</span></pre>
+</div>
+<h2><strong>getElementsByTagName</strong></h2>
+<p>getElementsByTagName方法返回的是一个节点集合，和数组类似也有length属性，重要的一个特性是他是live的——如果你在该元素里添加一个新的li元素，这个集合就会自动更新，介于他和数组类型，所以可以和访问数组一样的方法来访问，所以从0开始：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 访问无序列表: [0]索引</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> unorderedList = document.getElementsByTagName('ul')[0];<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 获取所有的li集合:  </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> allListItems = unorderedList.getElementsByTagName('li');<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 循环遍历</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0, length = allListItems.length; i &lt; length; i++) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 弹出该节点的text内容</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    alert(allListItems[i].firstChild.data);<br>} </pre>
+</div>
+<p>以下图例更清晰地展示了DOM获取的知识：</p>
+<p><img src="https://pic002.cnblogs.com/images/2012/349491/2012021620011175.png" alt=""></p>
+<h2><strong>DOM穿梭</strong></h2>
+<p>“穿梭”这个词主要是用来描述通过DOM查找节点，DOM API提供了大量的节点属性让我们来往上或者往下查询节点。</p>
+<p>所有的节点都有这些属性，都是可以用于访问相关的node节点：</p>
+<ol>
+<li><strong>Node.childNodes</strong>: 访问一个单元素下所有的直接子节点元素，可以是一个可循环的类数组对象。该节点集合可以保护不同的类型的子节点（比如text节点或其他元素节点）。</li>
+<li><strong>Node.firstChild</strong>: 与‘childNodes’数组的第一个项(‘Element.childNodes[0]‘)是同样的效果，仅仅是快捷方式。</li>
+<li><strong>Node.lastChild</strong>: 与‘childNodes’数组的最后一个项(‘Element.childNodes[Element.childNodes.length-1]‘)是同样的效果，仅仅是快捷方式。shortcut.</li>
+<li><strong>Node.parentNode</strong>: 访问当前节点的父节点，父节点只能有一个，祖节点可以用‘Node.parentNode.parentNode’的形式来访问。</li>
+<li><strong>Node.nextSibling</strong>: 访问DOM树上与当前节点同级别的下一个节点。</li>
+<li><strong>Node.previousSibling</strong>: 访问DOM树上与当前节点同级别的上一个节点。</li>
+</ol>
+<p><img src="https://pic002.cnblogs.com/images/2012/349491/2012021421464211.png" alt=""></p>
+<p>通过这张图，理解起来就简单多了，但有个非常重要的知识点：那就是元素之间不能有空格，如果ul和li之间有空格的话，就会被认为是内容为空的text node节点，这样ul.childNodes[0]就不是第一个li元素了。相应地，&lt;p&gt;的下一个节点也不是&lt;ul&gt;，因为&lt;p&gt;和&lt;ul&gt;之间有一个空行的节点，一般遇到这种情况需要遍历所有的子节点然后判断nodeType类型，1是元素，2是属性，3是text节点，详细的type类型可以通过<a href="https://developer.mozilla.org/En/DOM/Node.nodeType" target="_blank">此地址</a>：</p>
+<div class="cnblogs_code">
+<pre>    Node.ELEMENT_NODE == 1<br>    Node.ATTRIBUTE_NODE == 2<br>    Node.TEXT_NODE == 3<br>    Node.CDATA_SECTION_NODE == 4<br>    Node.ENTITY_REFERENCE_NODE == 5<br>    Node.ENTITY_NODE == 6<br>    Node.PROCESSING_INSTRUCTION_NODE == 7<br>    Node.COMMENT_NODE == 8<br>    Node.DOCUMENT_NODE == 9<br>    Node.DOCUMENT_TYPE_NODE == 10<br>    Node.DOCUMENT_FRAGMENT_NODE == 11<br>    Node.NOTATION_NODE == 12</pre>
+</div>
+<h1>总结</h1>
+<p>原生的DOM方法和属性足够我们日常的应用了，本章节我们只列举了一些例子，下一章节我们列举更多的例子，还会包括浏览器事件模型。</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/DOM/">DOM</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2351331, cb_entryCreatedDate = '2012-02-16 08:56', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvfjDbvYA8C0y0SuqQJh8gvlBF2haffVPOnP_aKkhE5SFKOYC8uTylsYIDYuouAgMupuBPf473fJFj2DHxth5yibSW7mjb--u2tGZTRaWxJykkifvVhAHXA9sRvhptD17c" />
+</body>
+</html>

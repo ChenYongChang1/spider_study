@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍观察者模式又叫发布订阅模式（Publish/Subscribe），它定义了一种一对多的关系，让多个观察者对象同时监听某一个主题对象，这个主题对象的状态发生变化时就会通知所有的观察者对象，使得它们能" />
+    <meta property="og:description" content="介绍观察者模式又叫发布订阅模式（Publish/Subscribe），它定义了一种一对多的关系，让多个观察者对象同时监听某一个主题对象，这个主题对象的状态发生变化时就会通知所有的观察者对象，使得它们能" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（32）：设计模式之观察者模式 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-03-02 08:43';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/03/02/2355128.html">
+    <span>深入理解JavaScript系列（32）：设计模式之观察者模式</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-03-02 08:43</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">60979</span>)&nbsp;
+评论(<span id="post_comment_count">38</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2355128" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2355128);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>观察者模式又叫发布订阅模式（Publish/Subscribe），它定义了一种一对多的关系，让多个观察者对象同时监听某一个主题对象，这个主题对象的状态发生变化时就会通知所有的观察者对象，使得它们能够自动更新自己。</p>
+<p>使用观察者模式的好处：</p>
+<ol>
+<li>支持简单的广播通信，自动通知所有已经订阅过的对象。</li>
+<li>页面载入后目标对象很容易与观察者存在一种动态关联，增加了灵活性。</li>
+<li>目标对象与观察者之间的抽象耦合关系能够单独扩展以及重用。</li>
+</ol>
+<h1>正文（版本一）</h1>
+<p>JS里对观察者模式的实现是通过回调来实现的，我们来先定义一个pubsub对象，其内部包含了3个方法：订阅、退订、发布。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> pubsub = {};<br>(<span style="color: rgba(0, 0, 255, 1)">function</span> (q) {<br><br>    <span style="color: rgba(0, 0, 255, 1)">var</span> topics = {}, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 回调函数存放的数组</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        subUid = -1;<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 发布方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    q.publish = <span style="color: rgba(0, 0, 255, 1)">function</span> (topic, args) {<br><br>        <span style="color: rgba(0, 0, 255, 1)">if</span> (!topics[topic]) {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">false</span>;<br>        }<br><br>        setTimeout(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>            <span style="color: rgba(0, 0, 255, 1)">var</span> subscribers = topics[topic],<br>                len = subscribers ? subscribers.length : 0;<br><br>            <span style="color: rgba(0, 0, 255, 1)">while</span> (len--) {<br>                subscribers[len].func(topic, args);<br>            }<br>        }, 0);<br><br>        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">true</span>;<br><br>    };<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">订阅方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    q.subscribe = <span style="color: rgba(0, 0, 255, 1)">function</span> (topic, func) {<br><br>        <span style="color: rgba(0, 0, 255, 1)">if</span> (!topics[topic]) {<br>            topics[topic] = [];<br>        }<br><br>        <span style="color: rgba(0, 0, 255, 1)">var</span> token = (++subUid).toString();<br>        topics[topic].push({<br>            token: token,<br>            func: func<br>        });<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> token;<br>    };<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    q.unsubscribe = <span style="color: rgba(0, 0, 255, 1)">function</span> (token) {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> m <span style="color: rgba(0, 0, 255, 1)">in</span> topics) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (topics[m]) {<br>                <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0, j = topics[m].length; i &lt; j; i++) {<br>                    <span style="color: rgba(0, 0, 255, 1)">if</span> (topics[m][i].token === token) {<br>                        topics[m].splice(i, 1);<br>                        <span style="color: rgba(0, 0, 255, 1)">return</span> token;<br>                    }<br>                }<br>            }<br>        }<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">false</span>;<br>    };<br>} (pubsub));</pre>
+</div>
+<p>使用方式如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">来，订阅一个</span><span style="color: rgba(0, 128, 0, 1)"><br></span>pubsub.subscribe('example1', <span style="color: rgba(0, 0, 255, 1)">function</span> (topics, data) {<br>    console.log(topics + ": " + data);<br>});<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">发布通知</span><span style="color: rgba(0, 128, 0, 1)"><br></span>pubsub.publish('example1', 'hello world!');<br>pubsub.publish('example1', ['test', 'a', 'b', 'c']);<br>pubsub.publish('example1', [{ 'color': 'blue' }, { 'text': 'hello'}]);</pre>
+</div>
+<p>怎么样？用起来是不是很爽？但是这种方式有个问题，就是没办法退订订阅，要退订的话必须指定退订的名称，所以我们再来一个版本：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">将订阅赋值给一个变量，以便退订</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> testSubscription = pubsub.subscribe('example1', <span style="color: rgba(0, 0, 255, 1)">function</span> (topics, data) {<br>    console.log(topics + ": " + data);<br>});<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">发布通知</span><span style="color: rgba(0, 128, 0, 1)"><br></span>pubsub.publish('example1', 'hello world!');<br>pubsub.publish('example1', ['test', 'a', 'b', 'c']);<br>pubsub.publish('example1', [{ 'color': 'blue' }, { 'text': 'hello'}]);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订</span><span style="color: rgba(0, 128, 0, 1)"><br></span>setTimeout(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    pubsub.unsubscribe(testSubscription);<br>}, 0);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">再发布一次，验证一下是否还能够输出信息</span><span style="color: rgba(0, 128, 0, 1)"><br></span>pubsub.publish('example1', 'hello again! (this will fail)');</pre>
+</div>
+<h1>版本二</h1>
+<p>我们也可以利用原型的特性实现一个观察者模式，代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> Observer() {<br>    <span style="color: rgba(0, 0, 255, 1)">this</span>.fns = [];<br>}<br>Observer.prototype = {<br>    subscribe: <span style="color: rgba(0, 0, 255, 1)">function</span> (fn) {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.fns.push(fn);<br>    },<br>    unsubscribe: <span style="color: rgba(0, 0, 255, 1)">function</span> (fn) {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.fns = <span style="color: rgba(0, 0, 255, 1)">this</span>.fns.filter(<br>                        <span style="color: rgba(0, 0, 255, 1)">function</span> (el) {<br>                            <span style="color: rgba(0, 0, 255, 1)">if</span> (el !== fn) {<br>                                <span style="color: rgba(0, 0, 255, 1)">return</span> el;<br>                            }<br>                        }<br>                    );<br>    },<br>    update: <span style="color: rgba(0, 0, 255, 1)">function</span> (o, thisObj) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> scope = thisObj || window;<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.fns.forEach(<br>                        <span style="color: rgba(0, 0, 255, 1)">function</span> (el) {<br>                            el.call(scope, o);<br>                        }<br>                    );<br>    }<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">测试</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> o = <span style="color: rgba(0, 0, 255, 1)">new</span> Observer;<br><span style="color: rgba(0, 0, 255, 1)">var</span> f1 = <span style="color: rgba(0, 0, 255, 1)">function</span> (data) {<br>    console.log('Robbin: ' + data + ', 赶紧干活了！');<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> f2 = <span style="color: rgba(0, 0, 255, 1)">function</span> (data) {<br>    console.log('Randall: ' + data + ', 找他加点工资去！');<br>};<br><br>o.subscribe(f1);<br>o.subscribe(f2);<br><br>o.update("Tom回来了！")<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订f1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>o.unsubscribe(f1);<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">再来验证</span><span style="color: rgba(0, 128, 0, 1)"><br></span>o.update("Tom回来了！");   </pre>
+</div>
+<p>如果提示找不到filter或者forEach函数，可能是因为你的浏览器还不够新，暂时不支持新标准的函数，你可以使用如下方式自己定义：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (!Array.prototype.forEach) {<br>    Array.prototype.forEach = <span style="color: rgba(0, 0, 255, 1)">function</span> (fn, thisObj) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> scope = thisObj || window;<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0, j = <span style="color: rgba(0, 0, 255, 1)">this</span>.length; i &lt; j; ++i) {<br>            fn.call(scope, <span style="color: rgba(0, 0, 255, 1)">this</span>[i], i, <span style="color: rgba(0, 0, 255, 1)">this</span>);<br>        }<br>    };<br>}<br><span style="color: rgba(0, 0, 255, 1)">if</span> (!Array.prototype.filter) {<br>    Array.prototype.filter = <span style="color: rgba(0, 0, 255, 1)">function</span> (fn, thisObj) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> scope = thisObj || window;<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> a = [];<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0, j = <span style="color: rgba(0, 0, 255, 1)">this</span>.length; i &lt; j; ++i) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (!fn.call(scope, <span style="color: rgba(0, 0, 255, 1)">this</span>[i], i, <span style="color: rgba(0, 0, 255, 1)">this</span>)) {<br>                <span style="color: rgba(0, 0, 255, 1)">continue</span>;<br>            }<br>            a.push(<span style="color: rgba(0, 0, 255, 1)">this</span>[i]);<br>        }<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> a;<br>    };<br>}</pre>
+</div>
+<h1>版本三</h1>
+<p>如果想让多个对象都具有观察者发布订阅的功能，我们可以定义一个通用的函数，然后将该函数的功能应用到需要观察者功能的对象上，代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">通用代码</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> observer = {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">订阅</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    addSubscriber: <span style="color: rgba(0, 0, 255, 1)">function</span> (callback) {<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers[<span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers.length] = callback;<br>    },<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    removeSubscriber: <span style="color: rgba(0, 0, 255, 1)">function</span> (callback) {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0; i &lt; <span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers.length; i++) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers[i] === callback) {<br>                <span style="color: rgba(0, 0, 255, 1)">delete</span> (<span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers[i]);<br>            }<br>        }<br>    },<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">发布</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    publish: <span style="color: rgba(0, 0, 255, 1)">function</span> (what) {<br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0; i &lt; <span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers.length; i++) {<br>            <span style="color: rgba(0, 0, 255, 1)">if</span> (<span style="color: rgba(0, 0, 255, 1)">typeof</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers[i] === 'function') {<br>                <span style="color: rgba(0, 0, 255, 1)">this</span>.subscribers[i](what);<br>            }<br>        }<br>    },<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将对象o具有观察者功能</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    make: <span style="color: rgba(0, 0, 255, 1)">function</span> (o) { <br>        <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i <span style="color: rgba(0, 0, 255, 1)">in</span> <span style="color: rgba(0, 0, 255, 1)">this</span>) {<br>            o[i] = <span style="color: rgba(0, 0, 255, 1)">this</span>[i];<br>            o.subscribers = [];<br>        }<br>    }<br>};</pre>
+</div>
+<p>然后订阅2个对象blogger和user，使用observer.make方法将这2个对象具有观察者功能，代码如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> blogger = {<br>    recommend: <span style="color: rgba(0, 0, 255, 1)">function</span> (id) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> msg = 'dudu 推荐了的帖子:' + id;<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.publish(msg);<br>    }<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> user = {<br>    vote: <span style="color: rgba(0, 0, 255, 1)">function</span> (id) {<br>        <span style="color: rgba(0, 0, 255, 1)">var</span> msg = '有人投票了!ID=' + id;<br>        <span style="color: rgba(0, 0, 255, 1)">this</span>.publish(msg);<br>    }<br>};<br><br>observer.make(blogger);<br>observer.make(user);</pre>
+</div>
+<p>使用方法就比较简单了，订阅不同的回调函数，以便可以注册到不同的观察者对象里（也可以同时注册到多个观察者对象里）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> tom = {<br>    read: <span style="color: rgba(0, 0, 255, 1)">function</span> (what) {<br>        console.log('Tom看到了如下信息：' + what)<br>    }<br>};<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> mm = {<br>    show: <span style="color: rgba(0, 0, 255, 1)">function</span> (what) {<br>        console.log('mm看到了如下信息：' + what)<br>    }<br>};<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 订阅</span><span style="color: rgba(0, 128, 0, 1)"><br></span>blogger.addSubscriber(tom.read);<br>blogger.addSubscriber(mm.show);<br>blogger.recommend(123); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">调用发布</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订</span><span style="color: rgba(0, 128, 0, 1)"><br></span>blogger.removeSubscriber(mm.show);<br>blogger.recommend(456); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">调用发布</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">另外一个对象的订阅</span><span style="color: rgba(0, 128, 0, 1)"><br></span>user.addSubscriber(mm.show);<br>user.vote(789); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">调用发布</span></pre>
+</div>
+<h1>jQuery版本</h1>
+<p>根据jQuery1.7版新增的on/off功能，我们也可以定义jQuery版的观察者：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> ($) {<br><br>    <span style="color: rgba(0, 0, 255, 1)">var</span> o = $({});<br><br>    $.subscribe = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        o.on.apply(o, arguments);<br>    };<br><br>    $.unsubscribe = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        o.off.apply(o, arguments);<br>    };<br><br>    $.publish = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        o.trigger.apply(o, arguments);<br>    };<br><br>} (jQuery));</pre>
+</div>
+<p>调用方法比上面3个版本都简单：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">回调函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> handle(e, a, b, c) {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> `e`是事件对象，不需要关注</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    console.log(a + b + c);<br>};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">订阅</span><span style="color: rgba(0, 128, 0, 1)"><br></span>$.subscribe("/some/topic", handle);<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">发布</span><span style="color: rgba(0, 128, 0, 1)"><br></span>$.publish("/some/topic", ["a", "b", "c"]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 输出abc</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        <br><br>$.unsubscribe("/some/topic", handle); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 退订</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">订阅</span><span style="color: rgba(0, 128, 0, 1)"><br></span>$.subscribe("/some/topic", <span style="color: rgba(0, 0, 255, 1)">function</span> (e, a, b, c) {<br>    console.log(a + b + c);<br>});<br><br>$.publish("/some/topic", ["a", "b", "c"]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 输出abc</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">退订（退订使用的是/some/topic名称，而不是回调函数哦，和版本一的例子不一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span>$.unsubscribe("/some/topic"); </pre>
+</div>
+<p>可以看到，他的订阅和退订使用的是字符串名称，而不是回调函数名称，所以即便传入的是匿名函数，我们也是可以退订的。</p>
+<h1>总结</h1>
+<p>观察者的使用场合就是：当一个对象的改变需要同时改变其它对象，并且它不知道具体有多少对象需要改变的时候，就应该考虑使用观察者模式。</p>
+<p>总的来说，观察者模式所做的工作就是在解耦，让耦合的双方都依赖于抽象，而不是依赖于具体。从而使得各自的变化都不会影响到另一边的变化。</p>
+<p>参考地址：</p>
+<p>https://github.com/shichuan/javascript-patterns/blob/master/design-patterns/observer.html</p>
+<p>http://www.addyosmani.com/resources/essentialjsdesignpatterns/book/#observerpatternjavascript</p>
+<p>https://gist.github.com/661855</p>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F/">设计模式</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%A7%82%E5%AF%9F%E8%80%85/">观察者</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Observer/">Observer</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2355128, cb_entryCreatedDate = '2012-03-02 08:43', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjt6bSsmGk-qS7Z9tq17soYMPpwCSqNkFJiCBH2AUBG_5J7p8DohbwKVf5myJ7eDAXTKmlg9wkoSFJ-sjMBTumLXXbvAt2ckmbX5OYfHD1GkPfuR1RHsk-5FlX9RMH6c57E" />
+</body>
+</html>

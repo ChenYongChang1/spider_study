@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍本章，我们将讲解在ECMAScript向函数function传递参数的策略。计算机科学里对这种策略一般称为“evaluation strategy”（大叔注：有的人说翻译成求值策略，有的人翻译成赋" />
+    <meta property="og:description" content="介绍本章，我们将讲解在ECMAScript向函数function传递参数的策略。计算机科学里对这种策略一般称为“evaluation strategy”（大叔注：有的人说翻译成求值策略，有的人翻译成赋" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（19）：求值策略(Evaluation strategy) - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-08 09:50';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/08/2341439.html">
+    <span>深入理解JavaScript系列（19）：求值策略(Evaluation strategy)</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-08 09:50</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">17867</span>)&nbsp;
+评论(<span id="post_comment_count">21</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2341439" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2341439);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>本章，我们将讲解在ECMAScript向函数function传递参数的策略。</p>
+<p>计算机科学里对这种策略一般称为“evaluation strategy”（<span style="color: rgba(255, 102, 0, 1)">大叔注：有的人说翻译成求值策略，有的人翻译成赋值策略，通看下面的内容，我觉得称为赋值策略更为恰当，anyway，标题还是写成大家容易理解的求值策略吧</span>），例如在编程语言为求值或者计算表达式设置规则。向函数传递参数的策略是一个特殊的case。</p>
+<div class="cnblogs_code">
+<pre>http:<span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">dmitrysoshnikov.com/ecmascript/chapter-8-evaluation-strategy/</span></pre>
+</div>
+<p>写这篇文章的原因是因为论坛上有人要求准确解释一些传参的策略，我们这里给出了相应的定义，希望对大家有所帮助。</p>
+<p>很多程序员都确信在JavaScript中（甚至其它一些语言)，对象是按引用传参，而原始值类型按值传参，此外，很多文章都说到这个“事实”，但有多人真正理解这个术语，而且又有多少是正确的?我们本篇讲逐一讲解。</p>
+<h1>一般理论</h1>
+<p>需要注意到，在赋值理论里一般有2中赋值策略：严格——意思是说参数在进入程序之前是经过计算过的；非严格——意思是参数的计算是根据计算要求才去计算（也就是相当于延迟计算）。</p>
+<p>然后，这里我们考虑基本的函数传参策略，从ECMAScript出发点来说是非常重要的。首先需要注意的是，在ECMAScript中（甚至其他的语如，C，JAVA，Python和Ruby中）都使用了严格的参数传递策略。</p>
+<p>另外传递参数的计算顺序也是很重要的——在ECMAScript是左到右，而且其它语言实现的反省顺序（从右向做）也是可以用的。</p>
+<p>严格的传参策略也分为几种子策略，其中最重要的一些策略我们在本章详细讨论。</p>
+<p>下面讨论的策略不是全部都用在ECMAScript中，所以在讨论这些策略的具体行为的时候，我们使用了伪代码来展示。</p>
+<h2><strong>按值传递</strong></h2>
+<p>按值传递，很多开发人员都很了解了，参数的值是调用者传递的对象值的拷贝(copy of value），函数内部改变参数的值不会影响到外面的对象（该参数在外面的值），一般来说，是重新分配了新内存(我们不关注分配内存是怎么实现的——也是是栈也许是动态内存分配），该新内存块的值是外部对象的拷贝，并且它的值是用到函数内部的。</p>
+<div class="cnblogs_code">
+<pre>bar = 10<br> <br>procedure foo(barArg):<br>  barArg = 20;<br>end<br> <br>foo(bar)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo内部改变值不会影响内部的bar的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<p>但是，如果该函数的参数不是原始值而是复杂的结构对象是时候，将带来很大的性能问题，C++就有这个问题，将结构作为值传进函数的时候——就是完整的拷贝。</p>
+<p>我们来给一个一般的例子，用下面的赋值策略来检验一下，想想一下一个函数接受2个参数，第1个参数是对象的值，第2个是个布尔型的标记，用来标记是否完全修改传入的对象（给对象重新赋值），还是只修改该对象的一些属性。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注：以下都是伪代码，不是JS实现</span><br>bar = {<br>  x: 10,<br>  y: 20<br>}<br> <br>procedure foo(barArg, isFullChange):<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> isFullChange:<br>    barArg = {z: 1, q: 2}<br>    exit<br>  end<br> <br>  barArg.x = 100<br>  barArg.y = 200<br> <br>end<br> <br>foo(bar)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 按值传递，外部的对象不被改变</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 10, y: 20}</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 完全改变对象（赋新值）</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(bar, <span style="color: rgba(0, 0, 255, 1)">true</span>)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">也没有改变</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 10, y: 20}, 而不是{z: 1, q: 2}</span></pre>
+</div>
+<h2><strong>按引用传递</strong></h2>
+<p>另外一个众所周知的按引用传递接收的不是值拷贝，而是对象的隐式引用，如该对象在外部的直接引用地址。函数内部对参数的任何改变都是影响该对象在函数外部的值，因为两者引用的是同一个对象，也就是说：这时候参数就相当于外部对象的一个别名。</p>
+<p>伪代码：</p>
+<div class="cnblogs_code">
+<pre>procedure foo(barArg, isFullChange):<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> isFullChange:<br>    barArg = {z: 1, q: 2}<br>    exit<br>  end<br> <br>  barArg.x = 100<br>  barArg.y = 200<br> <br>end<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用和上例相同的对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>bar = {<br>  x: 10,<br>  y: 20<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 按引用调用的结果如下： </span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(bar)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象的属性值已经被改变了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 100, y: 200}</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 重新赋新值也影响到了该对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(bar, <span style="color: rgba(0, 0, 255, 1)">true</span>)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 此刻该对象已经是一个新对象了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {z: 1, q: 2}</span></pre>
+</div>
+<p>该策略可以更有效地传递复杂对象，例如带有大批量属性的大结构对象。</p>
+<h2><strong>按共享传递（Call by sharing）</strong></h2>
+<p>上面2个策略大家都是知道的，但这里要讲的一个策略可能大家不太了解（其实是学术上的策略)。但是，我们很快就会看到这正是它在ECMAScript中的参数传递战略中起着关键作用的策略。</p>
+<p>这个策略还有一些代名词：“按对象传递”或“按对象共享传递”。</p>
+<p>该策略是1974年由Barbara Liskov为CLU编程语言提出的。</p>
+<p>该策略的要点是：函数接收的是对象对于的拷贝（副本），该引用拷贝和形参以及其值相关联。</p>
+<p>这里出现的引用，我们不能称之为“按引用传递”，因为函数接收的参数不是直接的对象别名，而是该引用地址的拷贝。</p>
+<p>最重要的区别就是：函数内部给参数重新赋新值不会影响到外部的对象（和上例按引用传递的case），但是因为该参数是一个地址拷贝，所以在外面访问和里面访问的都是同一个对象（例如外部的该对象不是想按值传递一样完全的拷贝),改变该参数对象的属性值将会影响到外部的对象。</p>
+<div class="cnblogs_code">
+<pre>procedure foo(barArg, isFullChange):<br> <br>  <span style="color: rgba(0, 0, 255, 1)">if</span> isFullChange:<br>    barArg = {z: 1, q: 2}<br>    exit<br>  end<br> <br>  barArg.x = 100<br>  barArg.y = 200<br> <br>end<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">还是使用这个对象结构</span><span style="color: rgba(0, 128, 0, 1)"><br></span>bar = {<br>  x: 10,<br>  y: 20<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 按贡献传递会影响对象 </span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(bar)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象的属性被修改了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 100, y: 200}</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 重新赋值没有起作用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo(bar, <span style="color: rgba(0, 0, 255, 1)">true</span>)<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 依然是上面的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>print(bar) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 100, y: 200}</span></pre>
+</div>
+<p>这个处理的假设前提是大多数语言里用到的对象，而不是原始值。</p>
+<h2><strong>按共享传递是按值传递的特例</strong></h2>
+<p>按共享传递这个策略很很多语言里都使用了：Java, ECMAScript, Python, Ruby, Visual Basic等。此外，Python社区已经使用了这个术语，至于其他语言也可以用这个术语，因为其他的名称往往会让大家感觉到混乱。大多数情况下，例如在Java，ECMAScript或Visual Basic中，这一策略也称之为按值传递——意味着：特殊值——引用拷贝（副本）。</p>
+<p>一方面，它是这样的——传递给函数内部用的参数仅仅是绑定值（引用地址）的一个名称，并不会影响外部的对象。</p>
+<p>另一方面，如果不深入研究，这些术语真的被认为吃错误的，因为很多论坛都在说如何将对象传递给JavaScript函数）。</p>
+<p>一般理论确实有按值传递的说法：但这时候这个值就是我们所说的地址拷贝（副本），因此并没哟破坏规则。</p>
+<p>在Ruby中，这个策略称为按引用传递。再说一下：它不是按照大结构的拷贝来传递（例如，不是按值传递),而另一方面，我们没有处理原始对象的引用，并且不能修改它；因此，这个跨术语的概念可能更会造成混乱。</p>
+<p>理论里没有像按值传递的特殊case一样来面试按引用传递的特殊case。</p>
+<p>但依然有必要了解这些策略在上述提到的技术中（Java, ECMAScript, Python, Ruby, other），实际上——他们用的策略就是按共享传递。</p>
+<h2><strong>按共享与指针</strong></h2>
+<p>对于С/С+ +，这个策略在思想上和按指针值传递是一样的，但有一个重要的区别——该策略可以取消引用指针以及完全改变对象。但在一般情况下，分配一个值（地址）指针到新的内存块（即之前引用的内存块保持不变）；通过指针改变对象属性的话会影响阿东外部对象。</p>
+<p>因此，和指针类别，我们可以明显看到，这是按地址值传递。 在这种情况下，按共享传递只是“语法糖”，像指针赋值行为一样（但不能取消引用），或者像引用一样修改属性（不需要取消引用操作），有时候，它可以被命名为“安全指针”。</p>
+<p>然而，С/С+ +如果在没有明显指针的解引用的情况下，引用对象属性的时候，还具有特殊的语法糖：</p>
+<div class="cnblogs_code">
+<pre>obj-&gt;x instead of (*obj).x</pre>
+</div>
+<p>和C++关系最为紧密的这种意识形态可以从“智能指针”的实现中看到，例如，在 boost :: shared_ptr里，重载了赋值操作符以及拷贝构造函数，而且还使用了对象的引用计数器，通过GC删除对象。 这种数据类型，甚至有类似的名字- 共享_ptr。</p>
+<h1>ECMAScript实现</h1>
+<p>现在我们知道了ECMAScript中将对象作为参数传递的策略了——按共享传递：修改参数的属性将会影响到外部，而重新赋值将不会影响到外部对象。但是，正如我们上面提到的，其中的ECMAScript开发人员一般都称之为是：按值传递，只不过该值是引用地址的拷贝。</p>
+<p>JavaScript发明人布伦丹·艾希也写到了：传递的是引用的拷贝（地址副本）。所以论坛里大家曾说的按值传递，在这种解释下，也是对的。</p>
+<p>更确切地说，这种行为可以理解为简单的赋值，我们可以看到，内部是完全不同的对象，只不过引用的是相同的值——也就是地址副本。</p>
+<p>ECMAScript代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10, y: 20};<br><span style="color: rgba(0, 0, 255, 1)">var</span> bar = foo;<br> <br>alert(bar === foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>bar.x = 100;<br>bar.y = 200;<br> <br>alert([foo.x, foo.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [100, 200]</span></pre>
+</div>
+<p>即两个标识符（名称绑定）绑定到内存中的同一个对象， <em>共享</em>这个对象：</p>
+<div class="cnblogs_code">
+<pre>foo value: addr(<span style="color: rgba(128, 0, 128, 1)">0xFF</span>) =&gt; {x: <span style="color: rgba(128, 0, 128, 1)">100</span>, y: <span style="color: rgba(128, 0, 128, 1)">200</span>} (address <span style="color: rgba(128, 0, 128, 1)">0xFF</span>) &lt;= bar value: addr(<span style="color: rgba(128, 0, 128, 1)">0xFF</span>)</pre>
+</div>
+<p>而重新赋值分配，绑定是新的对象标识符（新地址），而不影响已经先前绑定的对象 ：</p>
+<div class="cnblogs_code">
+<pre>bar = {z: 1, q: 2};<br> <br>alert([foo.x, foo.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [100, 200] – 没改变</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert([bar.z, bar.q]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [1, 2] – 但现在引用的是新对象</span></pre>
+</div>
+<p>即现在foo和 bar，有不同的值和不同的地址:</p>
+<div class="cnblogs_code">
+<pre>foo value: addr(0xFF) =&gt; {x: 100, y: 200} (address 0xFF)<br>bar value: addr(0xFA) =&gt; {z: 1, q: 2} (address 0xFA)</pre>
+</div>
+<p>再强调一下，这里所说对象的值是地址（address），而不是对象结构本身，将变量赋值给另外一个变量——是赋值值的引用。因此两个变量引用的是同一个内存地址。下一个赋值却是新地址，是解析与旧对象的地址绑定，然后绑定到新对象的地址上，这就是和按引用传递的最重要区别。</p>
+<p>此外，如果只考虑ECMA-262标准所提供的抽象层次，我们在算法里看到的只有“值”这个概念，实现传递的“值”（可以是原始值，也可以是对象），但是按照我们上面的定义，也可以完全称之为“按值传递”，因为引用地址也是值。</p>
+<p>然而，为了避免误解（为什么外部对象的属性可以在函数内部改变），这里依然需要考虑实现层面的细节——我们看到的按共享传递，或者换句话讲——按安全指针传递，而安全指针不可能去解除引用和改变对象的，但可以去修改该对象的属性值。</p>
+<h2><strong>术语版本</strong></h2>
+<p>让我们来定义ECMAScript中该策略的术语版本。</p>
+<p>可以称之为“按值传递”——这里所说的值是一个特殊的case，也就是该值是地址副本（address copy）。从这个层面我们可以说：ECMAScript中除了异常之外的对象都是按值传递的，这实际上是ECMAScript抽象的层面。</p>
+<p>或针对这种情况下，专门称之为“按共享传递”，通过这个正好可以看到传统的按值传递和按引用传递的区别，这种情况，可以分成2个种情况：1：原始值按值传递；2：对象按共享传递。</p>
+<p>“通过引用类型将对象到函数”这句话和ECMAScript无关，而且它是错误的。</p>
+<h1>结论</h1>
+<p>我希望这篇文章有助于宏观上了解更多细节，以及在ECMAScript中的实现。一如既往，如果有任何问题，欢迎讨论。</p>
+<h1>其它参考</h1>
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Evaluation_strategy">Evaluation strategy</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_value">Call by value</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference">Call by reference</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_sharing">Call by sharing</a></li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E8%B5%8B%E5%80%BC/">赋值</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BC%A0%E5%8F%82/">传参</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E6%8C%89%E5%80%BC%E4%BC%A0%E9%80%92/">按值传递</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E6%8C%89%E5%BC%95%E7%94%A8%E4%BC%A0%E9%80%92/">按引用传递</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E6%8C%89%E5%85%B1%E4%BA%AB%E4%BC%A0%E9%80%92/">按共享传递</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2341439, cb_entryCreatedDate = '2012-02-08 09:50', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvkCYR7DQ_UIL2RVR2GKCWMd9KWXQGxB34idJOVm_JL-Ni8Y1xsZ5DTXfH6093iS2ZmQAaWpTaXOMl9LhhUb_31KHxJgesDtubJhKVY8FxNOPoL4vf0g-yNVhQ-Z6Mtt_8" />
+</body>
+</html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="前言大家学JavaScript的时候，经常遇到自执行匿名函数的代码，今天我们主要就来想想说一下自执行。在详细了解这个之前，我们来谈了解一下“自执行”这个叫法，本文对这个功能的叫法也不一定完全对，主要是" />
+    <meta property="og:description" content="前言大家学JavaScript的时候，经常遇到自执行匿名函数的代码，今天我们主要就来想想说一下自执行。在详细了解这个之前，我们来谈了解一下“自执行”这个叫法，本文对这个功能的叫法也不一定完全对，主要是" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（4）：立即调用的函数表达式 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2011-12-31 09:45';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2011/12/31/2289423.html">
+    <span>深入理解JavaScript系列（4）：立即调用的函数表达式</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2011-12-31 09:45</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">113135</span>)&nbsp;
+评论(<span id="post_comment_count">48</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2289423" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2289423);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>前言</h1>
+<p>大家学JavaScript的时候，经常遇到自执行匿名函数的代码，今天我们主要就来想想说一下自执行。<br><br>在详细了解这个之前，我们来谈了解一下“自执行”这个叫法，本文对这个功能的叫法也不一定完全对，主要是看个人如何理解，因为有的人说立即调用，有的人说自动执行，所以你完全可以按照你自己的理解来取一个名字，不过我听很多人都叫它为“自执行”，但作者后面说了很多，来说服大家称呼为“立即调用的函数表达式”。</p>
+<p>本文英文原文地址：http://benalman.com/news/2010/11/immediately-invoked-function-expression/</p>
+<h1>什么是自执行？</h1>
+<p>在JavaScript里，任何function在执行的时候都会创建一个执行上下文，因为为function声明的变量和function有可能只在该function内部，这个上下文，在调用function的时候，提供了一种简单的方式来创建自由变量或私有子function。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 由于该function里返回了另外一个function，其中这个function可以访问自由变量i</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所有说，这个内部的function实际上是有权限可以调用内部的对象。</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">function</span> makeCounter() {<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 只能在makeCounter内部访问i</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    <span style="color: rgba(0, 0, 255, 1)">var</span> i = 0;<br><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>        console.log(++i);<br>    };<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注意，counter和counter2是不同的实例，分别有自己范围内的i。</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> counter = makeCounter();<br>counter(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> logs: 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>counter(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> logs: 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> counter2 = makeCounter();<br>counter2(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> logs: 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>counter2(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> logs: 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>alert(i); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用错误：i没有defind（因为i是存在于makeCounter内部）。</span></pre>
+</div>
+<p>很多情况下，我们不需要makeCounter多个实例，甚至某些case下，我们也不需要显示的返回值，OK，往下看。</p>
+<p>&nbsp;</p>
+<h2><strong>问题的核心</strong></h2>
+<p>当你声明类似function foo(){}或var foo = function(){}函数的时候，通过在后面加个括弧就可以实现自执行，例如foo()，看代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 因为想下面第一个声明的function可以在后面加一个括弧()就可以自己执行了，比如foo()，</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 因为foo仅仅是function() { /* code */ }这个表达式的一个引用</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span>(){ <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ...是不是意味着后面加个括弧都可以自动执行？</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span>(){ <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> SyntaxError: Unexpected token (</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span></pre>
+</div>
+<p>上述代码，如果甚至运行，第2个代码会出错，因为在解析器解析全局的function或者function内部function关键字的时候，默认是认为function声明，而不是function表达式，如果你不显示告诉编译器，它默认会声明成一个缺少名字的function，并且抛出一个语法错误信息，因为function声明需要一个名字。</p>
+<h2><strong>旁白：函数(function)，括弧(paren)，语法错误(SyntaxError)</strong></h2>
+<p>有趣的是，即便你为上面那个错误的代码加上一个名字，他也会提示语法错误，只不过和上面的原因不一样。在一个表达式后面加上括号()，该表达式会立即执行，但是在一个语句后面加上括号()，是完全不一样的意思，他的只是分组操作符。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 下面这个function在语法上是没问题的，但是依然只是一个语句</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 加上括号()以后依然会报错，因为分组操作符需要包含表达式</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> foo(){ <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> SyntaxError: Unexpected token )</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但是如果你在括弧()里传入一个表达式，将不会有异常抛出</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但是foo函数依然不会执行</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> foo(){ <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }( 1 );<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 因为它完全等价于下面这个代码，一个function声明后面，又声明了一个毫无关系的表达式： </span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> foo(){ <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }<br> <br>( 1 );</pre>
+</div>
+<p>你可以访问<a href="http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/#question-about-surrounding-parentheses" target="_blank">ECMA-262-3 in detail. Chapter 5. Functions</a> 获取进一步的信息。</p>
+<h1>自执行函数表达式</h1>
+<p>要解决上述问题，非常简单，我们只需要用大括弧将代码的代码全部括住就行了，因为JavaScript里括弧()里面不能包含语句，所以在这一点上，解析器在解析function关键字的时候，会将相应的代码解析成function表达式，而不是function声明。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 下面2个括弧()都会立即执行</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 推荐使用这个</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> })(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但是这个也是可以用的</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 由于括弧()和JS的&amp;&amp;，异或，逗号等操作符是在函数表达式和函数声明上消除歧义的</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所以一旦解析器知道其中一个已经是表达式了，其它的也都默认为表达式了</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 不过，请注意下一章节的内容解释</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> i = <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 0, 255, 1)">return</span> 10; } ();<br><span style="color: rgba(0, 0, 255, 1)">true</span> &amp;&amp; <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br>0, <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果你不在意返回值，或者不怕难以阅读</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 你甚至可以在function前面加一元操作符号</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>!<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br>~<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br>-<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br>+<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ();<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 还有一个情况，使用new关键字,也可以用，但我不确定它的效率</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> http://twitter.com/kuvos/status/18209252090847232</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">new</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> }<br><span style="color: rgba(0, 0, 255, 1)">new</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } () <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果需要传递参数，只需要加上括弧()</span></pre>
+</div>
+<p>上面所说的括弧是消除歧义的，其实压根就没必要，因为括弧本来内部本来期望的就是函数表达式，但是我们依然用它，主要是为了方便开发人员阅读，当你让这些已经自动执行的表达式赋值给一个变量的时候，我们看到开头有括弧(，很快就能明白，而不需要将代码拉到最后看看到底有没有加括弧。</p>
+<h2><strong>用闭包保存状态</strong></h2>
+<p>和普通function执行的时候传参数一样，自执行的函数表达式也可以这么传参，因为闭包直接可以引用传入的这些参数，利用这些被lock住的传入参数，自执行函数表达式可以有效地保存状态。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这个代码是错误的，因为变量i从来就没背locked住</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 相反，当循环执行以后，我们在点击的时候i才获得数值</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 因为这个时候i操真正获得值</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所以说无论点击那个连接，最终显示的都是I am link #10（如果有10个a元素的话）</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> elems = document.getElementsByTagName('a');<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0; i &lt; elems.length; i++) {<br><br>    elems[i].addEventListener('click', <span style="color: rgba(0, 0, 255, 1)">function</span> (e) {<br>        e.preventDefault();<br>        alert('I am link #' + i);<br>    }, 'false');<br><br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这个是可以用的，因为他在自执行函数表达式闭包内部</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> i的值作为locked的索引存在，在循环执行结束以后，尽管最后i的值变成了a元素总数（例如10）</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但闭包内部的lockedInIndex值是没有改变，因为他已经执行完毕了</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所以当点击连接的时候，结果是正确的</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> elems = document.getElementsByTagName('a');<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0; i &lt; elems.length; i++) {<br><br>    (<span style="color: rgba(0, 0, 255, 1)">function</span> (lockedInIndex) {<br><br>        elems[i].addEventListener('click', <span style="color: rgba(0, 0, 255, 1)">function</span> (e) {<br>            e.preventDefault();<br>            alert('I am link #' + lockedInIndex);<br>        }, 'false');<br><br>    })(i);<br><br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 你也可以像下面这样应用，在处理函数那里使用自执行函数表达式</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 而不是在addEventListener外部</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但是相对来说，上面的代码更具可读性</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> elems = document.getElementsByTagName('a');<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> i = 0; i &lt; elems.length; i++) {<br><br>    elems[i].addEventListener('click', (<span style="color: rgba(0, 0, 255, 1)">function</span> (lockedInIndex) {<br>        <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> (e) {<br>            e.preventDefault();<br>            alert('I am link #' + lockedInIndex);<br>        };<br>    })(i), 'false');<br><br>}</pre>
+</div>
+<p>其实，上面2个例子里的lockedInIndex变量，也可以换成i，因为和外面的i不在一个作用于，所以不会出现问题，这也是匿名函数+闭包的威力。</p>
+<h2><strong>自执行匿名函数和立即执行的函数表达式区别</strong></h2>
+<p>在这篇帖子里，我们一直叫自执行函数，确切的说是自执行匿名函数（Self-executing anonymous function），但英文原文作者一直倡议使用立即调用的函数表达式（Immediately-Invoked Function Expression）这一名称，作者又举了一堆例子来解释，好吧，我们来看看：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这是一个自执行的函数，函数内部执行自身，递归</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> foo() { foo(); }<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这是一个自执行的匿名函数，因为没有标示名称</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 必须使用arguments.callee属性来执行自己</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () { arguments.callee(); };<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这可能也是一个自执行的匿名函数，仅仅是foo标示名称引用它自身</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 如果你将foo改变成其它的，你将得到一个used-to-self-execute匿名函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () { foo(); };<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 有些人叫这个是自执行的匿名函数（即便它不是），因为它没有调用自身，它只是立即执行而已。</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ());<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 为函数表达式添加一个标示名称，可以方便Debug</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但一定命名了，这个函数就不再是匿名的了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() { <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> code </span><span style="color: rgba(0, 128, 0, 1)">*/</span> } ());<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 立即调用的函数表达式（IIFE）也可以自执行，不过可能不常用罢了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> () { arguments.callee(); } ());<br>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() { foo(); } ());<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 另外，下面的代码在黑莓5里执行会出错，因为在一个命名的函数表达式里，他的名称是undefined</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 呵呵，奇怪</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> foo() { foo(); } ());</pre>
+</div>
+<p>希望这里的一些例子，可以让大家明白，什么叫自执行，什么叫立即调用。</p>
+<p><em>注：arguments.callee在<a href="https://developer.mozilla.org/en/JavaScript/Strict_mode#Differences_in_functions" target="_blank">ECMAScript 5 strict mode</a>里被废弃了，所以在这个模式下，其实是不能用的。</em><br><br></p>
+<h2><strong>最后的旁白：Module模式</strong></h2>
+<p>在讲到这个立即调用的函数表达式的时候，我又想起来了Module模式，如果你还不熟悉这个模式，我们先来看看代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 创建一个立即调用的匿名函数表达式</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> return一个变量，其中这个变量里包含你要暴露的东西</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 返回的这个变量将赋值给counter，而不是外面声明的function自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 0, 255, 1)">var</span> counter = (<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> i = 0;<br><br>    <span style="color: rgba(0, 0, 255, 1)">return</span> {<br>        get: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> i;<br>        },<br>        set: <span style="color: rgba(0, 0, 255, 1)">function</span> (val) {<br>            i = val;<br>        },<br>        increment: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>            <span style="color: rgba(0, 0, 255, 1)">return</span> ++i;<br>        }<br>    };<br>} ());<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> counter是一个带有多个属性的对象，上面的代码对于属性的体现其实是方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>counter.get(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0</span><span style="color: rgba(0, 128, 0, 1)"><br></span>counter.set(3);<br>counter.increment(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 4</span><span style="color: rgba(0, 128, 0, 1)"><br></span>counter.increment(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 5</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>counter.i; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined 因为i不是返回对象的属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>i; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用错误: i 没有定义（因为i只存在于闭包）</span></pre>
+</div>
+<p>关于更多Module模式的介绍，请访问我的上一篇帖子：深入理解JavaScript系列（2）：全面解析Module模式 。</p>
+<h1>更多阅读</h1>
+<p>希望上面的一些例子，能让你对立即调用的函数表达（也就是我们所说的自执行函数）有所了解，如果你想了解更多关于function和Module模式的信息，请继续访问下面列出的网站：</p>
+<ol>
+<li><a href="http://dmitrysoshnikov.com/ecmascript/chapter-5-functions/#question-about-surrounding-parentheses" target="benalman2">ECMA-262-3 in detail. Chapter 5. Functions.</a> - Dmitry A. Soshnikov</li>
+<li><a href="https://developer.mozilla.org/en/JavaScript/Reference/Functions_and_function_scope" target="benalman2">Functions and function scope</a> - Mozilla Developer Network</li>
+<li><a href="http://kangax.github.com/nfe/" target="benalman2">Named function expressions</a> - Juriy “kangax” Zaytsev</li>
+<li><a href="http://www.cnblogs.com/TomXu/archive/2011/12/30/2288372.html" target="_blank">全面解析Module模式</a>- Ben Cherry（大叔翻译整理）</li>
+<li><a href="http://skilldrick.co.uk/2011/04/closures-explained-with-javascript/" target="benalman2">Closures explained with JavaScript</a> - Nick Morgan</li>
+</ol>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E5%8C%BF%E5%90%8D%E5%87%BD%E6%95%B0/">匿名函数</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E8%87%AA%E6%89%A7%E8%A1%8C%E5%87%BD%E6%95%B0/">自执行函数</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E9%97%AD%E5%8C%85/">闭包</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2289423, cb_entryCreatedDate = '2011-12-31 09:45', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsJEpmudCZZuDTtrB7CAaEUWydAX1sfj9pxP2NGbt_3Nkx-FQAZw-GRscKMynoeXdYbqRs1x3Ugn9itmh1X7HBCRRlcx-DOileXHt5SX0qUuh_LEo0XbEd1-1Yt6fh_Eug" />
+</body>
+</html>

@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍本章是关于ECMAScript面向对象实现的第2篇，第1篇我们讨论的是概论和CEMAScript的比较，如果你还没有读第1篇，在进行本章之前，我强烈建议你先读一下第1篇，因为本篇实在太长了（35页" />
+    <meta property="og:description" content="介绍本章是关于ECMAScript面向对象实现的第2篇，第1篇我们讨论的是概论和CEMAScript的比较，如果你还没有读第1篇，在进行本章之前，我强烈建议你先读一下第1篇，因为本篇实在太长了（35页" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（18）：面向对象编程之ECMAScript实现（推荐） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-06 09:27';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/06/2330609.html">
+    <span>深入理解JavaScript系列（18）：面向对象编程之ECMAScript实现（推荐）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-06 09:27</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">22307</span>)&nbsp;
+评论(<span id="post_comment_count">23</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2330609" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2330609);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>本章是关于ECMAScript面向对象实现的第2篇，第1篇我们讨论的是概论和CEMAScript的比较，如果你还没有读第1篇，在进行本章之前，我强烈建议你先读一下第1篇，因为本篇实在太长了（35页）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://dmitrysoshnikov.com/ecmascript/chapter-7-2-oop-ecmascript-implementation/</span></pre>
+</div>
+<p><span style="color: rgba(153, 204, 0, 1)"><em>注：由于篇幅太长了，难免出现错误，时刻保持修正中。</em></span></p>
+<p>在概论里，我们延伸到了ECMAScript，现在，当我们知道它OOP实现时，我们再来准确定义一下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">ECMAScript is an object-oriented programming language supporting delegating inheritance based on prototypes.</span><br><span style="color: rgba(255, 102, 0, 1)">ECMAScript是一种<span style="color: rgba(255, 102, 0, 1)">面向对象语言</span>，支持基于原型的委托式继承。</span></pre>
+</div>
+<p>我们将从最基本的数据类型来分析，首先要了解的是ECMAScript用原始值（primitive values）和对象（objects）来区分实体，因此有些文章里说的“在JavaScript里，一切都是对象”是错误的（不完全对），原始值就是我们这里要讨论的一些数据类型。</p>
+<h1>数据类型</h1>
+<p>虽然ECMAScript是可以动态转化类型的动态弱类型语言，它还是有数据类型的。也就是说，一个对象要属于一个实实在在的类型。<br>标准规范里定义了9种数据类型，但只有6种是在ECMAScript程序里可以直接访问的,它们是：Undefined、Null、Boolean、String、Number、Object。</p>
+<p>另外3种类型只能在实现级别访问（ECMAScript对象是不能使用这些类型的）并用于规范来解释一些操作行为、保存中间值。这3种类型是：Reference、List和Completion。</p>
+<p>因此，Reference是用来解释delete、typeof、this这样的操作符，并且包含一个基对象和一个属性名称；List描述的是参数列表的行为（在new表达式和函数调用的时候）；Completion是用来解释行为break、continue、return和throw语句的。</p>
+<h2><strong>原始值类型</strong></h2>
+<p>回头来看6中用于ECMAScript程序的数据类型，前5种是原始值类型，包括Undefined、Null、Boolean、String、Number、Object。<br>原始值类型例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = undefined;<br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">null</span>;<br><span style="color: rgba(0, 0, 255, 1)">var</span> c = <span style="color: rgba(0, 0, 255, 1)">true</span>;<br><span style="color: rgba(0, 0, 255, 1)">var</span> d = 'test';<br><span style="color: rgba(0, 0, 255, 1)">var</span> e = 10;</pre>
+</div>
+<p>这些值是在底层上直接实现的，他们不是object，所以没有原型，没有构造函数。</p>
+<p><span style="color: rgba(255, 102, 0, 1)">大叔注：这些原生值和我们平时用的(Boolean、String、Number、Object)虽然名字上相似，但不是同一个东西。所以typeof(true)和typeof(Boolean)结果是不一样的，因为typeof(Boolean)的结果是function，所以函数Boolean、String、Number是有原型的（下面的读写属性章节也会提到）。</span></p>
+<p>想知道数据是哪种类型用typeof是最好不过了，有个例子需要注意一下，如果用typeof来判断null的类型，结果是object，为什么呢？因为null的类型是定义为Null的。</p>
+<div class="cnblogs_code">
+<pre>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> <span style="color: rgba(0, 0, 255, 1)">null</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "object"</span></pre>
+</div>
+<p>显示"object"原因是因为规范就是这么规定的：对于Null值的typeof字符串值返回"object“。</p>
+<p>规范没有想象解释这个，但是Brendan Eich (JavaScript发明人)注意到null相对于undefined大多数都是用于对象出现的地方，例如设置一个对象为空引用。但是有些文档里有些气人将之归结为bug，而且将该bug放在Brendan Eich也参与讨论的bug列表里，结果就是任其自然，还是把typeof null的结果设置为object（尽管262-3的标准是定义null的类型是Null，262-5已经将标准修改为null的类型是object了）。</p>
+<h2><strong>Object类型</strong></h2>
+<p>接着，Object类型（不要和Object构造函数混淆了，现在只讨论抽象类型）是描述 ECMAScript对象的唯一一个数据类型。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">Object is an unordered collection of key-value pairs.</span><br><span style="color: rgba(255, 102, 0, 1)">对象是一个包含key-value对的无序集合</span></pre>
+</div>
+<p>对象的key值被称为属性，属性是原始值和其他对象的容器。如果属性的值是函数我们称它为方法 。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = { <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象"x"有3个属性: a, b, c</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  a: 10, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 原始值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  b: {z: 100}, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象"b"有一个属性z</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  c: <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 函数(方法)</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    alert('method x.c');<br>  }<br>};<br> <br>alert(x.a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(x.b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Object]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(x.b.z); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 100</span><span style="color: rgba(0, 128, 0, 1)"><br></span>x.c(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 'method x.c'</span></pre>
+</div>
+<h3><strong>动态性</strong></h3>
+<p>正如我们在第17章中指出的，ES中的对象是完全动态的。这意味着，在程序执行的时候我们可以任意地添加，修改或删除对象的属性。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.y = 20;<br>console.log(foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 10, y: 20}</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将属性值修改为函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.x = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  console.log('foo.x');<br>};<br> <br>foo.x(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 'foo.x'</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">delete</span> foo.x;<br>console.log(foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {y: 20}</span></pre>
+</div>
+<p>有些属性不能被修改——（只读属性、已删除属性或不可配置的属性）。 我们将稍后在属性特性里讲解。</p>
+<p>另外，ES5规范规定，静态对象不能扩展新的属性，并且它的属性页不能删除或者修改。他们是所谓的冻结对象，可以通过应用Object.freeze(o)方法得到。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 冻结对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Object.freeze(foo);<br>console.log(Object.isFrozen(foo)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能修改</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.x = 100;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能扩展</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.y = 200;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能删除</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">delete</span> foo.x;<br> <br>console.log(foo); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {x: 10}</span></pre>
+</div>
+<p>在ES5规范里，也使用Object.preventExtensions(o)方法防止扩展，或者使用Object.defineProperty(o)方法来定义属性：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x : 10};<br> <br>Object.defineProperty(foo, "y", {<br>  value: 20,<br>  writable: <span style="color: rgba(0, 0, 255, 1)">false</span>, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 只读</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  configurable: <span style="color: rgba(0, 0, 255, 1)">false</span> <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不可配置</span><span style="color: rgba(0, 128, 0, 1)"><br></span>});<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能修改</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.y = 200;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能删除</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">delete</span> foo.y; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 防治扩展</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Object.preventExtensions(foo);<br>console.log(Object.isExtensible(foo)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不能添加新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.z = 30;<br> <br>console.log(foo); {x: 10, y: 20}</pre>
+</div>
+<h3><strong>内置对象、原生对象及宿主对象</strong></h3>
+<p>有必要需要注意的是规范还区分了这内置对象、元素对象和宿主对象。</p>
+<p>内置对象和元素对象是被ECMAScript规范定义和实现的，两者之间的差异微不足道。所有ECMAScript实现的对象都是原生对象（其中一些是内置对象、一些在程序执行的时候创建，例如用户自定义对象）。内置对象是原生对象的一个子集、是在程序开始之前内置到ECMAScript里的（例如，parseInt, Match等）。所有的宿主对象是由宿主环境提供的，通常是浏览器，并可能包括如window、alert等。</p>
+<p>注意，宿主对象可能是ES自身实现的，完全符合规范的语义。从这点来说，他们能称为“原生宿主”对象（尽快很理论），不过规范没有定义“原生宿主”对象的概念。</p>
+<h3><strong>Boolean，String和Number对象</strong></h3>
+<p>另外，规范也定义了一些原生的特殊包装类，这些对象是：</p>
+<ol>
+<li>布尔对象</li>
+<li>字符串对象</li>
+<li>数字对象</li>
+</ol>
+<p>这些对象的创建，是通过相应的内置构造器创建，并且包含原生值作为其内部属性，这些对象可以转换省原始值，反之亦然。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> c = <span style="color: rgba(0, 0, 255, 1)">new</span> Boolean(<span style="color: rgba(0, 0, 255, 1)">true</span>);<br><span style="color: rgba(0, 0, 255, 1)">var</span> d = <span style="color: rgba(0, 0, 255, 1)">new</span> String('test');<br><span style="color: rgba(0, 0, 255, 1)">var</span> e = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(10);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 转换成原始值</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 使用不带new关键字的函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>с = Boolean(c);<br>d = String(d);<br>e = Number(e);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 重新转换成对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>с = Object(c);<br>d = Object(d);<br>e = Object(e);</pre>
+</div>
+<p>此外，也有对象是由特殊的内置构造函数创建： Function（函数对象构造器）、Array（数组构造器） RegExp（正则表达式构造器）、Math（数学模块）、 Date（日期的构造器）等等，这些对象也是Object对象类型的值，他们彼此的区别是由内部属性管理的，我们在下面讨论这些内容。</p>
+<h3><strong>字面量Literal</strong></h3>
+<p>对于三个对象的值：对象（object）,数组（array）和正则表达式（regular expression），他们分别有简写的标示符称为：对象初始化器、数组初始化器、和正则表达式初始化器：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于new Array(1, 2, 3);</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 或者array = new Array();</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> array[0] = 1;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> array[1] = 2;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> array[2] = 3;</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> array = [1, 2, 3];<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> var object = new Object();</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> object.a = 1;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> object.b = 2;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> object.c = 3;</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> object = {a: 1, b: 2, c: 3};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等价于new RegExp("^\\d+$", "g")</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> re = /^\d+$/g;</pre>
+</div>
+<p>注意，如果上述三个对象进行重新赋值名称到新的类型上的话，那随后的实现语义就是按照新赋值的类型来使用，例如在当前的Rhino和老版本SpiderMonkey 1.7的实现上，会成功以new关键字的构造器来创建对象，但有些实现（当前Spider/TraceMonkey）字面量的语义在类型改变以后却不一定改变。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> getClass = Object.prototype.toString;<br> <br>Object = Number;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">new</span> Object;<br>alert([foo, getClass.call(foo)]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0, "[object Number]"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> bar = {};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Rhino, SpiderMonkey 1.7中 - 0, "[object Number]"</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 其它: still "[object Object]", "[object Object]"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert([bar, getClass.call(bar)]);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Array也是一样的效果</span><span style="color: rgba(0, 128, 0, 1)"><br></span>Array = Number;<br> <br>foo = <span style="color: rgba(0, 0, 255, 1)">new</span> Array;<br>alert([foo, getClass.call(foo)]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0, "[object Number]"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>bar = [];<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Rhino, SpiderMonkey 1.7中 - 0, "[object Number]"</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 其它: still "", "[object Object]"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert([bar, getClass.call(bar)]);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但对RegExp,字面量的语义是不被改变的。 semantics of the literal</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> isn't being changed in all tested implementations</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>RegExp = Number;<br> <br>foo = <span style="color: rgba(0, 0, 255, 1)">new</span> RegExp;<br>alert([foo, getClass.call(foo)]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0, "[object Number]"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>bar = /(?!)/g;<br>alert([bar, getClass.call(bar)]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> /(?!)/g, "[object RegExp]"</span></pre>
+</div>
+<p>正则表达式字面量和RegExp对象</p>
+<p>注意，下面2个例子在第三版的规范里，正则表达式的语义都是等价的，regexp字面量只在一句里存在，并且再解析阶段创建，但RegExp构造器创建的却是新对象，所以这可能会导致出一些问题，如lastIndex的值在测试的时候结果是错误的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 4; k++) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> re = /ecma/g;<br>  alert(re.lastIndex); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0, 4, 0, 4</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(re.test("ecmascript")); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true, false, true, false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对比</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 4; k++) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> re = <span style="color: rgba(0, 0, 255, 1)">new</span> RegExp("ecma", "g");<br>  alert(re.lastIndex); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0, 0, 0, 0</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(re.test("ecmascript")); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true, true, true, true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p><span style="color: rgba(51, 153, 102, 1)">注：不过这些问题在第5版的ES规范都已经修正了，不管是基于字面量的还是构造器的，正则都是创建新对象</span>。</p>
+<h3><strong>关联数组</strong></h3>
+<p>各种文字静态讨论，JavaScript对象（经常是用对象初始化器{}来创建）被称为哈希表哈希表或其它简单的称谓：哈希（Ruby或Perl里的概念）， 管理数组（PHP里的概念），词典 （Python里的概念）等。</p>
+<p>只有这样的术语，主要是因为他们的结构都是相似的，就是使用“键-值”对来存储对象，完全符合“关联数组 ”或“哈希表 ”理论定义的数据结构。 此外，哈希表抽象数据类型通常是在实现层面使用。</p>
+<p>但是，尽管术语上来描述这个概念，但实际上这个是错误，从ECMAScript来看：ECMAScript只有一个对象以及类型以及它的子类型，这和“键-值”对存储没有什么区别，因此在这上面没有特别的概念。 因为任何对象的内部属性都可以存储为键-值”对：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = {x: 10};<br>a['y'] = 20;<br>a.z = 30;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(1);<br>b.x = 10;<br>b.y = 20;<br>b['z'] = 30;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> c = <span style="color: rgba(0, 0, 255, 1)">new</span> Function('');<br>c.x = 10;<br>c.y = 20;<br>c['z'] = 30;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等等，任意对象的子类型"subtype"</span></pre>
+</div>
+<p>此外，由于在ECMAScript中对象可以是空的，所以"hash"的概念在这里也是不正确的：</p>
+<div class="cnblogs_code">
+<pre>Object.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = {}; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 创建空"hash"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(a["x"]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 但不为空</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.toString); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a["y"] = 20; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加新的键值对到 "hash"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a["y"]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>Object.prototype.y = 20; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 添加原型属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">delete</span> a["y"]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 删除</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a["y"]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但这里key和value依然有值 – 20</span></pre>
+</div>
+<p>请注意， ES5标准可以让我们创建没原型的对象（使用Object.create(null)方法实现）对，从这个角度来说，这样的对象可以<em><strong><span style="text-decoration: underline"><span style="color: rgba(136, 136, 136, 1); text-decoration: underline">称之为</span></span></strong></em>哈希表：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> aHashTable = Object.create(<span style="color: rgba(0, 0, 255, 1)">null</span>);<br>console.log(aHashTable.toString); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 未定义</span></pre>
+</div>
+<p>此外，一些属性有特定的getter / setter方法​​，所以也可能导致混淆这个概念：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> String("foo");<br>a['length'] = 10;<br>alert(a['length']); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3</span></pre>
+</div>
+<p>然而，即使认为“哈希”可能有一个“原型”（例如，在Ruby或Python里委托哈希对象的类），在ECMAScript里，这个术语也是不对的，因为2个表示法之间没有语义上的区别（即用点表示法a.b和a["b"]表示法）。</p>
+<p>在ECMAScript中的“property属性”的概念语义上和"key"、数组索引、方法没有分开的，这里所有对象的属性读写都要遵循统一的规则：检查原型链。</p>
+<p>在下面Ruby的例子中，我们可以看到语义上的区别：</p>
+<div class="cnblogs_code">
+<pre>a = {}<br>a.<span style="color: rgba(0, 0, 255, 1)">class</span> <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> Hash</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a.length <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 0</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> new "key-value" pair</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">length</span><span style="color: rgba(128, 0, 0, 1)">'</span>] = 10;<br> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 语义上，用点访问的是属性或方法，而不是key</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a.length <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 而索引器访问访问的是hash里的key</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">length</span><span style="color: rgba(128, 0, 0, 1)">'</span>] <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 就类似于在现有对象上动态声明Hash类</span><span style="color: rgba(0, 128, 0, 1)"><br>#</span><span style="color: rgba(0, 128, 0, 1)"> 然后声明新属性或方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">class</span> Hash<br>  <span style="color: rgba(0, 0, 255, 1)">def</span> z<br>    100<br>  end<br>end<br> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 新属性可以访问</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a.z <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 100</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> 但不是"key"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>a[<span style="color: rgba(128, 0, 0, 1)">'</span><span style="color: rgba(128, 0, 0, 1)">z</span><span style="color: rgba(128, 0, 0, 1)">'</span>] <span style="color: rgba(0, 128, 0, 1)">#</span><span style="color: rgba(0, 128, 0, 1)"> nil</span></pre>
+</div>
+<p>ECMA-262-3标准并没有定义“哈希”（以及类似）的概念。但是，有这样的结构理论的话，那可能以此命名的对象。</p>
+<h3><strong>对象转换</strong></h3>
+<p>将对象转化成原始值可以用valueOf方法，正如我们所说的，当函数的构造函数调用做为function（对于某些类型的），但如果不用new关键字就是将对象转化成原始值，就相当于隐式的valueOf方法调用：<br><br></p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(1);<br><span style="color: rgba(0, 0, 255, 1)">var</span> primitiveA = Number(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 隐式"valueOf"调用</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> alsoPrimitiveA = a.valueOf(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显式调用</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert([<br>  <span style="color: rgba(0, 0, 255, 1)">typeof</span> a, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">typeof</span> primitiveA, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "number"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">typeof</span> alsoPrimitiveA <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "number"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>]);</pre>
+</div>
+<p>这种方式允许对象参与各种操作，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(1);<br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(2);<br> <br>alert(a + b); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 甚至</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> c = {<br>  x: 10,<br>  y: 20,<br>  valueOf: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">this</span>.x + <span style="color: rgba(0, 0, 255, 1)">this</span>.y;<br>  }<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> d = {<br>  x: 30,<br>  y: 40,<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 和c的valueOf功能一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  valueOf: c.valueOf<br>};<br> <br>alert(c + d); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 100</span></pre>
+</div>
+<p>valueOf的默认值会根据根据对象的类型改变（如果不被覆盖的话），对某些对象，他返回的是this——例如：Object.prototype.valueOf()，还有计算型的值：Date.prototype.valueOf()返回的是日期时间：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = {};<br>alert(a.valueOf() === a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true, "valueOf"返回this</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> d = <span style="color: rgba(0, 0, 255, 1)">new</span> Date();<br>alert(d.valueOf()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> time</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(d.valueOf() === d.getTime()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>此外,对象还有一个更原始的代表性——字符串展示。 这个toString方法是可靠的，它在某些操作上是自动使用的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = {<br>  valueOf: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> 100;<br>  },<br>  toString: <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> '__test';<br>  }<br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这个操作里，toString方法自动调用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "__test"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但是这里，调用的却是valueOf()方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a + 10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 110</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但，一旦valueOf删除以后</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> toString又可以自动调用了</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">delete</span> a.valueOf;<br>alert(a + 10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "_test10"</span></pre>
+</div>
+<p>Object.prototype上定义的toString方法具有特殊意义，它返回的我们下面将要讨论的内部[[Class]]属性值。</p>
+<p>和转化成原始值（ToPrimitive）相比，将值转化成对象类型也有一个转化规范（ToObject）。</p>
+<p>一个显式方法是使用内置的Object构造函数作为function来调用ToObject（有些类似通过new关键字也可以）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> n = Object(1); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Number]</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> s = Object('test'); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object String]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 一些类似，使用new操作符也可以</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> Object(<span style="color: rgba(0, 0, 255, 1)">true</span>); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Boolean]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 应用参数new Object的话创建的是简单对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> o = <span style="color: rgba(0, 0, 255, 1)">new</span> Object(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Object]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果参数是一个现有的对象</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 那创建的结果就是简单返回该对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> a = [];<br>alert(a === <span style="color: rgba(0, 0, 255, 1)">new</span> Object(a)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a === Object(a)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>关于调用内置构造函数，使用还是不适用new操作符没有通用规则，取决于构造函数。 例如Array或Function当使用new操作符的构造函数或者不使用new操作符的简单函数使用产生相同的结果的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = Array(1, 2, 3); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Array]</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> Array(1, 2, 3); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Array]</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> c = [1, 2, 3]; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Array]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> d = Function(''); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Function]</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> e = <span style="color: rgba(0, 0, 255, 1)">new</span> Function(''); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Function]</span></pre>
+</div>
+<p>有些操作符使用的时候，也有一些显示和隐式转化：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 1;<br><span style="color: rgba(0, 0, 255, 1)">var</span> b = 2;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 隐式</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> c = a + b; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, number</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> d = a + b + '5' <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "35", string</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显式</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> e = '10'; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "10", string</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> f = +e; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, number</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> g = parseInt(e, 10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, number</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 等等</span></pre>
+</div>
+<h3><strong>属性的特性</strong></h3>
+<p>所有的属性（property） 都可以有很多特性（attributes）。</p>
+<ol>
+<li>{ReadOnly}——忽略向属性赋值的写操作尝，但只读属性可以由宿主环境行为改变——也就是说不是“恒定值” ;</li>
+<li>{DontEnum}——属性不能被for..in循环枚举</li>
+<li>{DontDelete}——糊了delete操作符的行为被忽略（即删不掉）;</li>
+<li>{Internal}——内部属性，没有名字（仅在实现层面使用），ECMAScript里无法访问这样的属性。</li>
+</ol>
+<p><span style="color: rgba(255, 102, 0, 1)"><em>注意，在ES5里{ReadOnly}，{DontEnum}和{DontDelete}被重新命名为[[Writable]]，[[Enumerable]]和[[Configurable]]，可以手工通过Object.defineProperty或类似的方法来管理这些属性。</em></span></p>
+<p>&nbsp;</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {};<br> <br>Object.defineProperty(foo, "x", {<br>  value: 10,<br>  writable: <span style="color: rgba(0, 0, 255, 1)">true</span>, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 即{ReadOnly} = false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  enumerable: <span style="color: rgba(0, 0, 255, 1)">false</span>, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 即{DontEnum} = true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  configurable: <span style="color: rgba(0, 0, 255, 1)">true</span> <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 即{DontDelete} = false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>});<br> <br>console.log(foo.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 通过descriptor获取特性集attributes</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> desc = Object.getOwnPropertyDescriptor(foo, "x");<br> <br>console.log(desc.enumerable); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(desc.writable); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 等等</span></pre>
+</div>
+<h3><strong>内部属性和方法</strong></h3>
+<p>对象也可以有内部属性（实现层面的一部分），并且ECMAScript程序无法直接访问（但是下面我们将看到，一些实现允许访问一些这样的属性）。 这些属性通过嵌套的中括号[[ ]]进行访问。我们来看其中的一些，这些属性的描述可以到规范里查阅到。</p>
+<p>每个对象都应该实现如下内部属性和方法：</p>
+<ol>
+<li>[[Prototype]]——对象的原型（将在下面详细介绍）</li>
+<li>[[Class]]——字符串对象的一种表示（例如，Object Array ，Function Object，Function等）;用来区分对象</li>
+<li>[[Get]]——获得属性值的方法</li>
+<li>[[Put]]——设置属性值的方法</li>
+<li>[[CanPut]]——检查属性是否可写</li>
+<li>[[HasProperty]]——检查对象是否已经拥有该属性</li>
+<li>[[Delete]]——从对象删除该属性</li>
+<li>[[DefaultValue]]返回对象对于的原始值（调用valueOf方法，某些对象可能会抛出TypeError异常）。</li>
+</ol>
+<p>通过Object.prototype.toString()方法可以间接得到内部属性[[Class]]的值，该方法应该返回下列字符串： "[object " + [[Class]] + "]" 。例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> getClass = Object.prototype.toString;<br> <br>getClass.call({}); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Object]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>getClass.call([]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Array]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>getClass.call(<span style="color: rgba(0, 0, 255, 1)">new</span> Number(1)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Number]</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 等等</span></pre>
+</div>
+<p>这个功能通常是用来检查对象用的，但规范上说宿主对象的[[Class]]可以为任意值，包括内置对象的[[Class]]属性的值，所以理论上来看是不能100%来保证准确的。例如，document.childNodes.item(...)方法的[[Class]]属性，在IE里返回"String"，但其它实现里返回的确实"Function"。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> in IE - "String", in other - "Function"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(getClass.call(document.childNodes.item));</pre>
+</div>
+<h1>构造函数</h1>
+<p>因此，正如我们上面提到的，在ECMAScript中的对象是通过所谓的构造函数来创建的。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(255, 102, 0, 1)">Constructor is a function that creates and initializes the newly created object.</span><br><span style="color: rgba(255, 102, 0, 1)">构造函数是一个函数，用来创建并初始化新创建的对象。</span></pre>
+</div>
+<p>对象创建（内存分配）是由构造函数的内部方法[[Construct]]负责的。该内部方法的行为是定义好的，所有的构造函数都是使用该方法来为新对象分配内存的。</p>
+<p>而初始化是通过新建对象上下上调用该函数来管理的，这是由构造函数的内部方法[[Call]]来负责任的。</p>
+<p>注意，用户代码只能在初始化阶段访问，虽然在初始化阶段我们可以返回不同的对象（忽略第一阶段创建的tihs对象）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 更新新创建的对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = 10;<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但返回的是不同的对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">return</span> [1, 2, 3];<br>}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>console.log(a.x, a); undefined, [1, 2, 3]</pre>
+</div>
+<p>引用15章函数——创建函数的算法小节，我们可以看到该函数是一个原生对象，包含[[Construct]] ]和[[Call]] ]属性以及显示的prototype原型属性——未来对象的原型（注：NativeObject是对于native object原生对象的约定，在下面的伪代码中使用）。</p>
+<div class="cnblogs_code">
+<pre>F = <span style="color: rgba(0, 0, 255, 1)">new</span> NativeObject();<br> <br>F.[[Class]] = "Function"<br> <br>.... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>F.[[Call]] = &lt;reference to <span style="color: rgba(0, 0, 255, 1)">function</span>&gt; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>F.[[Construct]] = internalConstructor <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 普通的内部构造函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>.... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> F构造函数创建的对象原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>__objectPrototype = {};<br>__objectPrototype.constructor = F <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> {DontEnum}</span><span style="color: rgba(0, 128, 0, 1)"><br></span>F.prototype = __objectPrototype</pre>
+</div>
+<p>[[Call]] ]是除[[Class]]属性（这里等同于"Function" ）之外区分对象的主要方式，因此，对象的内部[[Call]]属性作为函数调用。 这样的对象用typeof运算操作符的话返回的是"function"。然而它主要是和原生对象有关，有些情况的实现在用typeof获取值的是不一样的，例如：window.alert (...)在IE中的效果：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> IE浏览器中 - "Object", "object", 其它浏览器 - "Function", "function"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(Object.prototype.toString.call(window.alert));<br>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> window.alert); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "Object"</span></pre>
+</div>
+<p>内部方法[[Construct]]是通过使用带new运算符的构造函数来激活的，正如我们所说的这个方法是负责内存分配和对象创建的。如果没有参数，调用构造函数的括号也可以省略：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A(x) { <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> constructor А</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = x || 10;<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不传参数的话，括号也可以省略</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> or new A();</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显式传入参数x</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> A(20);<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span></pre>
+</div>
+<p>我们也知道，构造函数（初始化阶段）里的shis被设置为新创建的对象 。</p>
+<p>让我们研究一下对象创建的算法。</p>
+<h2><strong>对象创建的算法</strong></h2>
+<p>内部方法[[Construct]] 的行为可以描述成如下：</p>
+<div class="cnblogs_code">
+<pre>F.[[Construct]](initialParameters):<br> <br>O = <span style="color: rgba(0, 0, 255, 1)">new</span> NativeObject();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 属性[[Class]]被设置为"Object"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>O.[[Class]] = "Object"<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用F.prototype的时候获取该对象g</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> __objectPrototype = F.prototype;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果__objectPrototype是对象，就:</span><span style="color: rgba(0, 128, 0, 1)"><br></span>O.[[Prototype]] = __objectPrototype<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 否则:</span><span style="color: rgba(0, 128, 0, 1)"><br></span>O.[[Prototype]] = Object.prototype;<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这里O.[[Prototype]]是Object对象的原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 新创建对象初始化的时候应用了F.[[Call]]</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 将this设置为新创建的对象O</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 参数和F里的initialParameters是一样的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>R = F.[[Call]](initialParameters); <span style="color: rgba(0, 0, 255, 1)">this</span> === O;<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这里R是[[Call]]的返回值</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 在JS里看，像这样:</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> R = F.apply(O, initialParameters);</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果R是对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">return</span> R<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 否则</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">return</span> O</pre>
+</div>
+<p>请注意两个主要特点：</p>
+<ol>
+<li>首先，新创建对象的原型是从当前时刻函数的prototype属性获取的（这意味着同一个构造函数创建的两个创建对象的原型可以不同是因为函数的prototype属性也可以不同）。</li>
+<li>其次，正如我们上面提到的，如果在对象初始化的时候，[[Call]]返回的是对象，这恰恰是用于整个new操作符的结果：</li>
+</ol>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 – 从原型上得到</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 设置.prototype属性为新对象</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 为什么显式声明.constructor属性将在下面说明</span><span style="color: rgba(0, 128, 0, 1)"><br></span>A.prototype = {<br>  constructor: A,<br>  y: 100<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象"b"有了新属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 100 – 从原型上得到</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但a对象的原型依然可以得到原来的结果</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 - 从原型上得到</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = 10;<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">new</span> Array();<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果"B"构造函数没有返回（或返回this）</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 那么this对象就可以使用，但是下面的情况返回的是array</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(Object.prototype.toString.call(b)); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Array]</span></pre>
+</div>
+<p>让我们来详细了解一下原型</p>
+<h1>原型</h1>
+<p>每个对象都有一个原型（一些系统对象除外）。原型通信是通过内部的、隐式的、不可直接访问[[Prototype]]原型属性来进行的，原型可以是一个对象，也可以是null值。</p>
+<h2>属性构造函数(Property constructor)</h2>
+<p>上面的例子有有2个重要的知识点，第一个是关于函数的constructor属性的prototype属性，在函数创建的算法里，我们知道constructor属性在函数创建阶段被设置为函数的prototype属性，constructor属性的值是函数自身的重要引用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.constructor); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> function A() {}, by delegation</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.constructor === A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>通常在这种情况下，存在着一个误区：constructor构造属性作为新创建对象自身的属性是错误的，但是，正如我们所看到的的，这个属性属于原型并且通过继承来访问对象。</p>
+<p>通过继承constructor属性的实例，可以间接得到的原型对象的引用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(10);<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.constructor.prototype); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [object Object]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 通过原型</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 和a.[[Prototype]].x效果一样</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.constructor.prototype.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(a.constructor.prototype.x === a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>但请注意，函数的constructor和prototype属性在对象创建以后都可以重新定义的。在这种情况下，对象失去上面所说的机制。如果通过函数的prototype属性去编辑元素的prototype原型的话（添加新对象或修改现有对象），实例上将看到新添加的属性。</p>
+<p>然而，如果我们彻底改变函数的prototype属性（通过分配一个新的对象），那原始构造函数的引用就是丢失，这是因为我们创建的对象不包括constructor属性：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype = {<br>  x: 10<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.constructor === A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false!</span></pre>
+</div>
+<p>因此，对函数的原型引用需要手工恢复：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype = {<br>  constructor: A,<br>  x: 10<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.constructor === A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<p>注意虽然手动恢复了constructor属性，和原来丢失的原型相比，{DontEnum}特性没有了，也就是说A.prototype里的for..in循环语句不支持了，不过第5版规范里，通过[[Enumerable]] 特性提供了控制可枚举状态enumerable的能力。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10};<br> <br>Object.defineProperty(foo, "y", {<br>  value: 20,<br>  enumerable: <span style="color: rgba(0, 0, 255, 1)">false</span> <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> aka {DontEnum} = true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>});<br> <br>console.log(foo.x, foo.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k <span style="color: rgba(0, 0, 255, 1)">in</span> foo) {<br>  console.log(k); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> only "x"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> xDesc = Object.getOwnPropertyDescriptor(foo, "x");<br><span style="color: rgba(0, 0, 255, 1)">var</span> yDesc = Object.getOwnPropertyDescriptor(foo, "y");<br> <br>console.log(<br>  xDesc.enumerable, <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  yDesc.enumerable  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span><span style="color: rgba(0, 128, 0, 1)"><br></span>);</pre>
+</div>
+<p>显式prototype和隐式[[Prototype]]属性</p>
+<p>通常，一个对象的原型通过函数的prototype属性显式引用是不正确的，他引用的是同一个对象，对象的[[Prototype]]属性：</p>
+<p><code class="jscript plain">a.[[Prototype]] ----&gt; Prototype &lt;---- A.prototype</code></p>
+<p><code class="jscript plain"></code>此外， 实例的[[Prototype]]值确实是在构造函数的prototype属性上获取的。</p>
+<p>然而，提交prototype属性不会影响已经创建对象的原型（只有在构造函数的prototype属性改变的时候才会影响到)，就是说新创建的对象才有有新的原型，而已创建对象还是引用到原来的旧原型（这个原型已经不能被再被修改了）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 在修改A.prototype原型之前的情况</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.[[Prototype]] ----&gt; Prototype &lt;---- A.prototype<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修改之后</span><span style="color: rgba(0, 128, 0, 1)"><br></span>A.prototype ----&gt; New prototype <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 新对象会拥有这个原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.[[Prototype]] ----&gt; Prototype <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引导的原来的原型上</span></pre>
+</div>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>A.prototype = {<br>  constructor: A,<br>  x: 20<br>  y: 30<br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 对象a是通过隐式的[[Prototype]]引用从原油的prototype上获取的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.y) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但新对象是从新原型上获取的值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.y) <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>因此，有的文章说“动态修改原型将影响所有的对象都会拥有新的原型”是错误的，新原型仅仅在原型修改以后的新创建对象上生效。</p>
+<p>这里的主要规则是：对象的原型是对象的创建的时候创建的，并且在此之后不能修改为新的对象，如果依然引用到同一个对象，可以通过构造函数的显式prototype引用，对象创建以后，只能对原型的属性进行添加或修改。</p>
+<h2><strong>非标准的__proto__属性</strong></h2>
+<p>然而，有些实现（例如SpiderMonkey），提供了不标准的__proto__显式属性来引用对象的原型：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> __newPrototype = {<br>  constructor: A,<br>  x: 20,<br>  y: 30<br>};<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用到新对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>A.prototype = __newPrototype;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "a"对象使用的依然是旧的原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显式修改原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.__proto__ = __newPrototype;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 现在"а"对象引用的是新对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>注意，ES5提供了Object.getPrototypeOf(O)方法，该方法直接返回对象的[[Prototype]]属性——实例的初始原型。 然而，和__proto__相比，它只是getter，它不允许set值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {};<br>Object.getPrototypeOf(foo) == Object.prototype; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<h2><strong>对象独立于构造函数</strong></h2>
+<p>因为实例的原型独立于构造函数和构造函数的prototype属性，构造函数完成了自己的主要工作（创建对象）以后可以删除。原型对象通过引用[[Prototype]]属性继续存在：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 设置A为null - 显示引用构造函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>A = <span style="color: rgba(0, 0, 255, 1)">null</span>;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但如果.constructor属性没有改变的话，</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 依然可以通过它创建对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> a.constructor();<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 隐式的引用也删除掉</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">delete</span> a.constructor.prototype.constructor;<br><span style="color: rgba(0, 0, 255, 1)">delete</span> b.constructor.prototype.constructor;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 通过A的构造函数再也不能创建对象了</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 但这2个对象依然有自己的原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<h2><strong>instanceof操作符的特性</strong></h2>
+<p>我们是通过构造函数的prototype属性来显示引用原型的，这和instanceof操作符有关。该操作符是和原型链一起工作的，而不是构造函数，考虑到这一点，当检测对象的时候往往会有误解：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (foo <span style="color: rgba(0, 0, 255, 1)">instanceof</span> Foo) {<br>  ...<br>}</pre>
+</div>
+<p>这不是用来检测对象foo是否是用Foo构造函数创建的，所有instanceof运算符只需要一个对象属性——foo.[[Prototype]]，在原型链中从Foo.prototype开始检查其是否存在。instanceof运算符是通过构造函数里的内部方法[[HasInstance]]来激活的。</p>
+<p>让我们来看看这个例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>alert(a <span style="color: rgba(0, 0, 255, 1)">instanceof</span> A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果设置原型为null</span><span style="color: rgba(0, 128, 0, 1)"><br></span>A.prototype = <span style="color: rgba(0, 0, 255, 1)">null</span>;<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> ..."a"依然可以通过a.[[Prototype]]访问原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 不过，instanceof操作符不能再正常使用了</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 因为它是从构造函数的prototype属性来实现的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a <span style="color: rgba(0, 0, 255, 1)">instanceof</span> A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 错误，A.prototype不是对象</span></pre>
+</div>
+<p>另一方面，可以由构造函数来创建对象，但如果对象的[[Prototype]]属性和构造函数的prototype属性的值设置的是一样的话，instanceof检查的时候会返回true：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> B() {}<br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br> <br>alert(b <span style="color: rgba(0, 0, 255, 1)">instanceof</span> B); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> C() {}<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> __proto = {<br>  constructor: C<br>};<br> <br>C.prototype = __proto;<br>b.__proto__ = __proto;<br> <br>alert(b <span style="color: rgba(0, 0, 255, 1)">instanceof</span> C); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(b <span style="color: rgba(0, 0, 255, 1)">instanceof</span> B); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> false</span></pre>
+</div>
+<h2><strong>原型可以存放方法并共享属性</strong></h2>
+<p>大部分程序里使用原型是用来存储对象的方法、默认状态和共享对象的属性。</p>
+<p>事实上，对象可以拥有自己的状态 ，但方法通常是一样的。 因此，为了内存优化，方法通常是在原型里定义的。 这意味着，这个构造函数创建的所有实例都可以共享找个方法。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A(x) {<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = x || 100;<br>}<br> <br>A.prototype = (<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 初始化上下文</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用额外的对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>  <span style="color: rgba(0, 0, 255, 1)">var</span> _someSharedVar = 500;<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> _someHelper() {<br>    alert('internal helper: ' + _someSharedVar);<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> method1() {<br>    alert('method1: ' + <span style="color: rgba(0, 0, 255, 1)">this</span>.x);<br>  }<br> <br>  <span style="color: rgba(0, 0, 255, 1)">function</span> method2() {<br>    alert('method2: ' + <span style="color: rgba(0, 0, 255, 1)">this</span>.x);<br>    _someHelper();<br>  }<br> <br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 原型自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">return</span> {<br>    constructor: A,<br>    method1: method1,<br>    method2: method2<br>  };<br> <br>})();<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A(10);<br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> A(20);<br> <br>a.method1(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> method1: 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.method2(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> method2: 10, internal helper: 500</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>b.method1(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> method1: 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>b.method2(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> method2: 20, internal helper: 500</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2个对象使用的是原型里相同的方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.method1 === b.method1); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.method2 === b.method2); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span></pre>
+</div>
+<h1>读写属性</h1>
+<p>正如我们提到，读取和写入属性值是通过内部的[[Get]]和[[Put]]方法。这些内部方法是通过属性访问器激活的：点标记法或者索引标记法：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 写入</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.bar = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 调用了[[Put]]</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>console.log(foo.bar); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 调用了[[Get]]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(foo['bar']); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 效果一样</span></pre>
+</div>
+<p>让我们用伪代码来看一下这些方法是如何工作的：</p>
+<h2><strong>[[Get]]方法</strong></h2>
+<p>[[Get]]也会从原型链中查询属性，所以通过对象也可以访问原型中的属性。</p>
+<div class="cnblogs_code">
+<pre>O.[[Get]](P):<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果是自己的属性，就返回</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> (O.hasOwnProperty(P)) {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> O.P;<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 否则，继续分析原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> __proto = O.[[Prototype]];<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果原型是null，返回undefined</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 这是可能的：最顶层Object.prototype.[[Prototype]]是null</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> (__proto === <span style="color: rgba(0, 0, 255, 1)">null</span>) {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> undefined;<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 否则，对原型链递归调用[[Get]]，在各层的原型中查找属性</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 直到原型为null</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">return</span> __proto.[[Get]](P)</pre>
+</div>
+<p>请注意，因为[[Get]]在如下情况也会返回undefined：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (window.someObject) {<br>  ...<br>}</pre>
+</div>
+<p>这里，在window里没有找到someObject属性，然后会在原型里找，原型的原型里找，以此类推，如果都找不到，按照定义就返回undefined。</p>
+<p>注意：in操作符也可以负责查找属性（也会查找原型链）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> ('someObject' <span style="color: rgba(0, 0, 255, 1)">in</span> window) {<br>  ...<br>}</pre>
+</div>
+<p>这有助于避免一些特殊问题：比如即便someObject存在，在someObject等于false的时候，第一轮检测就通不过。</p>
+<h2><strong>[[Put]]方法</strong></h2>
+<p>[[Put]]方法可以创建、更新对象自身的属性，并且掩盖原型里的同名属性。</p>
+<div class="cnblogs_code">
+<pre>O.[[Put]](P, V):<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果不能给属性写值，就退出</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> (!O.[[CanPut]](P)) {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span>;<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果对象没有自身的属性，就创建它</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 所有的attributes特性都是false</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">if</span> (!O.hasOwnProperty(P)) {<br>  createNewProperty(O, P, attributes: {<br>    ReadOnly: <span style="color: rgba(0, 0, 255, 1)">false</span>,<br>    DontEnum: <span style="color: rgba(0, 0, 255, 1)">false</span>,<br>    DontDelete: <span style="color: rgba(0, 0, 255, 1)">false</span>,<br>    Internal: <span style="color: rgba(0, 0, 255, 1)">false</span><br>  });<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 如果属性存在就设置值，但不改变attributes特性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>O.P = V<br> <br><span style="color: rgba(0, 0, 255, 1)">return</span>;</pre>
+</div>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre>Object.prototype.x = 100;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {};<br>console.log(foo.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 100, 继承属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>foo.x = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [[Put]]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>console.log(foo.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 自身属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">delete</span> foo.x;<br>console.log(foo.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 重新是100,继承属性</span></pre>
+</div>
+<p>请注意，不能掩盖原型里的只读属性，赋值结果将忽略，这是由内部方法[[CanPut]]控制的。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 例如，属性length是只读的，我们来掩盖一下length试试</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> SuperString() {<br>  <span style="color: rgba(0, 128, 0, 1)">/*</span><span style="color: rgba(0, 128, 0, 1)"> nothing </span><span style="color: rgba(0, 128, 0, 1)">*/</span><br>}<br> <br>SuperString.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> String("abc");<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = <span style="color: rgba(0, 0, 255, 1)">new</span> SuperString();<br> <br>console.log(foo.length); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, "abc"的长度</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 尝试掩盖</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo.length = 5;<br>console.log(foo.length); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 依然是3</span></pre>
+</div>
+<p>但在ES5的严格模式下，如果掩盖只读属性的话，会保存TypeError错误。</p>
+<h2><strong>属性访问器</strong></h2>
+<p>内部方法[[Get]]和[[Put]]在ECMAScript里是通过点符号或者索引法来激活的，如果属性标示符是合法的名字的话，可以通过“.”来访问，而索引方运行动态定义名称。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = {testProperty: 10};<br> <br>alert(a.testProperty); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 点</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a['testProperty']); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 索引</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> propertyName = 'Property';<br>alert(a['test' + propertyName]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 动态属性通过索引的方式</span></pre>
+</div>
+<p>这里有一个非常重要的特性——属性访问器总是使用ToObject规范来对待“.”左边的值。这种隐式转化和这句“在JavaScript中一切都是对象”有关系，（然而，当我们已经知道了，JavaScript里不是所有的值都是对象）。</p>
+<p>如果对原始值进行属性访问器取值，访问之前会先对原始值进行对象包装（包括原始值），然后通过包装的对象进行访问属性，属性访问以后，包装对象就会被删除。</p>
+<p>例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 10; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 原始值</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但是可以访问方法（就像对象一样）</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.toString()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "10"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 此外，我们可以在a上创建一个心属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a.test = 100; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 好像是没问题的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 但，[[Get]]方法没有返回该属性的值，返回的却是undefined</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(a.test); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span></pre>
+</div>
+<p>那么，为什么整个例子里的原始值可以访问toString方法，而不能访问新创建的test属性呢？</p>
+<p>答案很简单：</p>
+<p>首先，正如我们所说，使用属性访问器以后，它已经不是原始值了，而是一个包装过的中间对象（整个例子是使用new Number(a)），而toString方法这时候是通过原型链查找到的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 执行a.toString()的原理:</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>1. wrapper = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(a);<br>2. wrapper.toString(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "10"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>3. <span style="color: rgba(0, 0, 255, 1)">delete</span> wrapper;</pre>
+</div>
+<p>接下来，[[Put]]方法创建新属性时候，也是通过包装装的对象进行的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 执行a.test = 100的原理：</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>1. wrapper = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(a);<br>2. wrapper.test = 100;<br>3. <span style="color: rgba(0, 0, 255, 1)">delete</span> wrapper;</pre>
+</div>
+<p>我们看到，在第3步的时候，包装的对象以及删除了，随着新创建的属性页被删除了——删除包装对象本身。</p>
+<p>然后使用[[Get]]获取test值的时候，再一次创建了包装对象，但这时候包装的对象已经没有test属性了，所以返回的是undefined：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 执行a.test的原理:</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>1. wrapper = <span style="color: rgba(0, 0, 255, 1)">new</span> Number(a);<br>2. wrapper.test; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> undefined</span></pre>
+</div>
+<p>这种方式解释了原始值的读取方式，另外，任何原始值如果经常用在访问属性的话，时间效率考虑，都是直接用一个对象替代它；与此相反，如果不经常访问，或者只是用于计算的话，到可以保留这种形式。</p>
+<p>继承</p>
+<p>我们知道，ECMAScript是使用基于原型的委托式继承。链和原型在原型链里已经提到过了。其实，所有委托的实现和原型链的查找分析都浓缩到[[Get]]方法了。</p>
+<p>如果你完全理解[[Get]]方法，那JavaScript中的继承这个问题将不解自答了。</p>
+<p>经常在论坛上谈论JavaScript中的继承时，我都是用一行代码来展示，事实上，我们不需要创建任何对象或函数，因为该语言已经是基于继承的了，代码如下：</p>
+<div class="cnblogs_code">
+<pre>alert(1..toString()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> "1"</span></pre>
+</div>
+<p>我们已经知道了[[Get]]方法和属性访问器的原理了，我们来看看都发生了什么：</p>
+<ol>
+<li>首先，从原始值1，通过new Number(1)创建包装对象</li>
+<li>然后toString方法是从这个包装对象上继承得到的</li>
+</ol>
+<p>为什么是继承的？ 因为在ECMAScript中的对象可以有自己的属性，包装对象在这种情况下没有toString方法。 因此它是从原理里继承的，即Number.prototype。</p>
+<p><span style="color: rgba(255, 153, 0, 1)">注意有个微妙的地方，在上面的例子中的两个点不是一个错误。第一点是代表小数部分，第二个才是一个属性访问器：</span></p>
+<div class="cnblogs_code">
+<pre>1.toString(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 语法错误！</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>(1).toString(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> OK</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>1..toString(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> OK</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>1['toString'](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> OK</span></pre>
+</div>
+<h2><strong>原型链</strong></h2>
+<p>让我们展示如何为用户定义对象创建原型链，非常简单：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {<br>  alert('A.[[Call]] activated');<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = 10;<br>}<br>A.prototype.y = 20;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert([a.x, a.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 (自身), 20 (继承)</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 最近的原型链方式就是设置对象的原型为另外一个新对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>B.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修复原型的constructor属性，否则的话是A了 </span><span style="color: rgba(0, 128, 0, 1)"><br></span>B.prototype.constructor = B;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br>alert([b.x, b.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20, 2个都是继承的</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [[Get]] b.x:</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> b.x (no) --&gt;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> b.[[Prototype]].x (yes) - 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [[Get]] b.y</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> b.y (no) --&gt;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> b.[[Prototype]].y (no) --&gt;</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> b.[[Prototype]].[[Prototype]].y (yes) - 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> where b.[[Prototype]] === B.prototype,</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> and b.[[Prototype]].[[Prototype]] === A.prototype</span></pre>
+</div>
+<p>这种方法有两个特性：</p>
+<p>首先，B.prototype将包含x属性。乍一看这可能不对，你可能会想x属性是在A里定义的并且B构造函数也是这样期望的。尽管原型继承正常情况是没问题的，但B构造函数有时候可能不需要x属性，与基于class的继承相比，所有的属性都复制到后代子类里了。</p>
+<p>尽管如此，如果有需要（模拟基于类的继承）将x属性赋给B构造函数创建的对象上，有一些方法，我们后来来展示其中一种方式。</p>
+<p>其次，这不是一个特征而是缺点——子类原型创建的时候，构造函数的代码也执行了，我们可以看到消息"A.[[Call]] activated"显示了两次——当用A构造函数创建对象赋给B.prototype属性的时候，另外一场是a对象创建自身的时候！</p>
+<p>下面的例子比较关键，在父类的构造函数抛出的异常：可能实际对象创建的时候需要检查吧，但很明显，同样的case，也就是就是使用这些父对象作为原型的时候就会出错。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A(param) {<br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (!param) {<br>    <span style="color: rgba(0, 0, 255, 1)">throw</span> 'Param required';<br>  }<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>.param = param;<br>}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A(20);<br>alert([a.x, a.param]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {}<br>B.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> A(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> Error</span></pre>
+</div>
+<p>此外，在父类的构造函数有太多代码的话也是一种缺点。</p>
+<p>解决这些“功能”和问题，程序员使用原型链的标准模式（下面展示），主要目的就是在中间包装构造函数的创建，这些包装构造函数的链里包含需要的原型。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {<br>  alert('A.[[Call]] activated');<br>  <span style="color: rgba(0, 0, 255, 1)">this</span>.x = 10;<br>}<br>A.prototype.y = 20;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> a = <span style="color: rgba(0, 0, 255, 1)">new</span> A();<br>alert([a.x, a.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 (自身), 20 (集成)</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 或者使用A.apply(this, arguments)</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  B.superproto.constructor.apply(<span style="color: rgba(0, 0, 255, 1)">this</span>, arguments);<br>}<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 继承：通过空的中间构造函数将原型连在一起</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> F = <span style="color: rgba(0, 0, 255, 1)">function</span> () {};<br>F.prototype = A.prototype; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>B.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> F();<br>B.superproto = A.prototype; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 显示引用到另外一个原型上, "sugar"</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 修复原型的constructor属性，否则的就是A了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>B.prototype.constructor = B;<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br>alert([b.x, b.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 (自身), 20 (集成)</span></pre>
+</div>
+<p>注意，我们在b实例上创建了自己的x属性，通过B.superproto.constructor调用父构造函数来引用新创建对象的上下文。</p>
+<p>我们也修复了父构造函数在创建子原型的时候不需要的调用，此时，消息"A.[[Call]] activated"在需要的时候才会显示。</p>
+<p>为了在原型链里重复相同的行为（中间构造函数创建，设置superproto，恢复原始构造函数），下面的模板可以封装成一个非常方面的工具函数，其目的是连接原型的时候不是根据构造函数的实际名称。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> inherit(child, parent) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> F = <span style="color: rgba(0, 0, 255, 1)">function</span> () {};<br>  F.prototype = parent.prototype<br>  child.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> F();<br>  child.prototype.constructor = child;<br>  child.superproto = parent.prototype;<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>}</pre>
+</div>
+<p>因此，继承：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {}<br>inherit(B, A); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 连接原型</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 在A.prototype查找到</span></pre>
+</div>
+<p>也有很多语法形式（包装而成），但所有的语法行都是为了减少上述代码里的行为。</p>
+<p>例如，如果我们把中间的构造函数放到外面，就可以优化前面的代码（因此，只有一个函数被创建），然后重用它：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> inherit = (<span style="color: rgba(0, 0, 255, 1)">function</span>(){<br>  <span style="color: rgba(0, 0, 255, 1)">function</span> F() {}<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> (child, parent) {<br>    F.prototype = parent.prototype;<br>    child.prototype = <span style="color: rgba(0, 0, 255, 1)">new</span> F;<br>    child.prototype.constructor = child;<br>    child.superproto = parent.prototype;<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>  };<br>})();</pre>
+</div>
+<p>由于对象的真实原型是[[Prototype]]属性，这意味着F.prototype可以很容易修改和重用，因为通过new F创建的child.prototype可以从child.prototype的当前值里获取[[Prototype]]：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> A() {}<br>A.prototype.x = 10;<br> <br><span style="color: rgba(0, 0, 255, 1)">function</span> B() {}<br>inherit(B, A);<br> <br>B.prototype.y = 20;<br> <br>B.prototype.foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert("B#foo");<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> b = <span style="color: rgba(0, 0, 255, 1)">new</span> B();<br>alert(b.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 在A.prototype里查到</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br><span style="color: rgba(0, 0, 255, 1)">function</span> C() {}<br>inherit(C, B);<br> <br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 使用"superproto"语法糖</span><span style="color: rgba(0, 128, 0, 1)"><br>//</span><span style="color: rgba(0, 128, 0, 1)"> 调用父原型的同名方法</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>C.ptototype.foo = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  C.superproto.foo.call(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>  alert("C#foo");<br>};<br> <br><span style="color: rgba(0, 0, 255, 1)">var</span> c = <span style="color: rgba(0, 0, 255, 1)">new</span> C();<br>alert([c.x, c.y]); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span> <br>c.foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> B#foo, C#foo</span></pre>
+</div>
+<p>注意，ES5为原型链标准化了这个工具函数，那就是Object.create方法。ES3可以使用以下方式实现：</p>
+<div class="cnblogs_code">
+<pre>Object.create ||<br>Object.create = <span style="color: rgba(0, 0, 255, 1)">function</span> (parent, properties) {<br>  <span style="color: rgba(0, 0, 255, 1)">function</span> F() {}<br>  F.prototype = parent;<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> child = <span style="color: rgba(0, 0, 255, 1)">new</span> F;<br>  <span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k <span style="color: rgba(0, 0, 255, 1)">in</span> properties) {<br>    child[k] = properties[k].value;<br>  }<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> child;<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 用法</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {x: 10};<br><span style="color: rgba(0, 0, 255, 1)">var</span> bar = Object.create(foo, {y: {value: 20}});<br>console.log(bar.x, bar.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 20</span></pre>
+</div>
+<p>此外，所有模仿现在基于类的经典继承方式都是根据这个原则实现的，现在可以看到，它实际上不是基于类的继承，而是连接原型的一个很方便的代码重用。</p>
+<h1>结论</h1>
+<p>本章内容已经很充分和详细了，希望这些资料对你有用，并且消除你对ECMAScript的疑问，如果你有任何问题，请留言，我们一起讨论。</p>
+<h1>其它参考</h1>
+<ul>
+<li>4.2 — <a href="http://bclary.com/2004/11/07/#a-4.2">Language Overview</a>;</li>
+<li>4.3 — <a href="http://bclary.com/2004/11/07/#a-4.3">Definitions</a>;</li>
+<li>7.8.5 — <a href="http://bclary.com/2004/11/07/#a-7.8.5">Regular Expression Literals</a>;</li>
+<li>8 — <a href="http://bclary.com/2004/11/07/#a-8">Types</a>;</li>
+<li>9 — <a href="http://bclary.com/2004/11/07/#a-9">Type Conversion</a>;</li>
+<li>11.1.4 — <a href="http://bclary.com/2004/11/07/#a-11.1.4">Array Initialiser</a>;</li>
+<li>11.1.5 — <a href="http://bclary.com/2004/11/07/#a-11.1.5">Object Initialiser</a>;</li>
+<li>11.2.2 — <a href="http://bclary.com/2004/11/07/#a-11.2.2">The new Operator</a>;</li>
+<li>13.2.1 — <a href="http://bclary.com/2004/11/07/#a-13.2.1">[[Call]]</a>;</li>
+<li>13.2.2 — <a href="http://bclary.com/2004/11/07/#a-13.2.2">[[Construct]]</a>;</li>
+<li>15 — <a href="http://bclary.com/2004/11/07/#a-15">Native ECMAScript Objects</a>.</li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E7%BB%A7%E6%89%BF/">继承</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E9%9D%A2%E5%90%91%E5%AF%B9%E8%B1%A1/">面向对象</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/OOP/">OOP</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%B0%81%E8%A3%85/">封装</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%A4%9A%E6%80%81/">多态</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/AOP/">AOP</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2330609, cb_entryCreatedDate = '2012-02-06 09:27', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAju2s1rAFEN_qBEfh3UgBnhSPG9Ke9Glpr_n8dPnIGndH4PPA3rd2Bzud361fdadK-2G5WwV9iINJPjdEt4UdUVRzCSYuDh_HuD3GPEbQ3SawFcxx-F26wKG1M107MOk4BA" />
+</body>
+</html>

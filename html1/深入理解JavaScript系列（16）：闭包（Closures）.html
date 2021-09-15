@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍本章我们将介绍在JavaScript里大家经常来讨论的话题 —— 闭包（closure）。闭包其实大家都已经谈烂了。尽管如此，这里还是要试着从理论角度来讨论下闭包，看看ECMAScript中的闭包" />
+    <meta property="og:description" content="介绍本章我们将介绍在JavaScript里大家经常来讨论的话题 —— 闭包（closure）。闭包其实大家都已经谈烂了。尽管如此，这里还是要试着从理论角度来讨论下闭包，看看ECMAScript中的闭包" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（16）：闭包（Closures） - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-01-31 08:44';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/01/31/2330252.html">
+    <span>深入理解JavaScript系列（16）：闭包（Closures）</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-01-31 08:44</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">51092</span>)&nbsp;
+评论(<span id="post_comment_count">30</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2330252" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2330252);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>本章我们将介绍在JavaScript里大家经常来讨论的话题 —— 闭包（closure）。闭包其实大家都已经谈烂了。尽管如此，这里还是要试着从理论角度来讨论下闭包，看看ECMAScript中的闭包内部究竟是如何工作的。</p>
+<p>正如在前面的文章中提到的，这些文章都是系列文章，相互之间都是有关联的。因此，为了更好的理解本文要介绍的内容，建议先去阅读第<a href="http://www.cnblogs.com/TomXu/archive/2012/01/18/2312463.html" target="_blank">14章作用域链</a>和<a href="http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html" target="_blank">第12章变量对象</a>。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">英文原文：http://dmitrysoshnikov.com/ecmascript/chapter-6-closures/</span></pre>
+</div>
+<h1>概论</h1>
+<p>在直接讨论ECMAScript闭包之前，还是有必要来看一下函数式编程中一些基本定义。</p>
+<p>众所周知，在函数式语言中（ECMAScript也支持这种风格），函数即是数据。就比方说，函数可以赋值给变量，可以当参数传递给其他函数，还可以从函数里返回等等。这类函数有特殊的名字和结构。</p>
+<h2><strong>定义</strong></h2>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 0, 1)">A functional argument (“Funarg”) — is an argument which value is a function.</span><br><span style="color: rgba(0, 0, 0, 1)">函数式参数（“Funarg”） —— 是指</span><span style="color: rgba(255, 102, 0, 1)">值为函数的参数</span>。</pre>
+</div>
+<p>例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> exampleFunc(funArg) {<br>  funArg();<br>}<br><br>exampleFunc(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert('funArg');<br>});</pre>
+</div>
+<p>上述例子中funarg的实际参数其实是传递给exampleFunc的匿名函数。</p>
+<p>反过来，接受函数式参数的函数称为高阶函数（high-order function 简称：HOF）。还可以称作：函数式函数或者偏数理或操作符。上述例子中，exampleFunc 就是这样的函数。</p>
+<p>此前提到的，函数不仅可以作为参数，还可以作为返回值。这类以函数为返回值的函数称为带函数值的函数（functions with functional value or function valued functions）。</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> functionValued() {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert('returned function is called');<br>  };<br>})()();</pre>
+</div>
+<p>可以以正常数据形式存在的函数（比方说：当参数传递，接受函数式参数或者以函数值返回）都称作 第一类函数（一般说第一类对象）。在ECMAScript中，所有的函数都是第一类对象。</p>
+<p><em>函数可以作为正常数据存在（例如：当参数传递，接受函数式参数或者以函数值返回）都称作第一类函数（一般说第一类对象）。</em></p>
+<p>在ECMAScript中，所有的函数都是第一类对象。</p>
+<p>接受自己作为参数的函数，称为自应用函数（auto-applicative function 或者 self-applicative function）：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> selfApplicative(funArg) {<br><br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (funArg &amp;&amp; funArg === selfApplicative) {<br>    alert('self-applicative');<br>    <span style="color: rgba(0, 0, 255, 1)">return</span>;<br>  }<br><br>  selfApplicative(selfApplicative);<br><br>})();</pre>
+</div>
+<p>以自己为返回值的函数称为自复制函数（auto-replicative function 或者 self-replicative function）。通常，“自复制”这个词用在文学作品中：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> selfReplicative() {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> selfReplicative;<br>})();</pre>
+</div>
+<p>自复制函数的其中一个比较有意思的模式是让仅接受集合的一个项作为参数来接受从而代替接受集合本身。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 接受集合的函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> registerModes(modes) {<br>  modes.forEach(registerMode, modes);<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 用法</span><span style="color: rgba(0, 128, 0, 1)"><br></span>registerModes(['roster', 'accounts', 'groups']);<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 自复制函数的声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">function</span> modes(mode) {<br>  registerMode(mode); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 注册一个mode</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 0, 255, 1)">return</span> modes; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 返回函数自身</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 用法，modes链式调用</span><span style="color: rgba(0, 128, 0, 1)"><br></span>modes('roster')('accounts')('groups')<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">有点类似：jQueryObject.addClass("a").toggle().removClass("b")</span></pre>
+</div>
+<p>但直接传集合用起来相对来说，比较有效并且直观。</p>
+<p>在函数式参数中定义的变量，在“funarg”激活时就能够访问了（因为存储上下文数据的变量对象每次在进入上下文的时候就创建出来了）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> testFn(funArg) {<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> funarg激活时, 局部变量localVar可以访问了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  funArg(10); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  funArg(20); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>}<br><br>testFn(<span style="color: rgba(0, 0, 255, 1)">function</span> (arg) {<br>  <span style="color: rgba(0, 0, 255, 1)">var</span> localVar = 10;<br>  alert(arg + localVar);<br>});</pre>
+</div>
+<p>然而，我们从第14章知道，在ECMAScript中，函数是可以封装在父函数中的，并可以使用父函数上下文的变量。这个特性会引发funarg问题。</p>
+<h2><strong>Funarg问题</strong></h2>
+<p>在<a href="http://en.wikipedia.org/wiki/Stack-oriented_programming_language" target="_blank">面向堆栈的编程语言</a>中，函数的局部变量都是保存在栈上的，每当函数激活的时候，这些变量和函数参数都会压入到该堆栈上。</p>
+<p>当函数返回的时候，这些参数又会从栈中移除。这种模型对将函数作为函数式值使用的时候有很大的限制（比方说，作为返回值从父函数中返回）。绝大部分情况下，问题会出现在当函数有自由变量的时候。</p>
+<p><em>自由变量是指在函数中使用的，但既不是函数参数也不是函数的局部变量的变量</em></p>
+<p>例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> testFn() {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> localVar = 10;<br><br>  <span style="color: rgba(0, 0, 255, 1)">function</span> innerFn(innerParam) {<br>    alert(innerParam + localVar);<br>  }<br><br>  <span style="color: rgba(0, 0, 255, 1)">return</span> innerFn;<br>}<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> someFn = testFn();<br>someFn(20); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span></pre>
+</div>
+<p>上述例子中，对于innerFn函数来说，localVar就属于自由变量。</p>
+<p>对于采用面向栈模型来存储局部变量的系统而言，就意味着当testFn函数调用结束后，其局部变量都会从堆栈中移除。这样一来，当从外部对innerFn进行函数调用的时候，就会发生错误（因为localVar变量已经不存在了）。</p>
+<p>而且，上述例子在面向栈实现模型中，要想将innerFn以返回值返回根本是不可能的。因为它也是testFn函数的局部变量，也会随着testFn的返回而移除。</p>
+<p>还有一个问题是当系统采用动态作用域，函数作为函数参数使用的时候有关。</p>
+<p>看如下例子（伪代码）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> z = 10;<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(z);<br>}<br><br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 – 使用静态和动态作用域的时候</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> z = 20;<br>  foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 – 使用静态作用域, 20 – 使用动态作用域</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>})();<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将foo作为参数的时候是一样的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> (funArg) {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> z = 30;<br>  funArg(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10 – 静态作用域, 30 – 动态作用域</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>})(foo);</pre>
+</div>
+<p>我们看到，采用动态作用域，变量（标识符）的系统是通过变量动态栈来管理的。因此，自由变量是在当前活跃的动态链中查询的，而不是在函数创建的时候保存起来的静态作用域链中查询的。</p>
+<p>这样就会产生冲突。比方说，即使Z仍然存在（与之前从栈中移除变量的例子相反），还是会有这样一个问题： 在不同的函数调用中，Z的值到底取哪个呢（从哪个上下文，哪个作用域中查询）？</p>
+<p>上述描述的就是两类funarg问题 —— 取决于是否将函数以返回值返回（第一类问题）以及是否将函数当函数参数使用（第二类问题）。</p>
+<p>为了解决上述问题，就引入了 闭包的概念。</p>
+<h2><strong>闭包</strong></h2>
+<div class="cnblogs_code">
+<pre>闭包是代码块和创建该代码块的上下文中数据的结合。</pre>
+</div>
+<p>让我们来看下面这个例子（伪代码）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 自由变量"x" == 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 为foo闭包</span><span style="color: rgba(0, 128, 0, 1)"><br></span>fooClosure = {<br>  call: foo <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 引用到function</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  lexicalEnvironment: {x: 20} <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 搜索上下文的上下文</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};</pre>
+</div>
+<p>上述例子中，“fooClosure”部分是伪代码。对应的，在ECMAScript中，“foo”函数已经有了一个内部属性——创建该函数上下文的作用域链。</p>
+<p>“lexical”通常是省略的。上述例子中是为了强调在闭包创建的同时，上下文的数据就会保存起来。当下次调用该函数的时候，自由变量就可以在保存的（闭包）上下文中找到了，正如上述代码所示，变量“z”的值总是10。</p>
+<p>定义中我们使用的比较广义的词 —— “代码块”，然而，通常（在ECMAScript中）会使用我们经常用到的函数。当然了，并不是所有对闭包的实现都会将闭包和函数绑在一起，比方说，在Ruby语言中，闭包就有可能是： 一个过程对象（procedure object）, 一个lambda表达式或者是代码块。</p>
+<p>对于要实现将局部变量在上下文销毁后仍然保存下来，基于栈的实现显然是不适用的（因为与基于栈的结构相矛盾）。因此在这种情况下，上层作用域的闭包数据是通过 动态分配内存的方式来实现的（基于“堆”的实现），配合使用垃圾回收器（garbage collector简称GC）和 引用计数（reference counting）。这种实现方式比基于栈的实现性能要低，然而，任何一种实现总是可以优化的： 可以分析函数是否使用了自由变量，函数式参数或者函数式值，然后根据情况来决定 —— 是将数据存放在堆栈中还是堆中。</p>
+<h1>ECMAScript闭包的实现</h1>
+<p>讨论完理论部分，接下来让我们来介绍下ECMAScript中闭包究竟是如何实现的。这里还是有必要再次强调下：ECMAScript只使用<a href="http://en.wikipedia.org/wiki/Scope_(programming)#Lexical_scoping" target="_blank">静态（词法）作用域</a>（而诸如Perl这样的语言，既可以使用静态作用域也可以使用动态作用域进行变量声明）。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(x);<br>}<br><br>(<span style="color: rgba(0, 0, 255, 1)">function</span> (funArg) {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 20;<br><br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 变量"x"在(lexical)上下文中静态保存的，在该函数创建的时候就保存了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  funArg(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, 而不是20</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>})(foo);</pre>
+</div>
+<p>技术上说，创建该函数的父级上下文的数据是保存在函数的内部属性 [[Scope]]中的。如果你还不了解什么是[[Scope]]，建议你先阅读第14章, 该章节对[[Scope]]作了非常详细的介绍。如果你对[[Scope]]和作用域链的知识完全理解了的话，那对闭包也就完全理解了。</p>
+<p>根据函数创建的算法，我们看到 在ECMAScript中，所有的函数都是闭包，因为它们都是在创建的时候就保存了上层上下文的作用域链（除开异常的情况） （不管这个函数后续是否会激活 —— [[Scope]]在函数创建的时候就有了）：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br>  alert(x);<br>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> foo是闭包</span><span style="color: rgba(0, 128, 0, 1)"><br></span>foo: &lt;FunctionObject&gt; = {<br>  [[Call]]: &lt;code block of foo&gt;,<br>  [[Scope]]: [<br>    global: {<br>      x: 10<br>    }<br>  ],<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};</pre>
+</div>
+<p>如我们所说，为了优化目的，当一个函数没有使用自由变量的话，实现可能不保存在副作用域链里。不过，在ECMA-262-3规范里任何都没说。因此，正常来说，所有的参数都是在创建阶段保存在[[Scope]]属性里的。</p>
+<p>有些实现中，允许对闭包作用域直接进行访问。比如Rhino，针对函数的[[Scope]]属性，对应有一个非标准的 __parent__属性，在第12章中作过介绍：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> global = <span style="color: rgba(0, 0, 255, 1)">this</span>;<br><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br><br><span style="color: rgba(0, 0, 255, 1)">var</span> foo = (<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> y = 20;<br><br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(y);<br>  };<br><br>})();<br><br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(foo.__parent__.y); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 20</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>foo.__parent__.y = 30;<br>foo(); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 30</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 可以通过作用域链移动到顶部</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(foo.__parent__.__parent__ === global); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(foo.__parent__.__parent__.x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span></pre>
+</div>
+<h2><strong>所有对象都引用一个[[Scope]]</strong></h2>
+<p>这里还要注意的是：在ECMAScript中，同一个父上下文中创建的闭包是共用一个[[Scope]]属性的。也就是说，某个闭包对其中[[Scope]]的变量做修改会影响到其他闭包对其变量的读取：</p>
+<p><em>这就是说：所有的内部函数都共享同一个父作用域</em></p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> firstClosure;<br><span style="color: rgba(0, 0, 255, 1)">var</span> secondClosure;<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> foo() {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 1;<br><br>  firstClosure = <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 0, 255, 1)">return</span> ++x; };<br>  secondClosure = <span style="color: rgba(0, 0, 255, 1)">function</span> () { <span style="color: rgba(0, 0, 255, 1)">return</span> --x; };<br><br>  x = 2; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 影响 AO["x"], 在2个闭包公有的[[Scope]]中</span><span style="color: rgba(0, 128, 0, 1)"><br></span><br>  alert(firstClosure()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, 通过第一个闭包的[[Scope]]</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br>foo();<br><br>alert(firstClosure()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 4</span><span style="color: rgba(0, 128, 0, 1)"><br></span>alert(secondClosure()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3</span></pre>
+</div>
+<p>关于这个功能有一个非常普遍的错误认识，开发人员在循环语句里创建函数（内部进行计数）的时候经常得不到预期的结果，而期望是每个函数都有自己的值。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> data = [];<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 3; k++) {<br>  data[k] = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(k);<br>  };<br>}<br><br>data[0](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, 而不是0</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[1](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, 而不是1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[2](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 3, 而不是2</span></pre>
+</div>
+<p>上述例子就证明了 —— 同一个上下文中创建的闭包是共用一个[[Scope]]属性的。因此上层上下文中的变量“k”是可以很容易就被改变的。</p>
+<div class="cnblogs_code">
+<pre>activeContext.Scope = [<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它变量对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  {data: [...], k: 3} <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 活动对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>];<br><br>data[0].[[Scope]] === Scope;<br>data[1].[[Scope]] === Scope;<br>data[2].[[Scope]] === Scope;</pre>
+</div>
+<p>这样一来，在函数激活的时候，最终使用到的k就已经变成了3了。如下所示，创建一个闭包就可以解决这个问题了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> data = [];<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 3; k++) {<br>  data[k] = (<span style="color: rgba(0, 0, 255, 1)">function</span> _helper(x) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>      alert(x);<br>    };<br>  })(k); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 传入"k"值</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 现在结果是正确的了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[0](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[1](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[2](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2</span></pre>
+</div>
+<p>让我们来看看上述代码都发生了什么？函数“_helper”创建出来之后，通过传入参数“k”激活。其返回值也是个函数，该函数保存在对应的数组元素中。这种技术产生了如下效果： 在函数激活时，每次“_helper”都会创建一个新的变量对象，其中含有参数“x”，“x”的值就是传递进来的“k”的值。这样一来，返回的函数的[[Scope]]就成了如下所示：</p>
+<div class="cnblogs_code">
+<pre>data[0].[[Scope]] === [<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 其它变量对象</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  父级上下文中的活动对象AO: {data: [...], k: 3},<br>  _helper上下文中的活动对象AO: {x: 0}<br>];<br><br>data[1].[[Scope]] === [<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> <span style="color: rgba(0, 128, 0, 1)">其它变量对象</span></span><span style="color: rgba(0, 128, 0, 1)"><br></span>  父级上下文中的活动对象AO: {data: [...], k: 3},<br>  _helper上下文中的活动对象AO: {x: 1}<br>];<br><br>data[2].[[Scope]] === [<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> <span style="color: rgba(0, 128, 0, 1)">其它变量对象</span></span><span style="color: rgba(0, 128, 0, 1)"><br></span>  父级上下文中的活动对象AO: {data: [...], k: 3},<br>  _helper上下文中的活动对象AO: {x: 2}<br>];</pre>
+</div>
+<p>我们看到，这时函数的[[Scope]]属性就有了真正想要的值了，为了达到这样的目的，我们不得不在[[Scope]]中创建额外的变量对象。要注意的是，在返回的函数中，如果要获取“k”的值，那么该值还是会是3。</p>
+<p>顺便提下，大量介绍JavaScript的文章都认为只有额外创建的函数才是闭包，这种说法是错误的。实践得出，这种方式是最有效的，然而，从理论角度来说，在ECMAScript中所有的函数都是闭包。</p>
+<p>然而，上述提到的方法并不是唯一的方法。通过其他方式也可以获得正确的“k”的值，如下所示：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> data = [];<br><br><span style="color: rgba(0, 0, 255, 1)">for</span> (<span style="color: rgba(0, 0, 255, 1)">var</span> k = 0; k &lt; 3; k++) {<br>  (data[k] = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>    alert(arguments.callee.x);<br>  }).x = k; <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 将k作为函数的一个属性</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 结果也是对的</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[0](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 0</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[1](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1</span><span style="color: rgba(0, 128, 0, 1)"><br></span>data[2](); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2</span></pre>
+</div>
+<h2><strong>Funarg和return</strong></h2>
+<p>另外一个特性是从闭包中返回。在ECMAScript中，闭包中的返回语句会将控制流返回给调用上下文（调用者）。而在其他语言中，比如，Ruby，有很多中形式的闭包，相应的处理闭包返回也都不同，下面几种方式都是可能的：可能直接返回给调用者，或者在某些情况下——直接从上下文退出。</p>
+<p>ECMAScript标准的退出行为如下：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> getElement() {<br><br>  [1, 2, 3].forEach(<span style="color: rgba(0, 0, 255, 1)">function</span> (element) {<br><br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (element % 2 == 0) {<br>      <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 返回给函数"forEach"函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 而不是返回给getElement函数</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      alert('found: ' + element); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> found: 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span>      <span style="color: rgba(0, 0, 255, 1)">return</span> element;<br>    }<br><br>  });<br><br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span>;<br>}</pre>
+</div>
+<p>然而，在ECMAScript中通过try catch可以实现如下效果：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> $<span style="color: rgba(0, 0, 255, 1)">break</span> = {};<br><br><span style="color: rgba(0, 0, 255, 1)">function</span> getElement() {<br><br>  <span style="color: rgba(0, 0, 255, 1)">try</span> {<br><br>    [1, 2, 3].forEach(<span style="color: rgba(0, 0, 255, 1)">function</span> (element) {<br><br>      <span style="color: rgba(0, 0, 255, 1)">if</span> (element % 2 == 0) {<br>        <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> // 从getElement中"返回"</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        alert('found: ' + element); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> found: 2</span><span style="color: rgba(0, 128, 0, 1)"><br></span>        $<span style="color: rgba(0, 0, 255, 1)">break</span>.data = element;<br>        <span style="color: rgba(0, 0, 255, 1)">throw</span> $<span style="color: rgba(0, 0, 255, 1)">break</span>;<br>      }<br><br>    });<br><br>  } <span style="color: rgba(0, 0, 255, 1)">catch</span> (e) {<br>    <span style="color: rgba(0, 0, 255, 1)">if</span> (e == $<span style="color: rgba(0, 0, 255, 1)">break</span>) {<br>      <span style="color: rgba(0, 0, 255, 1)">return</span> $<span style="color: rgba(0, 0, 255, 1)">break</span>.data;<br>    }<br>  }<br><br>  <span style="color: rgba(0, 0, 255, 1)">return</span> <span style="color: rgba(0, 0, 255, 1)">null</span>;<br>}<br><br>alert(getElement()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 2</span></pre>
+</div>
+<h2><strong>理论版本</strong></h2>
+<p>这里说明一下，开发人员经常错误将闭包简化理解成从父上下文中返回内部函数，甚至理解成只有匿名函数才能是闭包。</p>
+<div class="cnblogs_code">
+<pre>再说一下，因为作用域链，使得所有的函数都是闭包（与函数类型无关： 匿名函数，FE，NFE，FD都是闭包）。</pre>
+</div>
+<p>这里只有一类函数除外，那就是通过Function构造器创建的函数，因为其[[Scope]]只包含全局对象。</p>
+<p>为了更好的澄清该问题，我们对ECMAScript中的闭包给出2个正确的版本定义：</p>
+<p>ECMAScript中，闭包指的是：</p>
+<ol>
+<li>从理论角度：所有的函数。因为它们都在创建的时候就将上层上下文的数据保存起来了。哪怕是简单的全局变量也是如此，因为函数中访问全局变量就相当于是在访问自由变量，这个时候使用最外层的作用域。</li>
+<li>从实践角度：以下函数才算是闭包：<ol>
+<li>即使创建它的上下文已经销毁，它仍然存在（比如，内部函数从父函数中返回）</li>
+<li>在代码中引用了自由变量</li>
+</ol></li>
+</ol>
+<h1>闭包用法实战</h1>
+<p>实际使用的时候，闭包可以创建出非常优雅的设计，允许对funarg上定义的多种计算方式进行定制。如下就是数组排序的例子，它接受一个排序条件函数作为参数：</p>
+<div class="cnblogs_code">
+<pre>[1, 2, 3].sort(<span style="color: rgba(0, 0, 255, 1)">function</span> (a, b) {<br>  ... <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 排序条件</span><span style="color: rgba(0, 128, 0, 1)"><br></span>});</pre>
+</div>
+<p>同样的例子还有，数组的map方法是根据函数中定义的条件将原数组映射到一个新的数组中：</p>
+<div class="cnblogs_code">
+<pre>[1, 2, 3].map(<span style="color: rgba(0, 0, 255, 1)">function</span> (element) {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> element * 2;<br>}); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> [2, 4, 6]</span></pre>
+</div>
+<p>使用函数式参数，可以很方便的实现一个搜索方法，并且可以支持无限制的搜索条件：</p>
+<div class="cnblogs_code">
+<pre>someCollection.find(<span style="color: rgba(0, 0, 255, 1)">function</span> (element) {<br>  <span style="color: rgba(0, 0, 255, 1)">return</span> element.someProperty == 'searchCondition';<br>});</pre>
+</div>
+<p>还有应用函数，比如常见的forEach方法，将函数应用到每个数组元素：</p>
+<div class="cnblogs_code">
+<pre>[1, 2, 3].forEach(<span style="color: rgba(0, 0, 255, 1)">function</span> (element) {<br>  <span style="color: rgba(0, 0, 255, 1)">if</span> (element % 2 != 0) {<br>    alert(element);<br>  }<br>}); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1, 3</span></pre>
+</div>
+<p>顺便提下，函数对象的 apply 和 call方法，在函数式编程中也可以用作应用函数。 apply和call已经在讨论“this”的时候介绍过了；这里，我们将它们看作是应用函数 —— 应用到参数中的函数（在apply中是参数列表，在call中是独立的参数）：</p>
+<div class="cnblogs_code">
+<pre>(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert([].join.call(arguments, ';')); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 1;2;3</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}).apply(<span style="color: rgba(0, 0, 255, 1)">this</span>, [1, 2, 3]);</pre>
+</div>
+<p>闭包还有另外一个非常重要的应用 —— 延迟调用：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 10;<br>setTimeout(<span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  alert(a); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10, after one second</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}, 1000);</pre>
+</div>
+<p>还有回调函数</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">...</span><span style="color: rgba(0, 128, 0, 1)"><br></span><span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> only for example</span><span style="color: rgba(0, 128, 0, 1)"><br></span>xmlHttpRequestObject.onreadystatechange = <span style="color: rgba(0, 0, 255, 1)">function</span> () {<br>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 当数据就绪的时候，才会调用;</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 这里，不论是在哪个上下文中创建</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 此时变量“x”的值已经存在了</span><span style="color: rgba(0, 128, 0, 1)"><br></span>  alert(x); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 10</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};<br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">...</span></pre>
+</div>
+<p>还可以创建封装的作用域来隐藏辅助对象：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> foo = {};<br><br><span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 初始化</span><span style="color: rgba(0, 128, 0, 1)"><br></span>(<span style="color: rgba(0, 0, 255, 1)">function</span> (object) {<br><br>  <span style="color: rgba(0, 0, 255, 1)">var</span> x = 10;<br><br>  object.getX = <span style="color: rgba(0, 0, 255, 1)">function</span> _getX() {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x;<br>  };<br><br>})(foo);<br><br>alert(foo.getX()); <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)"> 获得闭包 "x" – 10</span></pre>
+</div>
+<h1>总结</h1>
+<p>本文介绍了更多关于ECMAScript-262-3的理论知识，而我认为，这些基础的理论有助于理解ECMAScript中闭包的概念。如果有任何问题，我回在评论里回复大家。</p>
+<h1>其它参考</h1>
+<ul>
+<li><a href="http://jibbering.com/faq/notes/closures/">Javascript Closures (by Richard Cornford)</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Funarg_problem">Funarg problem</a></li>
+<li><a href="http://en.wikipedia.org/wiki/Closure_%28computer_science%29">Closures</a></li>
+</ul>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/%E9%97%AD%E5%8C%85/">闭包</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/Closures/">Closures</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2330252, cb_entryCreatedDate = '2012-01-31 08:44', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjvwBWMpEl8HNXAD8cV3UmwLfEXCctBn6vbvNbZwZY1s_Dsm-tEz4F5FmDJ7vitXlx5VqreKtVB2hIWQNe8rfZiEIbxVtHJkE4PUPYAmDp4uPMKzaZyKmfnItvsoaoNUe2w" />
+</body>
+</html>

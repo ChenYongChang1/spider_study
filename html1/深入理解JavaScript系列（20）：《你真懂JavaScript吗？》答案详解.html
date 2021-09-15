@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="referrer" content="origin-when-crossorigin" />
+    <meta name="description" content="介绍昨天发的《大叔手记（19）：你真懂JavaScript吗？》里面的5个题目，有很多回答，发现强人还是很多的，很多人都全部答对了。今天我们来对这5个题目详细分析一下，希望对大家有所帮助。注：问题来自" />
+    <meta property="og:description" content="介绍昨天发的《大叔手记（19）：你真懂JavaScript吗？》里面的5个题目，有很多回答，发现强人还是很多的，很多人都全部答对了。今天我们来对这5个题目详细分析一下，希望对大家有所帮助。注：问题来自" />
+    <meta http-equiv="Cache-Control" content="no-transform" />
+    <meta http-equiv="Cache-Control" content="no-siteapp" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>深入理解JavaScript系列（20）：《你真懂JavaScript吗？》答案详解 - 汤姆大叔 - 博客园</title>
+    <link id="favicon" rel="shortcut icon" href="//common.cnblogs.com/favicon.svg" type="image/svg+xml" />
+    
+    <link rel="stylesheet" href="/css/blog-common.min.css?v=zS6-e1bxywlu3kpHvpr1J6MySwya3ztFtEnS7RYQ0Fk" />
+    <link id="MainCss" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite.min.css?v=F-kpmc_yPJF8Dd7d6eY5Dqj_SeF3hi4z94QnNXriWxc" />
+    <link type="text/css" rel="stylesheet" href="https://www.cnblogs.com/TomXu/custom.css?v=QKNRkyVEGBMuUHoGoCJKINp&#x2B;yQA=" />
+    <link id="mobile-style" media="only screen and (max-width: 767px)" type="text/css" rel="stylesheet" href="/skins/minyx2_lite/bundle-minyx2_lite-mobile.min.css?v=iPf_XHQsJ-ofZZ2RiaeMCHG0JEaMNLa9yhkUGK3xTSQ" />
+    
+    <link type="application/rss+xml" rel="alternate" href="https://www.cnblogs.com/TomXu/rss" />
+    <link type="application/rsd+xml" rel="EditURI" href="https://www.cnblogs.com/TomXu/rsd.xml" />
+    <link type="application/wlwmanifest+xml" rel="wlwmanifest" href="https://www.cnblogs.com/TomXu/wlwmanifest.xml" />
+    <script>
+        var currentBlogId = 101461;
+        var currentBlogApp = 'TomXu';
+        var cb_enable_mathjax = false;
+        var isLogined = false;
+        var isBlogOwner = false;
+        var skinName = 'Minyx2_Lite';
+        var visitorUserId = '';
+    </script>
+        <script>
+            var currentPostDateAdded = '2012-02-10 08:54';
+        </script>
+    <script src="https://common.cnblogs.com/scripts/jquery-2.2.0.min.js"></script>
+    <script src="/js/blog-common.min.js?v=2Mic1VLeHXarpdzASbXqFMIMVLEBiWXNO5yiTHUcmhw"></script>
+    
+    
+    <script src="/skins/minyx2_lite/bundle-minyx2_lite.min.js?v=z_XLIOc5JYwRKqTPu9fAWp7D8tchhGxVWGYvlAiigUQ" type="text/javascript" language="javascript"></script>
+</head>
+<body class="has-navbar">
+    <a name="top"></a>
+        <div id="bannerbar" class="bannerbar-mobile formobile">
+            <a href="https://developer.aliyun.com/learning/trainingcamp/realtime/1?utm_content=g_1000268661" target="_blank" onclick="ga('send', 'event', 'Link', 'click', 'aliyun-realtime-blog-bannerbar-mobile')">
+                <img src="https://img2020.cnblogs.com/blog/35695/202105/35695-20210509221214222-438425324.png" alt="" />
+            </a>
+        </div>
+    <div id="top_nav" class="navbar forpc">
+        <nav id="nav_main" class="navbar-main">
+            <ul id="nav_left" class="navbar-list navbar-left">
+                <li class="navbar-branding"><a href="https://www.cnblogs.com/" title="开发者的网上家园"><img src="/images/logo.svg?v=R9M0WmLAIPVydmdzE2keuvnjl-bPR7_35oHqtiBzGsM" alt="博客园Logo" /></a></li>
+                <li><a href="/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-sitehome')">首页</a></li>
+                <li><a href="https://news.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-news')">新闻</a></li>
+                <li><a href="https://q.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-q')">博问</a></li>
+                <li><a id="nav_brandzone" href="https://brands.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-brands')">专区</a></li>
+                <li><a href="https://ing.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-ing')">闪存</a></li>
+                <li><a href="https://edu.cnblogs.com/" onclick="ga('send', 'event', 'Link', 'click', 'skin-navbar-edu')">班级</a></li>
+            </ul>
+            <ul id="nav_right" class="navbar-list navbar-right">
+                <li>
+                    <form id="zzk_search" class="navbar-search" action="https://zzk.cnblogs.com/s" method="get">
+                        <input name="w" id="zzk_search_input" placeholder="代码改变世界" type="text" tabindex="3" />
+                        <button type="submit" id="zzk_search_button">
+                            <img src="/images/aggsite/search.svg" alt="搜索" />
+                        </button>
+                    </form>
+                </li>
+                <li id="navbar_login_status" class="navbar-list">
+                    <a class="navbar-user-info navbar-blog" href="https://i.cnblogs.com/EditPosts.aspx?opt=1" alt="写随笔" title="写随笔">
+                        <img id="new_post_icon" class="navbar-icon" src="/images/aggsite/newpost.svg" alt="写随笔" />
+                    </a>
+                    <a id="navblog-myblog-icon" class="navbar-user-info navbar-blog" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx" alt="我的博客" title="我的博客">
+                        <img id="myblog_icon" class="navbar-icon" src="/images/aggsite/myblog.svg" alt="我的博客" />
+                    </a>
+                    <a class="navbar-user-info navbar-message navbar-icon-wrapper" href="https://msg.cnblogs.com/" alt="短消息" title="短消息">
+                        <img id="msg_icon" class="navbar-icon" src="/images/aggsite/message.svg?v=J0WS2P2iPgaIVgXxcAhliw4AFZIpaTWxtdoNAv9eiCA" alt="短消息" />
+                        <span id="msg_count" style="display: none"></span>
+                    </a>
+                    <div id="user_info" class="navbar-user-info dropdown">
+                        <a class="dropdown-button" href="https://home.cnblogs.com/">
+                            <img id="user_icon" class="navbar-avatar" src="/images/aggsite/avatar-default.svg" alt="用户头像" />
+                        </a>
+                        <div class="dropdown-menu">
+                            <a id="navblog-myblog-text" href="https://passport.cnblogs.com/GetBlogApplyStatus.aspx">我的博客</a>
+                            <a href="https://home.cnblogs.com/">我的园子</a>
+                            <a href="https://account.cnblogs.com/settings/account">账号设置</a>
+                            <a href="javascript:void(0)" id="navbar_lite_mode_toggle" title="简洁模式会使用简洁款皮肤显示所有博客">
+    简洁模式 <img id="navbar_lite_mode_on" src="/images/lite-mode-check.svg" class="hide" /><span id="navbar_lite_mode_spinner" class="hide">...</span>
+</a>
+                            <a href="javascript:void(0)" onclick="account.logout();">退出登录</a>
+                        </div>
+                    </div>
+                    <a class="navbar-anonymous" href="https://account.cnblogs.com/signup/">注册</a>
+                    <a class="navbar-anonymous" href="javascript:void(0);" onclick="account.login()">登录</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+
+    
+    
+<div id="container">
+    <a class="minyx" href="https://www.cnblogs.com/">代码改变世界</a>
+    <ul id="topMnu">
+        <!-- 统计数据 -->
+        <li>
+            <div id="blog_stats_place_holder"><script>loadBlogStats();</script></div>
+        </li>
+        <!-- 这边可以增加一些链接 -->
+        <!-- 博客园 -->
+        <li><a href="https://www.cnblogs.com/">Cnblogs</a></li>
+        <!-- 管理 -->
+        <li id="topMnu-dashboard">
+            <a id="lnkDashboard" href="https://i.cnblogs.com/">Dashboard</a>
+        </li>
+        <li>
+            
+    <a id="lnkLogin" href="https://account.cnblogs.com/signin/?returnUrl=https://www.cnblogs.com/TomXu/">Login</a>
+
+
+        </li>
+    </ul>
+
+    <script type="text/javascript">
+        var m = window.__blog.topMenuRendered;
+        if (m) { m(__$("topMnu")); }
+    </script>
+
+    <div id="header">
+        <ul id="menu">
+            <!-- 首页，当前section加上current类 -->
+            <li id="menu-home" class="current">
+                <a id="lnkHome" href="https://www.cnblogs.com/TomXu/">Home</a></li>
+            <!-- 联系 -->
+            <li id="menu-contact">
+                <a id="lnkContact" href="https://msg.cnblogs.com/send/%E6%B1%A4%E5%A7%86%E5%A4%A7%E5%8F%94">Contact</a></li>
+            <!-- 相册 -->
+            <li id="menu-gallary">
+                <a id="lnkGallery" href="https://www.cnblogs.com/TomXu/gallery.html">Gallery</a></li>
+            <!-- 订阅 -->
+            <li id="menu-subscribe">
+                <a id="blog_nav_rss" href="javascript:void(0);" data-rss="https://www.cnblogs.com/TomXu/rss/">Subscribe</a></li>
+            <!-- Rss订阅 -->
+            <li id="rss">
+                <a id="lnkRss" href="https://www.cnblogs.com/TomXu/rss/">RSS</a></li>
+        </ul>
+        <div id="newmsg"></div>
+        <h1>
+            <!-- 主标题 -->
+            <a id="lnkBlogTitle" href="https://www.cnblogs.com/TomXu/">汤姆大叔的博客</a>
+            <!-- 子标题 -->
+            <small>
+                
+            </small>
+        </h1>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.headerRendered;
+        if (m) { m(__$("header")); }
+    </script>
+
+    <div id="wrapper">
+        <div id="content">
+            <script type="text/javascript">
+                var m = window.__blog.preRenderPosts;
+                if (m) { m(); }
+            </script>
+            <div id="post_detail">
+<div class="post" id="post">
+    <a name="top"></a>
+    <h2>
+<a id="cb_post_title_url" class="postTitle2 vertical-middle" href="https://www.cnblogs.com/TomXu/archive/2012/02/10/2342098.html">
+    <span>深入理解JavaScript系列（20）：《你真懂JavaScript吗？》答案详解</span>
+    
+
+
+
+</a>
+</h2>
+    <small>
+<span id="post-date">2012-02-10 08:54</span>&nbsp;
+<a href="https://www.cnblogs.com/TomXu/">汤姆大叔</a>&nbsp;
+阅读(<span id="post_view_count">45157</span>)&nbsp;
+评论(<span id="post_comment_count">122</span>)&nbsp;
+<a href="https://i.cnblogs.com/EditPosts.aspx?postid=2342098" rel="nofollow">编辑</a>&nbsp;
+<a href="javascript:void(0)" onclick="AddToWz(2342098);return false;">收藏</a></small>
+    <div class="entry">
+        <div id="cnblogs_post_body" class="blogpost-body blogpost-body-html">
+<h1>介绍</h1>
+<p>昨天发的<a href="http://www.cnblogs.com/TomXu/archive/2012/02/09/2330578.html" target="_blank">《大叔手记（19）：你真懂JavaScript吗？》</a>里面的5个题目，有很多回答，发现强人还是很多的，很多人都全部答对了。</p>
+<p>今天我们来对这5个题目详细分析一下，希望对大家有所帮助。</p>
+<p>注：</p>
+<div class="cnblogs_code">
+<pre>问题来自大名鼎鼎的前端架构师Baranovskiy的帖子《<a href="http://dmitry.baranovskiy.com/post/91403200" target="_blank">So, you think you know JavaScript?</a>》。<br>答案也是来自大名鼎鼎的JS牛人Nicholas C. Zakas的帖子《<a href="http://www.nczonline.net/blog/2010/01/26/answering-baranovskiys-javascript-quiz/" target="_blank">Answering Baranovskiy’s JavaScript quiz</a>》——《JavaScript高级程序设计》一书的原作者<br>(但题目2的解释貌似有点问题）</pre>
+</div>
+<p>OK，我们先看第一题</p>
+<h1>题目1</h1>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">if</span> (!("a" <span style="color: rgba(0, 0, 255, 1)">in</span> window)) {<br>    <span style="color: rgba(0, 0, 255, 1)">var</span> a = 1;<br>}<br>alert(a);</pre>
+</div>
+<p>代码看起来是想说：如果window不包含属性a，就声明一个变量a，然后赋值为1。</p>
+<p>你可能认为alert出来的结果是1，然后实际结果是“undefined”。要了解为什么，我们需要知道JavaScript里的3个概念。</p>
+<p>首先，所有的全局变量都是window的属性，语句 var a = 1;等价于window.a = 1; 你可以用如下方式来检测全局变量是否声明：</p>
+<div class="cnblogs_code">
+<pre>"变量名称" <span style="color: rgba(0, 0, 255, 1)">in</span> window</pre>
+</div>
+<p>第二，所有的变量声明都在范围作用域的顶部，看一下相似的例子：</p>
+<div class="cnblogs_code">
+<pre>alert("a" <span style="color: rgba(0, 0, 255, 1)">in</span> window);<br><span style="color: rgba(0, 0, 255, 1)">var</span> a;</pre>
+</div>
+<p>此时，尽管声明是在alert之后，alert弹出的依然是true，这是因为JavaScript引擎首先会扫墓所有的变量声明，然后将这些变量声明移动到顶部，最终的代码效果是这样的：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a;<br>alert("a" <span style="color: rgba(0, 0, 255, 1)">in</span> window);</pre>
+</div>
+<p>这样看起来就很容易解释为什么alert结果是true了。</p>
+<p>第三，你需要理解该题目的意思是，变量声明被提前了，但变量赋值没有，因为这行代码包括了变量声明和变量赋值。</p>
+<p>你可以将语句拆分为如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">声明</span><span style="color: rgba(0, 128, 0, 1)"><br></span>a = 1;    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">初始化赋值</span></pre>
+</div>
+<p>当变量声明和赋值在一起用的时候，JavaScript引擎会自动将它分为两部以便将变量声明提前，不将赋值的步骤提前是因为他有可能影响代码执行出不可预期的结果。</p>
+<p>所以，知道了这些概念以后，重新回头看一下题目的代码，其实就等价于：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a;<br><span style="color: rgba(0, 0, 255, 1)">if</span> (!("a" <span style="color: rgba(0, 0, 255, 1)">in</span> window)) {<br>    a = 1;<br>}<br>alert(a);</pre>
+</div>
+<p>这样，题目的意思就非常清楚了：首先声明a，然后判断a是否在存在，如果不存在就赋值为1，很明显a永远在window里存在，这个赋值语句永远不会执行，所以结果是undefined。</p>
+<p>大叔注：<em><strong>提前</strong></em>这个词语显得有点迷惑了，其实就是执行上下文的关系，因为执行上下文分2个阶段：进入执行上下文和执行代码，在进入执行上下文的时候，创建变量对象VO里已经有了：函数的所有形参、所有的函数声明、所有的变量声明</p>
+<div class="cnblogs_code">
+<pre>VO(global) = {<br>    a: undefined<br>}</pre>
+</div>
+<p>这个时候a已经有了；</p>
+<p>然后执行代码的时候才开始走if语句，详细信息请查看<a href="http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html" target="_blank">《深入理解JavaScript系列（12）：变量对象（Variable Object）》</a>中的处理上下文代码的2个阶段小节。</p>
+<p>大叔注：相信很多人都是认为a在里面不可访问，结果才是undefined的吧，其实是已经有了，只不过初始值是undefined，而不是不可访问。</p>
+<h1>题目2</h1>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 1,<br>    b = <span style="color: rgba(0, 0, 255, 1)">function</span> a(x) {<br>        x &amp;&amp; a(--x);<br>    };<br>alert(a);</pre>
+</div>
+<p>这个题目看起来比实际复杂，alert的结果是1；这里依然有3个重要的概念需要我们知道。</p>
+<p>首先，在题目1里我们知道了变量声明在进入执行上下文就完成了；第二个概念就是函数声明也是提前的，所有的函数声明都在执行代码之前都已经完成了声明，和变</p>
+<p>量声明一样。澄清一下，函数声明是如下这样的代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> functionName(arg1, arg2){<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">函数体</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}</pre>
+</div>
+<p>如下不是函数，而是函数表达式，相当于变量赋值：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> functionName = <span style="color: rgba(0, 0, 255, 1)">function</span>(arg1, arg2){<br>    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">函数体</span><span style="color: rgba(0, 128, 0, 1)"><br></span>};</pre>
+</div>
+<p>澄清一下，函数表达式没有提前，就相当于平时的变量赋值。</p>
+<p>第三需要知道的是，函数声明会覆盖变量声明，但不会覆盖变量赋值，为了解释这个，我们来看一个例子：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> value(){<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> 1;<br>}<br><span style="color: rgba(0, 0, 255, 1)">var</span> value;<br>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> value);    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">"function"</span></pre>
+</div>
+<p>尽快变量声明在下面定义，但是变量value依然是function，也就是说这种情况下，函数声明的优先级高于变量声明的优先级，但如果该变量value赋值了，那结果就完全不一样了：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> value(){<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> 1;<br>}<br><span style="color: rgba(0, 0, 255, 1)">var</span> value = 1;<br>alert(<span style="color: rgba(0, 0, 255, 1)">typeof</span> value);    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">"number"</span></pre>
+</div>
+<p>该value赋值以后，变量赋值初始化就覆盖了函数声明。</p>
+<p>重新回到题目，这个函数其实是一个有名函数表达式，函数表达式不像函数声明一样可以覆盖变量声明，但你可以注意到，变量b是包含了该函数表达式，而该函数表达式的名字是a；不同的浏览器对a这个名词处理有点不一样，在IE里，会将a认为函数声明，所以它被变量初始化覆盖了，就是说如果调用a(--x)的话就会出错，而其它浏览器在允许在函数内部调用a(--x)，因为这时候a在函数外面依然是数字。基本上，IE里调用b(2)的时候会出错，但其它浏览器则返回undefined。</p>
+<p>理解上述内容之后，该题目换成一个更准确和更容易理解的代码应该像这样：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> a = 1,<br>    b = <span style="color: rgba(0, 0, 255, 1)">function</span>(x) {<br>        x &amp;&amp; b(--x);<br>    };<br>alert(a);</pre>
+</div>
+<p>这样的话，就很清晰地知道为什么alert的总是1了，详细内容请参考<a href="http://www.cnblogs.com/TomXu/archive/2011/12/29/2290308.html" target="_blank">《深入理解JavaScript系列（2）：揭秘命名函数表达式》</a>中的内容。</p>
+<p><span style="color: rgba(255, 102, 0, 1)">大叔注：安装ECMAScript规范，作者对函数声明覆盖变量声明的解释其实不准确的，正确的理解应该是如下：</span></p>
+<p><strong>进入执行上下文</strong>： 这里出现了名字一样的情况，一个是函数申明，一个是变量申明。那么，根据<a href="http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html" target="_blank">深入理解JavaScript系列（12）：变量对象（Variable Object）</a>介绍的，填充VO的顺序是: 函数的形参 -&gt; 函数申明 -&gt; 变量申明。<br>上述例子中，变量a在函数a后面，那么，变量a遇到函数a怎么办呢？还是根据变量对象中介绍的，当变量申明遇到VO中已经有同名的时候，不会影响已经存在的属性。而函数表达式不会影响VO的内容，所以b只有在执行的时候才会触发里面的内容。</p>
+<h1>题目3</h1>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> a(x) {<br>    <span style="color: rgba(0, 0, 255, 1)">return</span> x * 2;<br>}<br><span style="color: rgba(0, 0, 255, 1)">var</span> a;<br>alert(a);</pre>
+</div>
+<p>这个题目就是题目2里的大叔加的注释了，也就是函数声明和变量声明的关系和影响，遇到同名的函数声明，VO不会重新定义，所以这时候全局的VO应该是如下这样的：</p>
+<div class="cnblogs_code">
+<pre>VO(global) = {<br>    a: 引用了函数声明“a”<br>}</pre>
+</div>
+<p>而执行a的时候，相应地就弹出了函数a的内容了。</p>
+<h1>题目4</h1>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> b(x, y, a) {<br>    arguments[2] = 10;<br>    alert(a);<br>}<br>b(1, 2, 3);</pre>
+</div>
+<p>关于这个题目，NC搬出了262-3的规范出来解释，其实从《<a id="ctl02_lnkTitle" href="http://www.cnblogs.com/TomXu/archive/2012/01/16/2309728.html" target="_blank">深入理解JavaScript系列（12）：变量对象（Variable Object）</a>》中的函数上下文中的变量对象一节就可以清楚地知道，活动对象是在进入函数上下文时刻被创建的，它通过函数的arguments属性初始化。arguments属性的值是Arguments对象：</p>
+<div class="cnblogs_code">
+<pre>AO = {<br>  arguments: &lt;ArgO&gt;<br>};</pre>
+</div>
+<p>Arguments对象是活动对象的一个属性，它包括如下属性：</p>
+<ol>
+<li>callee — 指向当前函数的引用</li>
+<li>length — 真正传递的参数个数</li>
+<li>properties-indexes (字符串类型的整数) 属性的值就是函数的参数值(按参数列表从左到右排列)。 properties-indexes内部元素的个数等于arguments.length. properties-indexes 的值和实际传递进来的参数之间是<strong><span style="color: rgba(255, 102, 0, 1)">共享</span></strong>的。</li>
+</ol>
+<p>这个共享其实不是真正的共享一个内存地址，而是2个不同的内存地址，使用JavaScript引擎来保证2个值是随时一样的，当然这也有一个前提，那就是这个索引值要小于你传入的参数个数，也就是说如果你只传入2个参数，而还继续使用arguments[2]赋值的话，就会不一致，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> b(x, y, a) {<br>    arguments[2] = 10;<br>    alert(a);<br>}<br>b(1, 2);</pre>
+</div>
+<p>这时候因为没传递第三个参数a，所以赋值10以后，alert(a)的结果依然是undefined，而不是10，但如下代码弹出的结果依然是10，因为和a没有关系。</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> b(x, y, a) {<br>    arguments[2] = 10;<br>    alert(arguments[2]);<br>}<br>b(1, 2);</pre>
+</div>
+<h1>题目5</h1>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> a() {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>}<br>a.call(<span style="color: rgba(0, 0, 255, 1)">null</span>);</pre>
+</div>
+<p>这个题目可以说是最简单的，也是最诡异的，因为如果没学到它的定义的话，打死也不会知道结果的，关于这个题目，我们先来了解2个概念。</p>
+<p>首先，就是this值是如何定义的，当一个方法在对象上调用的时候，this就指向到了该对象上，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">var</span> object = {<br>    method: <span style="color: rgba(0, 0, 255, 1)">function</span>() {<br>        alert(<span style="color: rgba(0, 0, 255, 1)">this</span> === object);    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>    }<br>}<br>object.method(); </pre>
+</div>
+<p>上面的代码，调用method()的时候this被指向到调用它的object对象上，但在全局作用域里，this是等价于window（浏览器中，非浏览器里等价于global），在如果一个function的定义不是属于一个对象属性的时候（也就是单独定义的函数），函数内部的this也是等价于window的，例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> method() {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span> === window);    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>}<br>method(); </pre>
+</div>
+<p>了解了上述概念之后，我们再来了解一下call()是做什么的，call方法作为一个function执行代表该方法可以让另外一个对象作为调用者来调用，call方法的第一个参数是对象调用者，随后的其它参数是要传给调用method的参数（如果声明了的话），例如：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> method() {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span> === window);<br>}<br>method();    <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">true</span><span style="color: rgba(0, 128, 0, 1)"><br></span>method.call(document);   <span style="color: rgba(0, 128, 0, 1)">//</span><span style="color: rgba(0, 128, 0, 1)">false</span></pre>
+</div>
+<p>第一个依然是true没什么好说的，第二个传入的调用对象是document，自然不会等于window，所以弹出了false。</p>
+<p>另外，根据ECMAScript262规范规定：如果第一个参数传入的对象调用者是null或者undefined的话，call方法将把全局对象（也就是window）作为this的值。所以，不管你什么时候传入null，其this都是全局对象window，所以该题目可以理解成如下代码：</p>
+<div class="cnblogs_code">
+<pre><span style="color: rgba(0, 0, 255, 1)">function</span> a() {<br>    alert(<span style="color: rgba(0, 0, 255, 1)">this</span>);<br>}<br>a.call(window);</pre>
+</div>
+<p>所以弹出的结果是[object Window]就很容易理解了。</p>
+<h1>总结</h1>
+<p>这5个题目虽然貌似有点偏，但实际上考察的依然是基本概念，只有熟知了这些基本概念才能写出高质量代码。</p>
+<p>关于JavaScript的基本核心内容和理解基本上在该系列就到此为止了，接下来的章节除了把五大原则剩余的2篇补全依然，会再加两篇关于DOM的文章，然后就开始转向整理关于JavaScript模式与设计模式相关的文章了（大概10篇左右），随后再会花几个章节来一个实战系列。</p>
+<h1>更多题目</h1>
+<p>如果大家有兴趣，可以继续研究下面的一些题目，详细通过这些题目也可以再次加深对JavaScript基础核心特性的理解。</p>
+<p><span style="color: rgba(255, 102, 0, 1)">大叔注：这些题目也是来自出这5个题目的人，当然如果你能答对4个及以上并且想拿高工资的话，请联系我。</span></p>
+<ol>
+<li>找出数字数组中最大的元素（使用Match.max函数）</li>
+<li>转化一个数字数组为function数组（每个function都弹出相应的数字）</li>
+<li>给object数组进行排序（排序条件是每个元素对象的属性个数）</li>
+<li>利用JavaScript打印出Fibonacci数（不使用全局变量）</li>
+<li>实现如下语法的功能：var a = (5).plus(3).minus(6); //2</li>
+<li>实现如下语法的功能：var a = add(2)(3)(4); //9</li>
+</ol>
+<h1>同步与推荐</h1>
+<p>本文已同步至目录索引：<span style="font-size: 14pt"><a href="http://www.cnblogs.com/TomXu/archive/2011/12/15/2288411.html" target="_blank">深入理解JavaScript系列</a></span></p>
+<p>深入理解JavaScript系列文章，包括了原创，翻译，转载等各类型的文章，如果对你有用，请推荐支持一把，给大叔写作的动力。</p>
+</div>
+<div id="MySignature"></div>
+<div class="clear"></div>
+<div id="blog_post_info_block">
+    <div id="blog_post_info"></div>
+    <div class="clear"></div>
+    <div id="post_next_prev"></div>
+</div>
+        <div class="clear"></div>
+        <div id="blog_post_info_block">
+        <div id="blog_post_info">
+        </div>
+        <div class="clear"></div>
+        <div id="post_next_prev"></div>
+    </div>
+</div>
+    <ul class="postmetadata">
+        
+<li class="icon_cat" id="BlogPostCategory">
+分类            <a href="https://www.cnblogs.com/TomXu/category/338104.html" target="_blank">[06]JS/jQuery</a>
+,            <a href="https://www.cnblogs.com/TomXu/category/337109.html" target="_blank">[07]Web开发</a>
+</li>
+<li class="icon_bullet" id="EntryTag">
+标签            <a href="https://www.cnblogs.com/TomXu/tag/JavaScript/">JavaScript</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E9%97%AD%E5%8C%85/">闭包</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/this/">this</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E5%8E%9F%E5%9E%8B/">原型</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%BD%9C%E7%94%A8%E5%9F%9F/">作用域</a>
+,            <a href="https://www.cnblogs.com/TomXu/tag/%E4%B8%8A%E4%B8%8B%E6%96%87/">上下文</a>
+</li>
+    </ul>
+</div>
+<script type="text/javascript">
+    var m = window.__blog.postRendered;
+    if (m) { m(__$("post")); }
+</script>
+<script type="text/javascript">
+    var m = window.__blog.postRenderPosts;
+    if (m) { m(); }
+</script>
+<script src="https://common.cnblogs.com/highlight/10.3.1/highlight.min.js"></script>
+<script>markdown_highlight();</script>
+<script>
+    var allowComments = true, cb_blogId = 101461, cb_blogApp = 'TomXu', cb_blogUserGuid = '65b02d3c-5b0b-e111-b7b9-842b2b196315';
+    var cb_entryId = 2342098, cb_entryCreatedDate = '2012-02-10 08:54', cb_postType = 1;
+    updatePostStats(
+        [cb_entryId],
+        function(id, count) { $("#post_view_count").text(count) },
+        function(id, count) { $("#post_comment_count").text(count) })
+    zoomManager.apply("#cnblogs_post_body img:not(.code_img_closed):not(.code_img_opened)");
+</script>
+<a name="!comments"></a>
+<div id="blog-comments-placeholder"></div>
+<div id="comment_form" class="commentform">
+    <a name="commentform"></a>
+    <div id="divCommentShow"></div>
+    <div id="comment_nav"><span id="span_refresh_tips"></span><a href="javascript:void(0);" onclick="return RefreshCommentList();" id="lnk_RefreshComments" runat="server" clientidmode="Static">刷新评论</a><a href="#" onclick="return RefreshPage();">刷新页面</a><a href="#top">返回顶部</a></div>
+    <div id="comment_form_container"></div>
+    <div class="ad_text_commentbox" id="ad_text_under_commentbox"></div>
+    <div id="ad_t2"></div>
+    <div id="opt_under_post"></div>
+    <div id="cnblogs_c1" class="under-post-card">
+        <div id='div-gpt-ad-1592365906576-0' style='width: 300px; height: 250px;'></div>
+    </div>
+    <div id="under_post_card1"></div>
+    <div id="cnblogs_c2" class="under-post-card">
+        <div id='div-gpt-ad-1592366332455-0' style='width: 468px; height: 60px;'></div>
+    </div>
+    <div id="under_post_card2"></div>
+    <div id="HistoryToday" class="under-post-card"></div>
+    <script type="text/javascript">
+       var commentManager = new blogCommentManager();
+       commentManager.renderComments(0);
+       fixPostBody();
+       deliverBigBanner();
+setTimeout(function() { incrementViewCount(cb_entryId); }, 50);       deliverT2();
+       deliverC1C2();
+       loadNewsAndKb();
+       loadBlogSignature();
+       LoadPostInfoBlock(cb_blogId, cb_entryId, cb_blogApp, cb_blogUserGuid);
+       GetPrevNextPost(cb_entryId, cb_blogId, cb_entryCreatedDate, cb_postType);
+       loadOptUnderPost();
+       GetHistoryToday(cb_blogId, cb_blogApp, cb_entryCreatedDate);
+    </script>
+</div>
+
+</div>
+
+
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.contentRendered;
+            if (m) { m(__$("content")); }
+        </script>
+
+        <div id="sidebar">
+            <div id="about">
+                <div>
+                    <h2 id="about_title">About</h2>
+                    <div id="about_body">
+                        <div id="sidebar_news"></div>
+                        <script type="text/javascript">loadBlogNews();</script>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.aboutRendered;
+                if (m) { m(__$("about")); }
+            </script>
+            <div id="mySearchWrapper">
+                <div id="mySearch">
+                    <input type="image" src="/skins/minyx2_lite/images/btnsearch.gif" id="btnZzk"  class="submit" onclick="zzk_go();return false;"/>
+                    <label class="lb_search"><input type="text" id="q" onkeydown="return zzk_go_enter(event);" class="keyword" /></label>
+                </div>
+            </div>
+            <script type="text/javascript">
+                var m = window.__blog.searchFormRendered;
+                if (m) { m(__$("searchform")); }
+            </script>
+            <div id="sideMain">
+            </div>
+            <div id="sideRight">
+            </div>
+            <div id="sideLeft">
+            </div>            
+                <div id="sideContainer">
+                </div>
+                <script type="text/javascript">
+                    $.ajax({
+                        url: '/' + currentBlogApp + '/ajax/Minyx2_Lite_SideColumn.aspx',
+                        data: '{}',
+                        type: 'post',
+                        dataType: 'text',
+                        contentType: 'application/json; charset=utf-8',
+                        success: function (data) {
+                            if (data) {
+                                $("#sideContainer").html(data);
+                                $.ajax({
+                                    url: getAjaxBaseUrl() + 'TopLists.aspx',
+                                    type: 'get',
+                                    dataType: 'text',
+                                    success: function (topLists) {
+                                        if (topLists) {
+                                            $("#sideContainer").append(topLists);
+                                        }
+                                        var m = window.__blog.sideContainerRendered;
+                                        if (m) { m(__$("sideContainer")); }
+                                        window.__blog.sidebar.__layout();
+                                    }
+                                });
+                            }
+                        }
+                    });
+
+                </script>
+        </div>
+
+        <script type="text/javascript">
+            var m = window.__blog.sidebarRendered;
+            if (m) { m(__$("sidebar")); }
+        </script>
+
+        <div id="footer">
+            <p id="logoFoot">
+    <a href="http://www.spiga.com.mx/" title="Agencia Interactiva Spiga">www.spiga.com.mx</a>
+</p>
+<div class="footText">
+<p>
+Copyright &copy; 2021 汤姆大叔
+<br /><span id="poweredby">Powered by .NET 5.0 on Kubernetes</span>
+
+</p>
+<p>
+<a href="http://www.cnblogs.com">博客园</a>
+</p>
+</div>
+
+
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        var m = window.__blog.wrapperRendered;
+        if (m) { m(__$("wrapper")); }
+    </script>
+
+</div>
+<script type="text/javascript">
+    var m = window.__blog.containerRendered;
+    if (m) { m(__$("container")); }
+</script>
+
+
+    <div id="page_end_html">
+        <script type="text/javascript">
+    $(document).ready(function () {
+        $("body").prepend($("#div_digg").css({
+            "position": "fixed", "right": "0px", "bottom": "0px", "z-index": "10", "background-color": "white", "margin": "10px", "padding": "10px", "border": "1px solid #cccccc"
+        }));
+      $(".cnblogs_code_toolbar").hide();
+    });
+</script>
+    </div>
+
+    <input type="hidden" id="antiforgery_token" value="CfDJ8L-rpLgFVEJMgssCVvNUAjsh8boLxczu-hWOt2R7Hr_3NOceu4pgL3E06u9EpY0r2cnzFM4ycuP76fPLDsa7cyPh3jGzcevgKGPEAyxBYkcXQgg6C0AmdCOc8In72oh4jusb-JTIpTGGhdWZ8oAJGZ8" />
+</body>
+</html>
