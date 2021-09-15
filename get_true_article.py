@@ -6,7 +6,7 @@ import os
 import threading
 
 file_path = ['微信小程序', '算法', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
-              'HTML', '面试', 'Webpack', 'Flutter', 'Node.js', 'Vue.js', 'JavaScript', '前端']
+             'HTML', '面试', 'Webpack', 'Flutter', 'Node.js', 'Vue.js', 'JavaScript', '前端']
 
 base_url = 'https://api.juejin.cn/content_api/v1/article/detail?uuid='
 
@@ -61,10 +61,14 @@ def get(base_path, name):
     make_dir(path)
     for i in arr:
         print(i['id'])
-        md = get_requests_marked(i['id'])
-        time.sleep(30 + 10 * random.random())
+        try:
+            md = get_requests_marked(i['id'])
+        except Exception as e:
+            time.sleep(1800 + 1800 * random.random())
+            get(base_path, name)
+        time.sleep(30 + 30 * random.random())
         str = '标题:{}\n描述:{}\n\n'.format(i['title'], i['desc'])
-        with open('./{}/{}.md'.format(path, repr(i['title']).replace('\\', '_').replace('/', '_')), 'w+', encoding='utf-8') as f:
+        with open('./{}/{}.md'.format(path, i['title']).replace('\\', '_').replace('/', '_'), 'w+', encoding='utf-8') as f:
             f.write(str + md)
 
 # get('article/', '面试')
