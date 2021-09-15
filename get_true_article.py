@@ -66,10 +66,10 @@ def get(base_path, name):
         except Exception as e:
             time.sleep(1800 + 1800 * random.random())
             get(base_path, name)
-        time.sleep(30 + 30 * random.random())
         str = '标题:{}\n描述:{}\n\n'.format(i['title'], i['desc'])
         with open('./{}/{}.md'.format(path, i['title']).replace('\\', '_').replace('/', '_'), 'w+', encoding='utf-8') as f:
             f.write(str + md)
+    time.sleep(30 + 30 * random.random())
 
 # get('article/', '面试')
 
