@@ -5,8 +5,8 @@ import json
 import os
 import threading
 
-file_path = ['面试', '微信小程序', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
-             'HTML', '算法', 'Webpack', 'Flutter', 'Node.js', 'Vue.js', 'JavaScript', '前端']
+file_path = ['Vue.js', '面试', '前端', '算法', '微信小程序', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
+             'HTML', 'Webpack', 'Flutter', 'Node.js', 'JavaScript']
 
 base_url = 'https://api.juejin.cn/content_api/v1/article/detail?uuid='
 
@@ -67,8 +67,9 @@ def get(base_path, name):
             print(e, '==========')
             time.sleep(1800 + 1800 * random.random())
             get(base_path, name)
-            return 
-        str = 'url:{}\n标题:{}\n描述:{}\n\n'.format('https://juejin.cn/post/{}'.format(i['id']), i['title'], i['desc'])
+            return
+        str = 'url:{}\n标题:{}\n描述:{}\n\n'.format(
+            'https://juejin.cn/post/{}'.format(i['id']), i['title'], i['desc'])
         with open('{}/{}.md'.format(path, i['title'].replace('\\', '_').replace('/', '_')), 'w+', encoding='utf-8') as f:
             f.write(str + md)
         time.sleep(10 * random.random())
