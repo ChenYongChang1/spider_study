@@ -5,7 +5,7 @@ import json
 import os
 import threading
 
-file_path = ['Vue.js', '面试', '前端', '算法', '微信小程序', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
+file_path = ['面试', 'Vue.js', '前端', '算法', '微信小程序', 'CSS', 'React.js', 'LeetCode', 'TypeScript', 'Element',
              'HTML', 'Webpack', 'Flutter', 'Node.js', 'JavaScript']
 
 base_url = 'https://api.juejin.cn/content_api/v1/article/detail?uuid='
