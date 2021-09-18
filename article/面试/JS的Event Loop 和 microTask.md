@@ -1,3 +1,4 @@
+url:https://juejin.cn/post/6844903651526311949
 标题:JS的Event Loop 和 microTask
 描述:上面问题的答案，都在文章《Tasks, microtasks, queues and schedules》讲的非常透彻。 建议英文可以的同学直接看这篇文章，就不要看我这个“笔记”了。( 之所以叫笔记，因为大部分内容出自文章，但是又不是按字翻译 ) 问题来了，为什么promise…
 
